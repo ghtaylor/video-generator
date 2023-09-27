@@ -1,3 +1,4 @@
-const t: string = "hello world";
+import { registerRoot } from "remotion";
+import { RemotionRoot } from "./Root";
 
-console.log(t);
+registerRoot(RemotionRoot);
