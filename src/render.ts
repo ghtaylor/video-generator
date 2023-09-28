@@ -9,12 +9,8 @@ async function main() {
   // You only have to create a bundle once, and you may reuse it
   const bundleLocation = await bundle({
     entryPoint: path.resolve("./src/index.ts"),
+    webpackOverride: (config) => enableTailwind(config),
   });
-
-  // Parametrize the video by passing arbitrary props to your component.
-  const inputProps = {
-    vidUrl: "",
-  };
 
   // Get the composition you want to render. Pass inputProps if you want to customize the
   // duration or other metadata.

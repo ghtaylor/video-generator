@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@remotion/tailwind": "^4.0.43",
     "@tsconfig/create-react-app": "^2.0.1",
     "@tsconfig/recommended": "^1.0.3",
     "@types/node": "^20.7.0",
