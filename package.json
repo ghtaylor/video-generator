@@ -14,14 +14,18 @@
     "@tsconfig/recommended": "^1.0.3",
     "@types/node": "^20.7.0",
     "@types/react": "^18.2.23",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@remotion/tailwind": "4.0.42",
     "@remotion/bundler": "4.0.42",
     "@remotion/cli": "4.0.42",
     "@remotion/renderer": "4.0.42",
+    "@remotion/tailwind": "4.0.42",
     "react": "^18.2.0",
     "remotion": "^4.0.42",
     "zod": "^3.22.2"

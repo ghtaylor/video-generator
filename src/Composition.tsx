@@ -1,11 +1,4 @@
-import {
-  AbsoluteFill,
-  RandomSeed,
-  Series,
-  Video,
-  random,
-  staticFile,
-} from "remotion";
+import { AbsoluteFill, RandomSeed, Series, Video, random, staticFile } from "remotion";
 import { exampleData } from "./example";
 
 export const MyComposition: React.FC = () => {
@@ -19,11 +12,7 @@ export const MyComposition: React.FC = () => {
   return (
     <Series>
       {exampleData.chunks.map((quoteChunk) => (
-        <Series.Sequence
-          key={quoteChunk}
-          durationInFrames={60}
-          className="items-center justify-center"
-        >
+        <Series.Sequence key={quoteChunk} durationInFrames={60} className="items-center justify-center">
           <AbsoluteFill className="-z-50">
             <Video src={staticFile(getRandomVideoUrl(quoteChunk))} />
           </AbsoluteFill>
