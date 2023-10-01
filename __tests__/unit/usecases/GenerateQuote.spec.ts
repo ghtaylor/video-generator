@@ -1,3 +1,5 @@
+import { NetworkError } from "@core/errors/NetworkError";
+import { UnknownError } from "@core/errors/UnknownError";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { Quote } from "@domain/Quote";
@@ -17,7 +19,7 @@ describe("GenerateQuote Use Case", () => {
     };
 
     beforeEach(() => {
-      quoteService.generateQuote.mockResolvedValue(quote);
+      quoteService.generateQuote.mockResolvedValue(Result.ok(quote));
     });
 
     describe("When the GenerateQuote Use Case is executed", () => {
@@ -34,12 +36,36 @@ describe("GenerateQuote Use Case", () => {
     };
 
     beforeEach(() => {
-      quoteService.generateQuote.mockResolvedValue(quote);
+      quoteService.generateQuote.mockResolvedValue(Result.ok(quote));
     });
 
     describe("When the GenerateQuote Use Case is executed", () => {
       test("Then the Use Case should return the quote", async () => {
         await expect(generateQuoteUseCase.execute()).resolves.toEqual(Result.ok(quote));
+      });
+    });
+  });
+
+  describe("Given the QuoteService fails to generate a Quote due to a network error", () => {
+    beforeEach(() => {
+      quoteService.generateQuote.mockResolvedValue(Result.err(new NetworkError()));
+    });
+
+    describe("When the GenerateQuote Use Case is executed", () => {
+      test("Then the Use Case should return the network error", async () => {
+        await expect(generateQuoteUseCase.execute()).resolves.toEqual(Result.err(new NetworkError()));
+      });
+    });
+  });
+
+  describe("Given the QuoteService fails to generate a Quote due to an unknown error", () => {
+    beforeEach(() => {
+      quoteService.generateQuote.mockResolvedValue(Result.err(new UnknownError()));
+    });
+
+    describe("When the GenerateQuote Use Case is executed", () => {
+      test("Then the Use Case should return the unknown error", async () => {
+        await expect(generateQuoteUseCase.execute()).resolves.toEqual(Result.err(new UnknownError()));
       });
     });
   });

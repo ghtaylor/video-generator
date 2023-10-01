@@ -12,7 +12,9 @@ export class GenerateQuoteUseCase {
   }
 
   async execute(): Promise<Result<Quote, QuoteChunksInvalidError>> {
-    const quote = await this.quoteService.generateQuote();
-    return this.validateQuote(quote);
+    const quoteResult = await this.quoteService.generateQuote();
+
+    if (quoteResult.isOk) return this.validateQuote(quoteResult.value);
+    return quoteResult;
   }
 }
