@@ -1,6 +1,14 @@
 {
   "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "./src",
+    "paths": {
+      "@domain/*": ["domain/*"],
+      "@infrastructure/*": ["infrastructure/*"],
+      "@core/*": ["core/*"],
+      "@common/*": ["common/*"]
+    },
+    "rootDirs": ["./src", "./__tests__"]
   }
 }
