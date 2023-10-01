@@ -1,20 +1,29 @@
+import { NetworkError } from "@core/errors/NetworkError";
+import { UnknownError } from "@core/errors/UnknownError";
+import { Queue } from "@core/queue";
 import { QuoteService } from "@core/quoteService";
 import { Quote } from "@domain/Quote";
 import { QuoteChunksInvalidError } from "@domain/errors/Quote";
-import { Result } from "true-myth";
+import { Result, Unit } from "true-myth";
 
 export class GenerateQuoteUseCase {
-  constructor(private quoteService: QuoteService) {}
+  constructor(
+    private quoteService: QuoteService,
+    private quoteQueue: Queue<Quote>,
+  ) {}
 
-  validateQuote(quote: Quote): Result<Quote, QuoteChunksInvalidError> {
+  validateQuote(quote: Quote): Result<Unit, QuoteChunksInvalidError> {
     if (quote.chunks.join(" ") !== quote.text) return Result.err(new QuoteChunksInvalidError());
-    return Result.ok(quote);
+    return Result.ok(Unit);
   }
 
-  async execute(): Promise<Result<Quote, QuoteChunksInvalidError>> {
+  async execute(): Promise<Result<Unit, QuoteChunksInvalidError | NetworkError | UnknownError>> {
     const quoteResult = await this.quoteService.generateQuote();
+    if (quoteResult.isErr) return Result.err(quoteResult.error);
 
-    if (quoteResult.isOk) return this.validateQuote(quoteResult.value);
-    return quoteResult;
+    const validateQuoteResult = this.validateQuote(quoteResult.value);
+    if (validateQuoteResult.isErr) return Result.err(validateQuoteResult.error);
+
+    return this.quoteQueue.enqueue(quoteResult.value);
   }
 }
