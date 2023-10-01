@@ -1,4 +1,4 @@
-import { Quote } from "domain/Quote";
+import { Quote } from "../domain/Quote";
 
 export interface QuoteService {
   generateQuote(): Promise<Quote>;
