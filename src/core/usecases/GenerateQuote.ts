@@ -8,8 +8,8 @@ import { Result, Unit } from "true-myth";
 
 export class GenerateQuoteUseCase {
   constructor(
-    private quoteService: QuoteService,
-    private quoteQueue: Queue<Quote>,
+    private readonly quoteService: QuoteService,
+    private readonly quoteQueue: Queue<Quote>,
   ) {}
 
   validateQuote(quote: Quote): Result<Unit, QuoteChunksInvalidError> {
@@ -20,8 +20,9 @@ export class GenerateQuoteUseCase {
   async execute(): Promise<Result<Unit, QuoteChunksInvalidError | NetworkError | UnknownError>> {
     const quoteResult = await this.quoteService.generateQuote();
     if (quoteResult.isErr) return Result.err(quoteResult.error);
+    const { value: quote } = quoteResult;
 
-    const validateQuoteResult = this.validateQuote(quoteResult.value);
+    const validateQuoteResult = this.validateQuote(quote);
     if (validateQuoteResult.isErr) return Result.err(validateQuoteResult.error);
 
     return this.quoteQueue.enqueue(quoteResult.value);
