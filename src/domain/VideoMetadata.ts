@@ -1,11 +1,8 @@
 import { z } from "zod";
 
-export const BaseVideoSection = z.object({
+export const VideoSection = z.object({
   text: z.string(),
   durationInFrames: z.number(),
-});
-
-export const VideoSection = BaseVideoSection.extend({
   backgroundVideoLocation: z.string(),
 });
 
@@ -15,6 +12,5 @@ export const VideoMetadata = z.object({
   sections: z.array(VideoSection),
 });
 
-export type BaseVideoSection = z.infer<typeof BaseVideoSection>;
 export type VideoSection = z.infer<typeof VideoSection>;
 export type VideoMetadata = z.infer<typeof VideoMetadata>;

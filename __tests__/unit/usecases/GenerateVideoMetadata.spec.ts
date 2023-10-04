@@ -1,8 +1,8 @@
-import { FileStore } from "@core/fileStore";
+import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { GenerateVideoMetadataUseCase } from "@core/usecases/GenerateVideoMetadata";
-import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
-import { VideoMetadata, BaseVideoSection } from "@domain/VideoMetadata";
+import { SpokenQuoteChunk } from "@domain/SpokenQuote";
+import { VideoMetadata, VideoSection } from "@domain/VideoMetadata";
 import { mock } from "jest-mock-extended";
 
 describe("GenerateVideoMetadata Use Case", () => {
@@ -13,7 +13,7 @@ describe("GenerateVideoMetadata Use Case", () => {
   const generateVideoMetadataUseCase = new GenerateVideoMetadataUseCase(fileStore, createVideoQueue);
 
   describe("`createBaseVideoSections`", () => {
-    describe.each<[SpokenQuoteChunk[], BaseVideoSection[]]>([
+    describe.each<[SpokenQuoteChunk[], FileLocation[], VideoSection[]]>([
       [
         [
           {
@@ -27,14 +27,17 @@ describe("GenerateVideoMetadata Use Case", () => {
             end: 1800,
           },
         ],
+        ["1.mp4", "2.mp4"],
         [
           {
             text: "This is an example,",
             durationInFrames: 30,
+            backgroundVideoLocation: "1.mp4",
           },
           {
             text: "with no time gap.",
             durationInFrames: 30,
+            backgroundVideoLocation: "2.mp4",
           },
         ],
       ],
@@ -56,18 +59,22 @@ describe("GenerateVideoMetadata Use Case", () => {
             end: 2760,
           },
         ],
+        ["1.mp4", "2.mp4"],
         [
           {
             text: "This is an example,",
             durationInFrames: 31,
+            backgroundVideoLocation: "1.mp4",
           },
           {
             text: "with time gaps.",
             durationInFrames: 31,
+            backgroundVideoLocation: "2.mp4",
           },
           {
             text: "There's even three chunks.",
             durationInFrames: 30,
+            backgroundVideoLocation: "1.mp4",
           },
         ],
       ],
@@ -84,20 +91,27 @@ describe("GenerateVideoMetadata Use Case", () => {
             end: 1830,
           },
         ],
+        ["1.mp4"],
         [
           {
             text: "This is an example,",
             durationInFrames: 32,
+            backgroundVideoLocation: "1.mp4",
           },
           {
             text: "where the outputted frames are rounded up.",
             durationInFrames: 30,
+            backgroundVideoLocation: "1.mp4",
           },
         ],
       ],
-    ])("GIVEN a SpokenQuote", (spokenQuote, expectedBaseVideoSections) => {
+    ])("GIVEN a SpokenQuote", (spokenQuote, backgroundVideoLocations, expectedBaseVideoSections) => {
       test("THEN `createBaseVideoSections` returns the expected VideoSections", () => {
-        const baseVideoSections = generateVideoMetadataUseCase.createBaseVideoSections(spokenQuote, FPS);
+        const baseVideoSections = generateVideoMetadataUseCase.createVideoSections(
+          spokenQuote,
+          backgroundVideoLocations,
+          FPS,
+        );
 
         expect(baseVideoSections).toEqual(expectedBaseVideoSections);
       });

@@ -7,5 +7,5 @@ export type FileUrl = string;
 
 export interface FileStore {
   store(buffer: Buffer): Promise<Result<FileLocation, NetworkError | UnknownError>>;
-  getBackgroundVideoLocations(): Promise<Result<FileLocation[], NetworkError | UnknownError>>;
+  getBackgroundVideoFiles(): Promise<Result<FileLocation[], NetworkError | UnknownError>>;
 }
