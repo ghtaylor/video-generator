@@ -4,24 +4,24 @@ import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
 import { Quote } from "@domain/Quote";
-import { QuoteWithSpeech, QuoteWithSpeechChunk } from "@domain/QuoteWithSpeech";
+import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
 import { Speech } from "@domain/Speech";
-import { QuoteSpeechMarksInvalidError } from "@domain/errors/QuoteWithSpeech";
+import { SpokenQuoteMarksInvalidError } from "@domain/errors/SpokenQuote";
 import { Result, Unit } from "true-myth";
 
-export class GenerateSpeechForQuoteUseCase {
+export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly quoteWithSpeechQueue: Queue<QuoteWithSpeech>,
+    private readonly spokenQuoteQueue: Queue<SpokenQuote>,
   ) {}
 
-  createQuoteWithSpeech(
+  createSpokenQuote(
     quote: Quote,
     speech: Speech,
     audioLocation: FileLocation,
-  ): Result<QuoteWithSpeech, QuoteSpeechMarksInvalidError> {
-    const chunks: QuoteWithSpeechChunk[] = [];
+  ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
+    const chunks: SpokenQuoteChunk[] = [];
 
     for (const chunk of quote.chunks) {
       const wordsOfChunk = chunk.replace(/[^a-zA-Z0-9\s']/g, "").split(" ");
@@ -33,7 +33,7 @@ export class GenerateSpeechForQuoteUseCase {
         const word = wordsOfChunk[i];
 
         if (word.toLowerCase() !== speech.marks[i].value.toLowerCase())
-          return Result.err(new QuoteSpeechMarksInvalidError());
+          return Result.err(new SpokenQuoteMarksInvalidError());
 
         if (i === 0) start = speech.marks[i].start;
 
@@ -56,7 +56,7 @@ export class GenerateSpeechForQuoteUseCase {
     });
   }
 
-  async execute(quote: Quote): Promise<Result<Unit, QuoteSpeechMarksInvalidError | NetworkError | UnknownError>> {
+  async execute(quote: Quote): Promise<Result<Unit, SpokenQuoteMarksInvalidError | NetworkError | UnknownError>> {
     const speechResult = await this.speechService.generateSpeech(quote.text);
     if (speechResult.isErr) return Result.err(speechResult.error);
     const { value: speech } = speechResult;
@@ -65,10 +65,10 @@ export class GenerateSpeechForQuoteUseCase {
     if (storeAudioResult.isErr) return Result.err(storeAudioResult.error);
     const { value: audioLocation } = storeAudioResult;
 
-    const quoteWithSpeechResult = this.createQuoteWithSpeech(quote, speech, audioLocation);
-    if (quoteWithSpeechResult.isErr) return Result.err(quoteWithSpeechResult.error);
-    const { value: quoteWithSpeech } = quoteWithSpeechResult;
+    const spokenQuoteResult = this.createSpokenQuote(quote, speech, audioLocation);
+    if (spokenQuoteResult.isErr) return Result.err(spokenQuoteResult.error);
+    const { value: spokenQuote } = spokenQuoteResult;
 
-    return this.quoteWithSpeechQueue.enqueue(quoteWithSpeech);
+    return this.spokenQuoteQueue.enqueue(spokenQuote);
   }
 }

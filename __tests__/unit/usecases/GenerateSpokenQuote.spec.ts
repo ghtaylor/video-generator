@@ -1,24 +1,24 @@
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
-import { GenerateSpeechForQuoteUseCase } from "@core/usecases/GenerateSpeechForQuote";
+import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@domain/Quote";
-import { QuoteWithSpeech } from "@domain/QuoteWithSpeech";
+import { SpokenQuote } from "@domain/SpokenQuote";
 import { Speech } from "@domain/Speech";
-import { QuoteSpeechMarksInvalidError } from "@domain/errors/QuoteWithSpeech";
+import { SpokenQuoteMarksInvalidError } from "@domain/errors/SpokenQuote";
 import { mock } from "jest-mock-extended";
 
 const speechService = mock<SpeechService>();
 const fileStore = mock<FileStore>();
-const quoteWithSpeechQueue = mock<Queue<QuoteWithSpeech>>();
+const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
 
-const generateSpeechForQuoteUseCase = new GenerateSpeechForQuoteUseCase(speechService, fileStore, quoteWithSpeechQueue);
+const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteQueue);
 
-describe("GenerateSpeechForQuote Use Case", () => {
-  describe("`createQuoteWithSpeech`", () => {
+describe("GenerateSpokenQuote Use Case", () => {
+  describe("`createSpokenQuote`", () => {
     const audioLocation = "audioLocation";
 
-    describe.each<[Quote, Speech, QuoteWithSpeech]>([
+    describe.each<[Quote, Speech, SpokenQuote]>([
       [
         {
           text: "This is an example, a good one.",
@@ -216,8 +216,8 @@ describe("GenerateSpeechForQuote Use Case", () => {
         },
       ],
     ])("GIVEN a Quote and Speech that are valid", (quote, speech, expectedResult) => {
-      test("THEN `createQuoteWithSpeech` should return a Result.ok with a QuoteWithSpeech", () => {
-        const result = generateSpeechForQuoteUseCase.createQuoteWithSpeech(quote, speech, audioLocation);
+      test("THEN `createSpokenQuote` should return a Result.ok with a SpokenQuote", () => {
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
 
         expect(result.isOk).toEqual(true);
         if (result.isOk) {
@@ -263,12 +263,12 @@ describe("GenerateSpeechForQuote Use Case", () => {
         ],
       };
 
-      test("THEN `createQuoteWithSpeech` should return a Result.err with a QuoteSpeechMarksInvalidError", () => {
-        const result = generateSpeechForQuoteUseCase.createQuoteWithSpeech(quote, speech, audioLocation);
+      test("THEN `createSpokenQuote` should return a Result.err with a SpokenQuoteMarksInvalidError", () => {
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
 
         expect(result.isErr).toEqual(true);
         if (result.isErr) {
-          expect(result.error).toBeInstanceOf(QuoteSpeechMarksInvalidError);
+          expect(result.error).toBeInstanceOf(SpokenQuoteMarksInvalidError);
         }
       });
     });
