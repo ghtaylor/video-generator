@@ -3,7 +3,9 @@ import { NetworkError } from "./errors/NetworkError";
 import { UnknownError } from "./errors/UnknownError";
 
 export type FileLocation = string;
+export type FileUrl = string;
 
 export interface FileStore {
   store(buffer: Buffer): Promise<Result<FileLocation, NetworkError | UnknownError>>;
+  getBackgroundVideoLocations(): Promise<Result<FileLocation[], NetworkError | UnknownError>>;
 }
