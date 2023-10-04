@@ -1,15 +1,10 @@
-import { z } from "zod";
+export type SpeechMark = {
+  value: string;
+  start: number;
+  end: number;
+};
 
-export const Speech = z.object({
-  text: z.string(),
-  audioUrl: z.string().url(),
-  marks: z.array(
-    z.object({
-      value: z.string(),
-      start: z.number(),
-      end: z.number(),
-    }),
-  ),
-});
-
-export type Speech = z.infer<typeof Speech>;
+export type Speech = {
+  audio: Buffer;
+  marks: SpeechMark[];
+};
