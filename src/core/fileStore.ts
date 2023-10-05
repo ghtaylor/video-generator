@@ -1,7 +1,6 @@
-import { Result } from "true-myth";
+import { ResultAsync } from "neverthrow";
 import { NetworkError } from "./errors/NetworkError";
 import { UnknownError } from "./errors/UnknownError";
-import { ResultAsync } from "neverthrow";
 
 export type FileLocation = string;
 export type FileUrl = string;

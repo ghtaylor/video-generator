@@ -22,9 +22,6 @@ dependencies:
   remotion:
     specifier: ^4.0.42
     version: 4.0.42(react-dom@18.2.0)(react@18.2.0)
-  true-myth:
-    specifier: ^7.1.0
-    version: 7.1.0
   zod:
     specifier: ^3.22.2
     version: 3.22.2
@@ -4796,11 +4793,6 @@ packages:
     resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
     dependencies:
       punycode: 2.3.0
-    dev: false
-
-  /true-myth@7.1.0:
-    resolution: {integrity: sha512-DcdyFRHfNyG31HgNtxqrVAHmBf7y1w4YZCpU7IR2Ohytm4LITv+u075Vc3dLyK9cdEPq6K9398iao6YpkU8hHA==}
-    engines: {node: 18.* || >= 20.*}
     dev: false
 
   /ts-api-utils@1.0.3(typescript@5.2.2):
