@@ -1,16 +1,16 @@
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
-import { GenerateVideoMetadataUseCase } from "@core/usecases/GenerateVideoMetadata";
-import { VideoMetadata } from "@domain/VideoMetadata";
+import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
+import { VideoOptions } from "@domain/Video";
 import { mock } from "jest-mock-extended";
 import { err, errAsync, ok, okAsync } from "neverthrow";
 
 const fileStore = mock<FileStore>();
-const createVideoQueue = mock<Queue<VideoMetadata>>();
+const createVideoQueue = mock<Queue<VideoOptions>>();
 
-const generateSpokenQuoteUseCase = new GenerateVideoMetadataUseCase(fileStore, createVideoQueue);
+const generateVideoOptionsUseCase = new GenerateVideoOptionsUseCase(fileStore, createVideoQueue);
 
-describe("GenerateVideoMetadata Use Case - Integration Tests", () => {
+describe("GenerateVideoOptions Use Case - Integration Tests", () => {
   const spokenQuote = {
     text: "This is an example, a good one.",
     chunks: [
@@ -37,8 +37,8 @@ describe("GenerateVideoMetadata Use Case - Integration Tests", () => {
       fileStore.getBackgroundVideoFiles.mockReturnValue(okAsync(backgroundVideoFiles));
     });
 
-    describe("AND the VideoMetadata is successfully created", () => {
-      const videoMetadata: VideoMetadata = {
+    describe("AND the VideoOptions is successfully created", () => {
+      const videoOptions: VideoOptions = {
         fps: 30,
         description: "This is an example, a good one.",
         speechAudioLocation: "speechAudioLocation",
@@ -57,55 +57,55 @@ describe("GenerateVideoMetadata Use Case - Integration Tests", () => {
       };
 
       beforeEach(() => {
-        jest.spyOn(generateSpokenQuoteUseCase, "createVideoMetadata").mockReturnValue(ok(videoMetadata));
+        jest.spyOn(generateVideoOptionsUseCase, "createVideoOptions").mockReturnValue(ok(videoOptions));
       });
 
-      describe("AND the CreateVideoQueue successfully enqueues the VideoMetadata", () => {
+      describe("AND the CreateVideoQueue successfully enqueues the VideoOptions", () => {
         beforeEach(() => {
-          createVideoQueue.enqueue.mockReturnValue(okAsync(videoMetadata));
+          createVideoQueue.enqueue.mockReturnValue(okAsync(videoOptions));
         });
 
         describe("WHEN the Use Case is executed with a SpokenQuote and FPS", () => {
           test("THEN the FileStore should be called to get the background video files", async () => {
-            await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
             expect(fileStore.getBackgroundVideoFiles).toHaveBeenCalledTimes(1);
           });
 
-          test("THEN the VideoMetadata should be created", async () => {
-            await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+          test("THEN the VideoOptions should be created", async () => {
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
-            expect(generateSpokenQuoteUseCase.createVideoMetadata).toHaveBeenCalledWith(
+            expect(generateVideoOptionsUseCase.createVideoOptions).toHaveBeenCalledWith(
               spokenQuote,
               backgroundVideoFiles,
               fps,
             );
           });
 
-          test("THEN the VideoMetadata should be enqueued", async () => {
-            await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+          test("THEN the VideoOptions should be enqueued", async () => {
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
-            expect(createVideoQueue.enqueue).toHaveBeenCalledWith(videoMetadata);
+            expect(createVideoQueue.enqueue).toHaveBeenCalledWith(videoOptions);
           });
 
-          test("THEN the execution should return the VideoMetadata, meaning success", async () => {
-            const result = await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+          test("THEN the execution should return the VideoOptions, meaning success", async () => {
+            const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
-            expect(result).toEqual(ok(videoMetadata));
+            expect(result).toEqual(ok(videoOptions));
           });
         });
       });
     });
 
-    describe("AND the VideoMetadata fails to be created, due to an UnknownError", () => {
+    describe("AND the VideoOptions fails to be created, due to an UnknownError", () => {
       const unknownError = new Error("UnknownError");
 
       beforeEach(() => {
-        jest.spyOn(generateSpokenQuoteUseCase, "createVideoMetadata").mockReturnValue(err(unknownError));
+        jest.spyOn(generateVideoOptionsUseCase, "createVideoOptions").mockReturnValue(err(unknownError));
       });
 
       test("THEN the execution should return the UnknownError", async () => {
-        const result = await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+        const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
         expect(result).toEqual(err(unknownError));
       });
@@ -120,7 +120,7 @@ describe("GenerateVideoMetadata Use Case - Integration Tests", () => {
     });
 
     test("THEN the execution should return the NetworkError", async () => {
-      const result = await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
       expect(result).toEqual(err(networkError));
     });
@@ -134,7 +134,7 @@ describe("GenerateVideoMetadata Use Case - Integration Tests", () => {
     });
 
     test("THEN the execution should return the UnknownError", async () => {
-      const result = await generateSpokenQuoteUseCase.execute(spokenQuote, fps);
+      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
       expect(result).toEqual(err(unknownError));
     });

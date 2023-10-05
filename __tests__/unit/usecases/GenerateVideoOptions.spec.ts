@@ -1,20 +1,20 @@
 import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
-import { GenerateVideoMetadataUseCase } from "@core/usecases/GenerateVideoMetadata";
+import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
 import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
-import { VideoMetadata, VideoSection } from "@domain/VideoMetadata";
+import { VideoOptions, VideoSection } from "@domain/Video";
 import { mock } from "jest-mock-extended";
 import { ok } from "neverthrow";
 
-describe("GenerateVideoMetadata Use Case", () => {
+describe("GenerateVideoOptions Use Case", () => {
   const FPS = 30;
   const fileStore = mock<FileStore>();
-  const createVideoQueue = mock<Queue<VideoMetadata>>();
+  const createVideoQueue = mock<Queue<VideoOptions>>();
 
-  const generateVideoMetadataUseCase = new GenerateVideoMetadataUseCase(fileStore, createVideoQueue);
+  const generateVideoOptionsUseCase = new GenerateVideoOptionsUseCase(fileStore, createVideoQueue);
 
-  describe("`createVideoMetadata`", () => {
-    describe.each<[SpokenQuote, FileLocation[], VideoMetadata]>([
+  describe("`createVideoOptions`", () => {
+    describe.each<[SpokenQuote, FileLocation[], VideoOptions]>([
       [
         {
           text: "This is an example, with no time gap.",
@@ -136,14 +136,14 @@ describe("GenerateVideoMetadata Use Case", () => {
     ])(
       "GIVEN a SpokenQuote and background video locations",
       (spokenQuote, backgroundVideoLocations, expectedBaseVideoSections) => {
-        test("THEN `createVideoMetadata` returns the expected VideoMetadata", () => {
-          const videoMetadata = generateVideoMetadataUseCase.createVideoMetadata(
+        test("THEN `createVideoOptions` returns the expected VideoOptions", () => {
+          const videoOptions = generateVideoOptionsUseCase.createVideoOptions(
             spokenQuote,
             backgroundVideoLocations,
             FPS,
           );
 
-          expect(videoMetadata).toEqual(ok(expectedBaseVideoSections));
+          expect(videoOptions).toEqual(ok(expectedBaseVideoSections));
         });
       },
     );

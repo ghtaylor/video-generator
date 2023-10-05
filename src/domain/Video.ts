@@ -6,7 +6,7 @@ export const VideoSection = z.object({
   backgroundVideoLocation: z.string(),
 });
 
-export const VideoMetadata = z.object({
+export const VideoOptions = z.object({
   fps: z.number(),
   description: z.string(), // quote text and hashtags
   speechAudioLocation: z.string(),
@@ -14,4 +14,4 @@ export const VideoMetadata = z.object({
 });
 
 export type VideoSection = z.infer<typeof VideoSection>;
-export type VideoMetadata = z.infer<typeof VideoMetadata>;
+export type VideoOptions = z.infer<typeof VideoOptions>;

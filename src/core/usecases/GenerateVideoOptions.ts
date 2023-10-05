@@ -3,20 +3,20 @@ import { UnknownError } from "@core/errors/UnknownError";
 import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpokenQuote } from "@domain/SpokenQuote";
-import { VideoMetadata, VideoSection } from "@domain/VideoMetadata";
+import { VideoOptions, VideoSection } from "@domain/Video";
 import { Result, ResultAsync, ok } from "neverthrow";
 
-export class GenerateVideoMetadataUseCase {
+export class GenerateVideoOptionsUseCase {
   constructor(
     private readonly fileStore: FileStore,
-    private readonly createVideoQueue: Queue<VideoMetadata>,
+    private readonly createVideoQueue: Queue<VideoOptions>,
   ) {}
 
-  createVideoMetadata(
+  createVideoOptions(
     spokenQuote: SpokenQuote,
     backgroundVideoLocations: FileLocation[],
     fps: number,
-  ): Result<VideoMetadata, UnknownError> {
+  ): Result<VideoOptions, UnknownError> {
     const videoSections: VideoSection[] = [];
 
     for (let i = 0; i < spokenQuote.chunks.length; i++) {
@@ -45,10 +45,10 @@ export class GenerateVideoMetadataUseCase {
     });
   }
 
-  execute(spokenQuote: SpokenQuote, fps: number): ResultAsync<VideoMetadata, NetworkError | UnknownError> {
+  execute(spokenQuote: SpokenQuote, fps: number): ResultAsync<VideoOptions, NetworkError | UnknownError> {
     return this.fileStore
       .getBackgroundVideoFiles()
-      .andThen((backgroundVideoFiles) => this.createVideoMetadata(spokenQuote, backgroundVideoFiles, fps))
+      .andThen((backgroundVideoFiles) => this.createVideoOptions(spokenQuote, backgroundVideoFiles, fps))
       .andThen(this.createVideoQueue.enqueue);
   }
 }
