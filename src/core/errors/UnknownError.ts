@@ -1,5 +1,7 @@
 export class UnknownError extends Error {
-  constructor() {
-    super("Unknown error");
+  name = "UnknownError";
+
+  constructor(message?: string) {
+    super(message);
   }
 }

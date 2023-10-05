@@ -1,5 +1,6 @@
 export class NetworkError extends Error {
-  constructor() {
-    super("Network error");
+  name = "NetworkError";
+  constructor(message?: string) {
+    super(message);
   }
 }
