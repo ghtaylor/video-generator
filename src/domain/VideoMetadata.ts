@@ -9,6 +9,7 @@ export const VideoSection = z.object({
 export const VideoMetadata = z.object({
   fps: z.number(),
   description: z.string(), // quote text and hashtags
+  speechAudioLocation: z.string(),
   sections: z.array(VideoSection),
 });
 

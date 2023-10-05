@@ -2,9 +2,9 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
-import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
-import { VideoSection, VideoMetadata } from "@domain/VideoMetadata";
-import { Result, Unit } from "true-myth";
+import { SpokenQuote } from "@domain/SpokenQuote";
+import { VideoMetadata, VideoSection } from "@domain/VideoMetadata";
+import { Result, ResultAsync, ok } from "neverthrow";
 
 export class GenerateVideoMetadataUseCase {
   constructor(
@@ -12,45 +12,43 @@ export class GenerateVideoMetadataUseCase {
     private readonly createVideoQueue: Queue<VideoMetadata>,
   ) {}
 
-  createVideoSections(
-    spokenQuoteChunks: SpokenQuoteChunk[],
+  createVideoMetadata(
+    spokenQuote: SpokenQuote,
     backgroundVideoLocations: FileLocation[],
     fps: number,
-  ): VideoSection[] {
-    const baseVideoSections: VideoSection[] = [];
+  ): Result<VideoMetadata, UnknownError> {
+    const videoSections: VideoSection[] = [];
 
-    for (let i = 0; i < spokenQuoteChunks.length; i++) {
+    for (let i = 0; i < spokenQuote.chunks.length; i++) {
       const backgroundVideoLocation = backgroundVideoLocations[i % backgroundVideoLocations.length];
 
-      const spokenQuoteChunk = spokenQuoteChunks[i];
-      const nextSpokenQuoteChunk = spokenQuoteChunks[i + 1];
+      const spokenQuoteChunk = spokenQuote.chunks[i];
+      const nextSpokenQuoteChunk = spokenQuote.chunks[i + 1];
 
       if (!nextSpokenQuoteChunk) {
-        const durationInFrames = Math.ceil((spokenQuoteChunk.end - spokenQuoteChunk.start) / fps);
+        const durationInFrames = Math.round((spokenQuoteChunk.end - spokenQuoteChunk.start) / fps);
         const text = spokenQuoteChunk.value;
-        baseVideoSections.push({ text, durationInFrames, backgroundVideoLocation });
+        videoSections.push({ text, durationInFrames, backgroundVideoLocation });
         continue;
       }
 
-      const durationInFrames = Math.ceil((nextSpokenQuoteChunk.start - spokenQuoteChunk.start) / fps);
+      const durationInFrames = Math.round((nextSpokenQuoteChunk.start - spokenQuoteChunk.start) / fps);
       const text = spokenQuoteChunk.value;
-      baseVideoSections.push({ text, durationInFrames, backgroundVideoLocation });
+      videoSections.push({ text, durationInFrames, backgroundVideoLocation });
     }
 
-    return baseVideoSections;
-  }
-
-  async execute(spokenQuote: SpokenQuote, fps: number): Promise<Result<Unit, NetworkError | UnknownError>> {
-    const backgroundVideoLocationsResult = await this.fileStore.getBackgroundVideoFiles();
-    if (backgroundVideoLocationsResult.isErr) return Result.err(backgroundVideoLocationsResult.error);
-    const { value: backgroundVideoLocations } = backgroundVideoLocationsResult;
-
-    const videoSections = this.createVideoSections(spokenQuote.chunks, backgroundVideoLocations, fps);
-
-    return this.createVideoQueue.enqueue({
+    return ok({
       fps,
       description: spokenQuote.text,
+      speechAudioLocation: spokenQuote.audioLocation,
       sections: videoSections,
     });
+  }
+
+  execute(spokenQuote: SpokenQuote, fps: number): ResultAsync<VideoMetadata, NetworkError | UnknownError> {
+    return this.fileStore
+      .getBackgroundVideoFiles()
+      .andThen((backgroundVideoFiles) => this.createVideoMetadata(spokenQuote, backgroundVideoFiles, fps))
+      .andThen(this.createVideoQueue.enqueue);
   }
 }
