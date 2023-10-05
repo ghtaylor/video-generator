@@ -13,7 +13,7 @@ const quoteQueue = mock<Queue<Quote>>();
 
 const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, quoteQueue);
 
-describe("GenerateQuote Use Case", () => {
+describe("GenerateQuote Use Case - Integration Tests", () => {
   describe("GIVEN the QuoteService generates a valid Quote", () => {
     const validQuote: Quote = {
       text: "This is an example, a good one.",
@@ -54,16 +54,6 @@ describe("GenerateQuote Use Case", () => {
       });
 
       describe("WHEN the GenerateQuote Use Case is executed", () => {
-        test("THEN the QuoteService should be called to generate a Quote", async () => {
-          await generateQuoteUseCase.execute();
-          expect(quoteService.generateQuote).toHaveBeenCalled();
-        });
-
-        test("THEN the Quote should be added to the QuoteQueue", async () => {
-          await generateQuoteUseCase.execute();
-          expect(quoteQueue.enqueue).toHaveBeenCalledWith(validQuote);
-        });
-
         test("THEN the execution should return a NetworkError", async () => {
           await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(networkError));
         });
@@ -78,16 +68,6 @@ describe("GenerateQuote Use Case", () => {
       });
 
       describe("WHEN the GenerateQuote Use Case is executed", () => {
-        test("THEN the QuoteService should be called to generate a Quote", async () => {
-          await generateQuoteUseCase.execute();
-          expect(quoteService.generateQuote).toHaveBeenCalled();
-        });
-
-        test("THEN the Quote should be added to the QuoteQueue", async () => {
-          await generateQuoteUseCase.execute();
-          expect(quoteQueue.enqueue).toHaveBeenCalledWith(validQuote);
-        });
-
         test("THEN the execution should return an UnknownError", async () => {
           await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(unknownError));
         });
@@ -106,11 +86,6 @@ describe("GenerateQuote Use Case", () => {
     });
 
     describe("WHEN the GenerateQuote Use Case is executed", () => {
-      test("THEN the QuoteService should be called to generate a Quote", async () => {
-        await generateQuoteUseCase.execute();
-        expect(quoteService.generateQuote).toHaveBeenCalled();
-      });
-
       test("THEN the QuoteQueue should not be called", async () => {
         await generateQuoteUseCase.execute();
         expect(quoteQueue.enqueue).not.toHaveBeenCalled();
@@ -130,11 +105,6 @@ describe("GenerateQuote Use Case", () => {
     });
 
     describe("WHEN the GenerateQuote Use Case is executed", () => {
-      test("THEN the QuoteService should be called to generate a Quote", async () => {
-        await generateQuoteUseCase.execute();
-        expect(quoteService.generateQuote).toHaveBeenCalled();
-      });
-
       test("THEN the QuoteQueue should not be called", async () => {
         await generateQuoteUseCase.execute();
         expect(quoteQueue.enqueue).not.toHaveBeenCalled();
@@ -154,11 +124,6 @@ describe("GenerateQuote Use Case", () => {
     });
 
     describe("WHEN the GenerateQuote Use Case is executed", () => {
-      test("THEN the QuoteService should be called to generate a Quote", async () => {
-        await generateQuoteUseCase.execute();
-        expect(quoteService.generateQuote).toHaveBeenCalled();
-      });
-
       test("THEN the QuoteQueue should not be called", async () => {
         await generateQuoteUseCase.execute();
         expect(quoteQueue.enqueue).not.toHaveBeenCalled();

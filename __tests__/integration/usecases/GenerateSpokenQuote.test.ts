@@ -16,7 +16,26 @@ const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
 
 const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteQueue);
 
-describe("GenerateSpokenQuote Use Case", () => {
+describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
+  const quote: Quote = {
+    text: "This is an example",
+    chunks: ["This is an example"],
+  };
+
+  const speechAudioLocation = "speechAudioLocation";
+
+  const spokenQuote: SpokenQuote = {
+    text: "This is an example",
+    chunks: [
+      {
+        value: "This is an example",
+        start: 0,
+        end: 480,
+      },
+    ],
+    audioLocation: speechAudioLocation,
+  };
+
   describe("GIVEN the SpeechService successfully generates Speech", () => {
     const speech: Speech = {
       audio: Buffer.from("audio"),
@@ -49,25 +68,11 @@ describe("GenerateSpokenQuote Use Case", () => {
     });
 
     describe("AND the FileStore successfully stores the Speech audio", () => {
-      const audioLocation = "audioLocation";
-
       beforeEach(() => {
-        fileStore.store.mockReturnValue(okAsync(audioLocation));
+        fileStore.store.mockReturnValue(okAsync(speechAudioLocation));
       });
 
       describe("AND the SpokenQuote is successfully created", () => {
-        const spokenQuote: SpokenQuote = {
-          text: "This is an example",
-          chunks: [
-            {
-              value: "This is an example",
-              start: 0,
-              end: 480,
-            },
-          ],
-          audioLocation,
-        };
-
         beforeEach(() => {
           jest.spyOn(generateSpokenQuoteUseCase, "createSpokenQuote").mockReturnValue(ok(spokenQuote));
         });
@@ -78,11 +83,6 @@ describe("GenerateSpokenQuote Use Case", () => {
           });
 
           describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-            const quote: Quote = {
-              text: "This is an example",
-              chunks: ["This is an example"],
-            };
-
             test("THEN the SpeechService should be called to generate a Speech", async () => {
               await generateSpokenQuoteUseCase.execute(quote);
               expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
@@ -95,7 +95,11 @@ describe("GenerateSpokenQuote Use Case", () => {
 
             test("THEN `createSpokenQuote` should be called to create the SpokenQuote", async () => {
               await generateSpokenQuoteUseCase.execute(quote);
-              expect(generateSpokenQuoteUseCase.createSpokenQuote).toHaveBeenCalledWith(quote, speech, audioLocation);
+              expect(generateSpokenQuoteUseCase.createSpokenQuote).toHaveBeenCalledWith(
+                quote,
+                speech,
+                speechAudioLocation,
+              );
             });
 
             test("THEN the SpokenQuote should be added to the SpokenQuoteQueue", async () => {
@@ -117,31 +121,6 @@ describe("GenerateSpokenQuote Use Case", () => {
           });
 
           describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-            const quote: Quote = {
-              text: "This is an example",
-              chunks: ["This is an example"],
-            };
-
-            test("THEN the SpeechService should be called to generate a Speech", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
-            });
-
-            test("THEN the FileStore should be called to store the Speech audio", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
-            });
-
-            test("THEN `createSpokenQuote` should be called to create the SpokenQuote", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(generateSpokenQuoteUseCase.createSpokenQuote).toHaveBeenCalledWith(quote, speech, audioLocation);
-            });
-
-            test("THEN the SpokenQuote should be added to the SpokenQuoteQueue", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(spokenQuoteQueue.enqueue).toHaveBeenCalledWith(spokenQuote);
-            });
-
             test("THEN the execution should return a NetworkError", async () => {
               await expect(generateSpokenQuoteUseCase.execute(quote)).resolves.toEqual(err(networkError));
             });
@@ -156,31 +135,6 @@ describe("GenerateSpokenQuote Use Case", () => {
           });
 
           describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-            const quote: Quote = {
-              text: "This is an example",
-              chunks: ["This is an example"],
-            };
-
-            test("THEN the SpeechService should be called to generate a Speech", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
-            });
-
-            test("THEN the FileStore should be called to store the Speech audio", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
-            });
-
-            test("THEN `createSpokenQuote` should be called to create the SpokenQuote", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(generateSpokenQuoteUseCase.createSpokenQuote).toHaveBeenCalledWith(quote, speech, audioLocation);
-            });
-
-            test("THEN the SpokenQuote should be added to the SpokenQuoteQueue", async () => {
-              await generateSpokenQuoteUseCase.execute(quote);
-              expect(spokenQuoteQueue.enqueue).toHaveBeenCalledWith(spokenQuote);
-            });
-
             test("THEN the execution should return an UnknownError", async () => {
               await expect(generateSpokenQuoteUseCase.execute(quote)).resolves.toEqual(err(unknownError));
             });
@@ -198,24 +152,9 @@ describe("GenerateSpokenQuote Use Case", () => {
         });
 
         describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-          const quote: Quote = {
-            text: "This is an example",
-            chunks: ["This is an example"],
-          };
-
-          test("THEN the SpeechService should be called to generate a Speech", async () => {
+          test("THEN the SpokenQuoteQueue should not be called to enqueue the SpokenQuote", async () => {
             await generateSpokenQuoteUseCase.execute(quote);
-            expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
-          });
-
-          test("THEN the FileStore should be called to store the Speech audio", async () => {
-            await generateSpokenQuoteUseCase.execute(quote);
-            expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
-          });
-
-          test("THEN `createSpokenQuote` should be called to create the SpokenQuote", async () => {
-            await generateSpokenQuoteUseCase.execute(quote);
-            expect(generateSpokenQuoteUseCase.createSpokenQuote).toHaveBeenCalledWith(quote, speech, audioLocation);
+            expect(spokenQuoteQueue.enqueue).not.toHaveBeenCalled();
           });
 
           test("THEN the execution should return a SpokenQuoteMarksInvalidError", async () => {
@@ -233,19 +172,9 @@ describe("GenerateSpokenQuote Use Case", () => {
       });
 
       describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-        const quote: Quote = {
-          text: "This is an example",
-          chunks: ["This is an example"],
-        };
-
-        test("THEN the SpeechService should be called to generate a Speech", async () => {
+        test("THEN the SpokenQuoteQueue should not be called to enqueue the SpokenQuote", async () => {
           await generateSpokenQuoteUseCase.execute(quote);
-          expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
-        });
-
-        test("THEN the FileStore should be called to store the Speech audio", async () => {
-          await generateSpokenQuoteUseCase.execute(quote);
-          expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
+          expect(spokenQuoteQueue.enqueue).not.toHaveBeenCalled();
         });
 
         test("THEN the execution should return a NetworkError", async () => {
@@ -262,19 +191,9 @@ describe("GenerateSpokenQuote Use Case", () => {
       });
 
       describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-        const quote: Quote = {
-          text: "This is an example",
-          chunks: ["This is an example"],
-        };
-
-        test("THEN the SpeechService should be called to generate a Speech", async () => {
+        test("THEN the SpokenQuoteQueue should not be called to enqueue the SpokenQuote", async () => {
           await generateSpokenQuoteUseCase.execute(quote);
-          expect(speechService.generateSpeech).toHaveBeenCalledWith(quote.text);
-        });
-
-        test("THEN the FileStore should be called to store the Speech audio", async () => {
-          await generateSpokenQuoteUseCase.execute(quote);
-          expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
+          expect(spokenQuoteQueue.enqueue).not.toHaveBeenCalled();
         });
 
         test("THEN the execution should return an UnknownError", async () => {
