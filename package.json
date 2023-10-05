@@ -30,6 +30,7 @@
     "@remotion/cli": "4.0.42",
     "@remotion/renderer": "4.0.42",
     "@remotion/tailwind": "4.0.42",
+    "neverthrow": "^6.0.0",
     "react": "^18.2.0",
     "remotion": "^4.0.42",
     "true-myth": "^7.1.0",

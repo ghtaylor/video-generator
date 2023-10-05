@@ -13,6 +13,9 @@ dependencies:
   '@remotion/tailwind':
     specifier: 4.0.42
     version: 4.0.42(@remotion/bundler@4.0.42)(ts-node@10.9.1)(typescript@5.2.2)(webpack@5.83.1)
+  neverthrow:
+    specifier: ^6.0.0
+    version: 6.0.0
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -3709,6 +3712,10 @@ packages:
 
   /neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
+    dev: false
+
+  /neverthrow@6.0.0:
+    resolution: {integrity: sha512-kPZKRs4VkdloCGQXPoP84q4sT/1Z+lYM61AXyV8wWa2hnuo5KpPBF2S3crSFnMrOgUISmEBP8Vo/ngGZX60NhA==}
     dev: false
 
   /node-int64@0.4.0:

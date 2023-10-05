@@ -1,7 +1,7 @@
-import { Result, Unit } from "true-myth";
+import { ResultAsync } from "neverthrow";
 import { NetworkError } from "./errors/NetworkError";
 import { UnknownError } from "./errors/UnknownError";
 
 export interface Queue<TMessage> {
-  enqueue(message: TMessage): Promise<Result<Unit, NetworkError | UnknownError>>;
+  enqueue(message: TMessage): ResultAsync<TMessage, NetworkError | UnknownError>;
 }
