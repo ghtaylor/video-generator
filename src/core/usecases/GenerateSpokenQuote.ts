@@ -4,10 +4,10 @@ import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
 import { Quote } from "@domain/Quote";
-import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
 import { Speech } from "@domain/Speech";
+import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";
 import { SpokenQuoteMarksInvalidError } from "@domain/errors/SpokenQuote";
-import { Result, Unit } from "true-myth";
+import { Result, ResultAsync, err, ok } from "neverthrow";
 
 export class GenerateSpokenQuoteUseCase {
   constructor(
@@ -32,8 +32,7 @@ export class GenerateSpokenQuoteUseCase {
       for (let i = 0; i < wordsOfChunk.length; i++) {
         const word = wordsOfChunk[i];
 
-        if (word.toLowerCase() !== speech.marks[i].value.toLowerCase())
-          return Result.err(new SpokenQuoteMarksInvalidError());
+        if (word.toLowerCase() !== speech.marks[i].value.toLowerCase()) return err(new SpokenQuoteMarksInvalidError());
 
         if (i === 0) start = speech.marks[i].start;
 
@@ -49,26 +48,21 @@ export class GenerateSpokenQuoteUseCase {
       });
     }
 
-    return Result.ok({
+    return ok({
       text: quote.text,
       chunks,
       audioLocation,
     });
   }
 
-  async execute(quote: Quote): Promise<Result<Unit, SpokenQuoteMarksInvalidError | NetworkError | UnknownError>> {
-    const speechResult = await this.speechService.generateSpeech(quote.text);
-    if (speechResult.isErr) return Result.err(speechResult.error);
-    const { value: speech } = speechResult;
-
-    const storeAudioResult = await this.fileStore.store(speechResult.value.audio);
-    if (storeAudioResult.isErr) return Result.err(storeAudioResult.error);
-    const { value: audioLocation } = storeAudioResult;
-
-    const spokenQuoteResult = this.createSpokenQuote(quote, speech, audioLocation);
-    if (spokenQuoteResult.isErr) return Result.err(spokenQuoteResult.error);
-    const { value: spokenQuote } = spokenQuoteResult;
-
-    return this.spokenQuoteQueue.enqueue(spokenQuote);
+  execute(quote: Quote): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | NetworkError | UnknownError> {
+    return this.speechService
+      .generateSpeech(quote.text)
+      .andThen((speech) =>
+        this.fileStore
+          .store(speech.audio)
+          .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
+      )
+      .andThen(this.spokenQuoteQueue.enqueue);
   }
 }

@@ -219,10 +219,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       test("THEN `createSpokenQuote` should return a Result.ok with a SpokenQuote", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
 
-        expect(result.isOk).toEqual(true);
-        if (result.isOk) {
-          expect(result.value).toEqual(expectedResult);
-        }
+        expect(result._unsafeUnwrap()).toEqual(expectedResult);
       });
     });
 
@@ -266,10 +263,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       test("THEN `createSpokenQuote` should return a Result.err with a SpokenQuoteMarksInvalidError", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
 
-        expect(result.isErr).toEqual(true);
-        if (result.isErr) {
-          expect(result.error).toBeInstanceOf(SpokenQuoteMarksInvalidError);
-        }
+        expect(result._unsafeUnwrapErr()).toEqual(new SpokenQuoteMarksInvalidError());
       });
     });
   });
