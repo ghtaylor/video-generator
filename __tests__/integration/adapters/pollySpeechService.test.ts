@@ -1,4 +1,5 @@
 import { PollyClient, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
+import { NetworkError } from "@core/errors/NetworkError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
 import { mock, mockDeep } from "jest-mock-extended";
@@ -160,6 +161,34 @@ describe("PollySpeechService - Integration Tests", () => {
             err(new ValidationError("Audio stream is invalid", new Error("Transform error"))),
           );
         });
+      });
+    });
+  });
+
+  describe("GIVEN the PollyClient throws an Error when sending a SynthesizeSpeechCommand", () => {
+    const pollyClientError = new Error("Polly error");
+
+    beforeEach(() => {
+      pollyClient.send.mockRejectedValue(pollyClientError as never);
+    });
+
+    describe("WHEN `getSpeechAudio` is called", () => {
+      const text = "Hello world";
+
+      test("THEN it should return a NetworkError", async () => {
+        await expect(pollySpeechService.getSpeechAudio(text)).resolves.toEqual(
+          err(new NetworkError("Polly API error", pollyClientError)),
+        );
+      });
+    });
+
+    describe("WHEN `getSpeechMarks` is called", () => {
+      const text = "Hello world";
+
+      test("THEN it should return a NetworkError", async () => {
+        await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
+          err(new NetworkError("Polly API error", pollyClientError)),
+        );
       });
     });
   });
