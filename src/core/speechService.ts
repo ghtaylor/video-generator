@@ -1,8 +1,8 @@
 import { Speech } from "@domain/Speech";
 import { ResultAsync } from "neverthrow";
 import { NetworkError } from "./errors/NetworkError";
-import { UnknownError } from "./errors/UnknownError";
+import { ValidationError } from "./errors/ValidationError";
 
 export interface SpeechService {
-  generateSpeech(text: string): ResultAsync<Speech, NetworkError | UnknownError>;
+  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError>;
 }

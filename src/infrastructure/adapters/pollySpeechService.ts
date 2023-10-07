@@ -1,11 +1,10 @@
 import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
 import { NetworkError } from "@core/errors/NetworkError";
 import { ParseError } from "@core/errors/ParseError";
-import { UnknownError } from "@core/errors/UnknownError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
 import { Speech, SpeechMark } from "@domain/Speech";
-import { Result, ResultAsync, err, errAsync, fromPromise, fromThrowable, ok } from "neverthrow";
+import { Result, ResultAsync, errAsync, fromPromise, fromThrowable } from "neverthrow";
 
 export class PollySpeechService implements SpeechService {
   constructor(private readonly pollyClient: PollyClient) {}
@@ -66,7 +65,10 @@ export class PollySpeechService implements SpeechService {
       .andThen(this.getBufferFromAudioStream);
   }
 
-  generateSpeech(text: string): ResultAsync<Speech, UnknownError | NetworkError> {
-    throw new Error("Method not implemented.");
+  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError> {
+    return ResultAsync.combine([this.getSpeechAudio(text), this.getSpeechMarks(text)]).map(([audio, marks]) => ({
+      audio,
+      marks,
+    }));
   }
 }

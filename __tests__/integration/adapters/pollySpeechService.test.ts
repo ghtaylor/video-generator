@@ -1,4 +1,4 @@
-import { PollyClient, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
+import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
 import { NetworkError } from "@core/errors/NetworkError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
@@ -188,6 +188,69 @@ describe("PollySpeechService - Integration Tests", () => {
       test("THEN it should return a NetworkError", async () => {
         await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
           err(new NetworkError("Polly API error", pollyClientError)),
+        );
+      });
+    });
+
+    describe("WHEN `generateSpeech` is called", () => {
+      const text = "Hello world";
+
+      test("THEN it should return a NetworkError", async () => {
+        await expect(pollySpeechService.generateSpeech(text)).resolves.toEqual(
+          err(new NetworkError("Polly API error", pollyClientError)),
+        );
+      });
+    });
+  });
+
+  describe("GIVEN the PollyClient responds for an MP3 request and a JSON (Speech Marks) request", () => {
+    const jsonSpeechMarksByteArray = new TextEncoder().encode(
+      `{"time":6,"type":"word","start":0,"end":5,"value":"Hello"}
+            {"time":732,"type":"word","start":7,"end":12,"value":"world"}`,
+    );
+
+    const mp3AudioStreamByteArray = new Uint8Array([1, 2, 3]);
+
+    beforeEach(() => {
+      pollyClient.send.mockImplementation(async (command) => {
+        const _command = command as SynthesizeSpeechCommand;
+        if (_command.input.OutputFormat === "mp3") {
+          return {
+            ContentType: "audio/mpeg",
+            AudioStream: {
+              transformToByteArray: async () => mp3AudioStreamByteArray,
+            },
+          };
+        }
+        return {
+          ContentType: "application/x-json-stream",
+          AudioStream: {
+            transformToByteArray: async () => jsonSpeechMarksByteArray,
+          },
+        };
+      });
+    });
+
+    describe("WHEN `generateSpeech` is called", () => {
+      const text = "Hello world";
+
+      test("THEN it should return the Speech", async () => {
+        await expect(pollySpeechService.generateSpeech(text)).resolves.toEqual(
+          ok({
+            audio: Buffer.from(mp3AudioStreamByteArray),
+            marks: [
+              {
+                start: 0,
+                end: 5,
+                value: "Hello",
+              },
+              {
+                start: 7,
+                end: 12,
+                value: "world",
+              },
+            ],
+          }),
         );
       });
     });
