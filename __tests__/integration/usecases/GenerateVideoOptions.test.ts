@@ -1,3 +1,5 @@
+import { NetworkError } from "@core/errors/NetworkError";
+import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
@@ -98,7 +100,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
 
     describe("AND the VideoOptions fails to be created, due to an UnknownError", () => {
-      const unknownError = new Error("UnknownError");
+      const unknownError = new UnknownError("Unknown error");
 
       beforeEach(() => {
         jest.spyOn(generateVideoOptionsUseCase, "createVideoOptions").mockReturnValue(err(unknownError));
@@ -113,7 +115,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the FileStore fails to return a list of background video files, due to a NetworkError", () => {
-    const networkError = new Error("NetworkError");
+    const networkError = new NetworkError("Network error");
 
     beforeEach(() => {
       fileStore.getBackgroundVideoFiles.mockReturnValue(errAsync(networkError));
@@ -127,7 +129,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the FileStore fails to return a list of background video files, due to an UnknownError", () => {
-    const unknownError = new Error("UnknownError");
+    const unknownError = new UnknownError("Unknown error");
 
     beforeEach(() => {
       fileStore.getBackgroundVideoFiles.mockReturnValue(errAsync(unknownError));

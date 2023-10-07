@@ -1,3 +1,5 @@
+import { NetworkError } from "@core/errors/NetworkError";
+import { UnknownError } from "@core/errors/UnknownError";
 import { SocialMediaUploader } from "@core/socialMediaUploader";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoDetails } from "@domain/Video";
@@ -32,7 +34,7 @@ describe("UploadVideo Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the SocialMediaUploader fails to upload the video, due to a NetworkError", () => {
-    const networkError = new Error("NetworkError");
+    const networkError = new NetworkError("Network error");
 
     beforeEach(() => {
       socialMediaUploader.upload.mockReturnValue(errAsync(networkError));
@@ -47,7 +49,7 @@ describe("UploadVideo Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the SocialMediaUploader fails to upload the video, due to an UnknownError", () => {
-    const unknownError = new Error("UnknownError");
+    const unknownError = new UnknownError("Unknown error");
 
     beforeEach(() => {
       socialMediaUploader.upload.mockReturnValue(errAsync(unknownError));

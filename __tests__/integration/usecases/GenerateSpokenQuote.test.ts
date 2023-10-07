@@ -1,4 +1,5 @@
 import { NetworkError } from "@core/errors/NetworkError";
+import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
@@ -114,7 +115,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
         });
 
         describe("AND the SpokenQuoteQueue fails to enqueue the SpokenQuote due to a NetworkError", () => {
-          const networkError = new NetworkError();
+          const networkError = new NetworkError("Network error");
 
           beforeEach(() => {
             spokenQuoteQueue.enqueue.mockReturnValue(errAsync(networkError));
@@ -128,7 +129,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
         });
 
         describe("AND the SpokenQuoteQueue fails to enqueue the SpokenQuote due to an UnknownError", () => {
-          const unknownError = new NetworkError();
+          const unknownError = new UnknownError("Unknown error");
 
           beforeEach(() => {
             spokenQuoteQueue.enqueue.mockReturnValue(errAsync(unknownError));
@@ -165,7 +166,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
     });
 
     describe("AND the FileStore fails to store the Speech audio due to a NetworkError", () => {
-      const networkError = new NetworkError();
+      const networkError = new NetworkError("Network error");
 
       beforeEach(() => {
         fileStore.store.mockReturnValue(errAsync(networkError));
@@ -184,7 +185,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
     });
 
     describe("AND the FileStore fails to store the Speech audio due to an UnknownError", () => {
-      const unknownError = new NetworkError();
+      const unknownError = new UnknownError("Unknown error");
 
       beforeEach(() => {
         fileStore.store.mockReturnValue(errAsync(unknownError));
