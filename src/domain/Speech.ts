@@ -2,8 +2,7 @@ import { z } from "zod";
 
 export const SpeechMark = z.object({
   value: z.string(),
-  start: z.number(),
-  end: z.number(),
+  time: z.number(),
 });
 
 export type SpeechMark = z.infer<typeof SpeechMark>;

@@ -17,6 +17,7 @@ const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService,
 describe("GenerateSpokenQuote Use Case", () => {
   describe("`createSpokenQuote`", () => {
     const audioLocation = "audioLocation";
+    const endDelay = 1000;
 
     describe.each<[Quote, Speech, SpokenQuote]>([
       [
@@ -29,38 +30,31 @@ describe("GenerateSpokenQuote Use Case", () => {
           marks: [
             {
               value: "this",
-              start: 0,
-              end: 120,
+              time: 0,
             },
             {
               value: "is",
-              start: 120,
-              end: 240,
+              time: 120,
             },
             {
               value: "an",
-              start: 240,
-              end: 360,
+              time: 240,
             },
             {
               value: "example",
-              start: 360,
-              end: 480,
+              time: 360,
             },
             {
               value: "a",
-              start: 490,
-              end: 610,
+              time: 490,
             },
             {
               value: "good",
-              start: 610,
-              end: 730,
+              time: 610,
             },
             {
               value: "one",
-              start: 730,
-              end: 850,
+              time: 730,
             },
           ],
         },
@@ -71,12 +65,12 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "This is an example,",
               start: 0,
-              end: 480,
+              end: 490,
             },
             {
               value: "a good one.",
               start: 490,
-              end: 850,
+              end: 730 + endDelay,
             },
           ],
         },
@@ -91,43 +85,35 @@ describe("GenerateSpokenQuote Use Case", () => {
           marks: [
             {
               value: "this",
-              start: 0,
-              end: 120,
+              time: 0,
             },
             {
               value: "is",
-              start: 120,
-              end: 240,
+              time: 120,
             },
             {
               value: "an",
-              start: 240,
-              end: 360,
+              time: 240,
             },
             {
               value: "example",
-              start: 360,
-              end: 480,
+              time: 360,
             },
             {
               value: "and",
-              start: 490,
-              end: 610,
+              time: 490,
             },
             {
               value: "there's",
-              start: 610,
-              end: 730,
+              time: 610,
             },
             {
               value: "an",
-              start: 730,
-              end: 850,
+              time: 730,
             },
             {
               value: "apostrophe",
-              start: 850,
-              end: 970,
+              time: 850,
             },
           ],
         },
@@ -138,130 +124,252 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "This is an example,",
               start: 0,
-              end: 480,
+              end: 490,
             },
             {
               value: "and there's an apostrophe.",
               start: 490,
-              end: 970,
+              end: 850 + endDelay,
             },
           ],
         },
       ],
       [
         {
-          text: "In this example, speech marks have bigger gaps.",
-          chunks: ["In this example,", "speech marks have bigger gaps."],
+          text: "This is an example. Speech marks have capital letters.",
+          chunks: ["This is an example.", "Speech marks have capital letters."],
         },
         {
           audio: Buffer.from("audio"),
           marks: [
             {
-              value: "in",
-              start: 0,
-              end: 120,
+              value: "this",
+              time: 0,
             },
             {
-              value: "this",
-              start: 124,
-              end: 244,
+              value: "is",
+              time: 120,
+            },
+            {
+              value: "an",
+              time: 240,
             },
             {
               value: "example",
-              start: 248,
-              end: 368,
+              time: 360,
             },
             {
-              value: "speech",
-              start: 372,
-              end: 492,
+              value: "Speech",
+              time: 490,
             },
             {
               value: "marks",
-              start: 496,
-              end: 616,
+              time: 610,
             },
             {
               value: "have",
-              start: 620,
-              end: 740,
+              time: 730,
             },
             {
-              value: "bigger",
-              start: 744,
-              end: 864,
+              value: "Capital",
+              time: 850,
             },
             {
-              value: "gaps",
-              start: 868,
-              end: 988,
+              value: "letters",
+              time: 970,
             },
           ],
         },
         {
-          text: "In this example, speech marks have bigger gaps.",
+          text: "This is an example. Speech marks have capital letters.",
           audioLocation: "audioLocation",
           chunks: [
             {
-              value: "In this example,",
+              value: "This is an example.",
               start: 0,
-              end: 368,
+              end: 490,
             },
             {
-              value: "speech marks have bigger gaps.",
-              start: 372,
-              end: 988,
+              value: "Speech marks have capital letters.",
+              start: 490,
+              end: 970 + endDelay,
+            },
+          ],
+        },
+      ],
+      [
+        {
+          text: "This is an example. Speech marks start later than zero.",
+          chunks: ["This is an example.", "Speech marks start later than zero."],
+        },
+        {
+          audio: Buffer.from("audio"),
+          marks: [
+            {
+              value: "this",
+              time: 10,
+            },
+            {
+              value: "is",
+              time: 120,
+            },
+            {
+              value: "an",
+              time: 240,
+            },
+            {
+              value: "example",
+              time: 360,
+            },
+            {
+              value: "Speech",
+              time: 490,
+            },
+            {
+              value: "marks",
+              time: 610,
+            },
+            {
+              value: "start",
+              time: 730,
+            },
+            {
+              value: "later",
+              time: 850,
+            },
+            {
+              value: "than",
+              time: 970,
+            },
+            {
+              value: "zero",
+              time: 1090,
+            },
+          ],
+        },
+        {
+          text: "This is an example. Speech marks start later than zero.",
+          audioLocation: "audioLocation",
+          chunks: [
+            {
+              value: "This is an example.",
+              start: 0,
+              end: 490,
+            },
+            {
+              value: "Speech marks start later than zero.",
+              start: 490,
+              end: 1090 + endDelay,
             },
           ],
         },
       ],
     ])("GIVEN a Quote and Speech that are valid", (quote, speech, expectedResult) => {
       test("THEN `createSpokenQuote` should return a Result.ok with a SpokenQuote", () => {
-        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation, endDelay);
 
         expect(result._unsafeUnwrap()).toEqual(expectedResult);
       });
     });
 
-    describe("GIVEN a Quote, but the Speech has marks that do not match the Quote", () => {
-      const quote: Quote = {
-        text: "This is an example, a good one.",
-        chunks: ["This is an example,", "a good one."],
-      };
-
-      const speech: Speech = {
-        audio: Buffer.from("audio"),
-        marks: [
-          {
-            value: "this",
-            start: 0,
-            end: 120,
-          },
-          {
-            value: "is",
-            start: 120,
-            end: 240,
-          },
-          {
-            value: "a",
-            start: 240,
-            end: 360,
-          },
-          {
-            value: "bad",
-            start: 360,
-            end: 480,
-          },
-          {
-            value: "example",
-            start: 480,
-            end: 600,
-          },
-        ],
-      };
-
+    describe.each<[Quote, Speech]>([
+      [
+        {
+          text: "This is an example, a bad one because the marks don't match.",
+          chunks: ["This is an example,", "a bad one because the marks don't match."],
+        },
+        {
+          audio: Buffer.from("audio"),
+          marks: [
+            {
+              value: "this",
+              time: 0,
+            },
+            {
+              value: "is",
+              time: 120,
+            },
+            {
+              value: "a",
+              time: 240,
+            },
+            {
+              value: "bad",
+              time: 360,
+            },
+            {
+              value: "example",
+              time: 490,
+            },
+          ],
+        },
+      ],
+      [
+        {
+          text: "This is a bad example, because there are more marks than words.",
+          chunks: ["This is a bad example,", "because there are more marks than words."],
+        },
+        {
+          audio: Buffer.from("audio"),
+          marks: [
+            {
+              value: "this",
+              time: 0,
+            },
+            {
+              value: "is",
+              time: 120,
+            },
+            {
+              value: "a",
+              time: 240,
+            },
+            {
+              value: "bad",
+              time: 360,
+            },
+            {
+              value: "example",
+              time: 490,
+            },
+            {
+              value: "because",
+              time: 610,
+            },
+            {
+              value: "there",
+              time: 730,
+            },
+            {
+              value: "are",
+              time: 850,
+            },
+            {
+              value: "more",
+              time: 970,
+            },
+            {
+              value: "marks",
+              time: 1090,
+            },
+            {
+              value: "than",
+              time: 1210,
+            },
+            {
+              value: "words",
+              time: 1330,
+            },
+            {
+              value: "see?",
+              time: 1450,
+            },
+          ],
+        },
+      ],
+    ])("GIVEN a Quote, but the Speech has marks that do not match the Quote", (quote, speech) => {
       test("THEN `createSpokenQuote` should return a Result.err with a SpokenQuoteMarksInvalidError", () => {
-        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation);
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation, endDelay);
 
         expect(result._unsafeUnwrapErr()).toEqual(new SpokenQuoteMarksInvalidError());
       });

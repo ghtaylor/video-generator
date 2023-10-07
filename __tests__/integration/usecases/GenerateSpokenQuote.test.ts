@@ -43,23 +43,19 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
       marks: [
         {
           value: "this",
-          start: 0,
-          end: 120,
+          time: 0,
         },
         {
           value: "is",
-          start: 120,
-          end: 240,
+          time: 120,
         },
         {
           value: "an",
-          start: 240,
-          end: 360,
+          time: 240,
         },
         {
           value: "example",
-          start: 360,
-          end: 480,
+          time: 360,
         },
       ],
     };

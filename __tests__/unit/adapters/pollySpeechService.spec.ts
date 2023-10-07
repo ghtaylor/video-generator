@@ -17,13 +17,11 @@ describe("PollySpeechService - Unit Tests", () => {
         [
           {
             value: "Hello",
-            start: 0,
-            end: 5,
+            time: 6,
           },
           {
             value: "world",
-            start: 7,
-            end: 12,
+            time: 732,
           },
         ],
       ],
@@ -37,59 +35,50 @@ describe("PollySpeechService - Unit Tests", () => {
         [
           {
             value: "Hello",
-            start: 0,
-            end: 5,
+            time: 6,
           },
           {
             value: "world",
-            start: 7,
-            end: 12,
+            time: 732,
           },
         ],
       ],
       [
         `{"time":6,"type":"word","start":0,"end":5,"value":"Hello"}
         {"time":732,"type":"word","start":7,"end":12,"value":"world"}
-        {"time":732,"type":"word","start":14,"end":19,"value":"This"}
-        {"time":732,"type":"word","start":21,"end":26,"value":"is"}
-        {"time":732,"type":"word","start":28,"end":33,"value":"a"}
-        {"time":732,"type":"word","start":35,"end":40,"value":"long"}
-        {"time":732,"type":"word","start":42,"end":47,"value":"sentence"}`,
+        {"time":1500,"type":"word","start":14,"end":19,"value":"This"}
+        {"time":2000,"type":"word","start":21,"end":26,"value":"is"}
+        {"time":2500,"type":"word","start":28,"end":33,"value":"a"}
+        {"time":3000,"type":"word","start":35,"end":40,"value":"long"}
+        {"time":3500,"type":"word","start":42,"end":47,"value":"sentence"}`,
         [
           {
             value: "Hello",
-            start: 0,
-            end: 5,
+            time: 6,
           },
           {
             value: "world",
-            start: 7,
-            end: 12,
+            time: 732,
           },
           {
             value: "This",
-            start: 14,
-            end: 19,
+            time: 1500,
           },
           {
             value: "is",
-            start: 21,
-            end: 26,
+            time: 2000,
           },
           {
             value: "a",
-            start: 28,
-            end: 33,
+            time: 2500,
           },
           {
             value: "long",
-            start: 35,
-            end: 40,
+            time: 3000,
           },
           {
             value: "sentence",
-            start: 42,
-            end: 47,
+            time: 3500,
           },
         ],
       ],

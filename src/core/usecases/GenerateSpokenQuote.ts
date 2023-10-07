@@ -20,23 +20,28 @@ export class GenerateSpokenQuoteUseCase {
     quote: Quote,
     speech: Speech,
     audioLocation: FileLocation,
+    endDelay: number = 1000,
   ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
     const chunks: SpokenQuoteChunk[] = [];
 
-    for (const chunk of quote.chunks) {
+    for (let chunkIndex = 0; chunkIndex < quote.chunks.length; chunkIndex++) {
+      const chunk = quote.chunks[chunkIndex];
       const wordsOfChunk = chunk.replace(/[^a-zA-Z0-9\s']/g, "").split(" ");
 
       let start = 0;
       let end = 0;
 
-      for (let i = 0; i < wordsOfChunk.length; i++) {
-        const word = wordsOfChunk[i];
+      for (let wordIndex = 0; wordIndex < wordsOfChunk.length; wordIndex++) {
+        const word = wordsOfChunk[wordIndex];
 
-        if (word.toLowerCase() !== speech.marks[i].value.toLowerCase()) return err(new SpokenQuoteMarksInvalidError());
+        if (word.toLowerCase() !== speech.marks[wordIndex].value.toLowerCase())
+          return err(new SpokenQuoteMarksInvalidError());
 
-        if (i === 0) start = speech.marks[i].start;
+        if (wordIndex === 0 && chunkIndex === 0) start = 0;
+        else if (wordIndex === 0) start = speech.marks[wordIndex].time;
 
-        if (i === wordsOfChunk.length - 1) end = speech.marks[i].end;
+        if (wordIndex === wordsOfChunk.length - 1)
+          end = speech.marks[wordIndex + 1]?.time ?? speech.marks[wordIndex].time + endDelay;
       }
 
       speech.marks = speech.marks.slice(wordsOfChunk.length);
@@ -47,6 +52,8 @@ export class GenerateSpokenQuoteUseCase {
         end,
       });
     }
+
+    if (speech.marks.length > 0) return err(new SpokenQuoteMarksInvalidError());
 
     return ok({
       text: quote.text,
