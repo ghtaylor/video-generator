@@ -129,7 +129,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
         });
 
         describe("AND the SpokenQuoteQueue fails to enqueue the SpokenQuote due to an UnknownError", () => {
-          const unknownError = new UnknownError("Unknown error");
+          const unknownError = new UnknownError();
 
           beforeEach(() => {
             spokenQuoteQueue.enqueue.mockReturnValue(errAsync(unknownError));
@@ -185,7 +185,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
     });
 
     describe("AND the FileStore fails to store the Speech audio due to an UnknownError", () => {
-      const unknownError = new UnknownError("Unknown error");
+      const unknownError = new UnknownError();
 
       beforeEach(() => {
         fileStore.store.mockReturnValue(errAsync(unknownError));

@@ -100,7 +100,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
 
     describe("AND the VideoOptions fails to be created, due to an UnknownError", () => {
-      const unknownError = new UnknownError("Unknown error");
+      const unknownError = new UnknownError();
 
       beforeEach(() => {
         jest.spyOn(generateVideoOptionsUseCase, "createVideoOptions").mockReturnValue(err(unknownError));
@@ -129,7 +129,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the FileStore fails to return a list of background video files, due to an UnknownError", () => {
-    const unknownError = new UnknownError("Unknown error");
+    const unknownError = new UnknownError();
 
     beforeEach(() => {
       fileStore.getBackgroundVideoFiles.mockReturnValue(errAsync(unknownError));

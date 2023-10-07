@@ -1,7 +1,8 @@
 export class UnknownError extends Error {
   name = "UnknownError";
 
-  constructor(message: string, originalError?: Error) {
+  constructor(originalError?: Error) {
+    const message = "An unknown error occurred";
     super(originalError ? `${message}: ${originalError.message}` : message);
 
     if (originalError) {

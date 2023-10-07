@@ -61,7 +61,7 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
     });
 
     describe("AND the QuoteQueue fails to enqueue the Quote due to an UnknownError", () => {
-      const unknownError = new UnknownError("Unknown error");
+      const unknownError = new UnknownError();
 
       beforeEach(() => {
         quoteQueue.enqueue.mockReturnValue(errAsync(unknownError));
@@ -117,7 +117,7 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the QuoteService fails to generate a Quote due to an UnknownError", () => {
-    const unknownError = new UnknownError("Unknown error");
+    const unknownError = new UnknownError();
 
     beforeEach(() => {
       quoteService.generateQuote.mockReturnValue(errAsync(unknownError));

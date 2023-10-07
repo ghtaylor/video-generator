@@ -49,7 +49,7 @@ describe("UploadVideo Use Case - Integration Tests", () => {
   });
 
   describe("GIVEN the SocialMediaUploader fails to upload the video, due to an UnknownError", () => {
-    const unknownError = new UnknownError("Unknown error");
+    const unknownError = new UnknownError();
 
     beforeEach(() => {
       socialMediaUploader.upload.mockReturnValue(errAsync(unknownError));
