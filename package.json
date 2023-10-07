@@ -27,6 +27,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@aws-sdk/client-polly": "^3.427.0",
     "@remotion/bundler": "4.0.42",
     "@remotion/cli": "4.0.42",
     "@remotion/renderer": "4.0.42",
