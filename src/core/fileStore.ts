@@ -6,6 +6,6 @@ export type FileLocation = string;
 export type FileUrl = string;
 
 export interface FileStore {
-  store(buffer: Buffer): ResultAsync<FileLocation, NetworkError | UnknownError>;
-  getBackgroundVideoLocations(): ResultAsync<FileLocation[], NetworkError | UnknownError>;
+  store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError | UnknownError>;
+  listFiles(path: FileLocation): ResultAsync<FileLocation[], NetworkError | UnknownError>;
 }

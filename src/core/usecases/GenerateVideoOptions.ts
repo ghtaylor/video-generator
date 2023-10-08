@@ -47,7 +47,7 @@ export class GenerateVideoOptionsUseCase {
 
   execute(spokenQuote: SpokenQuote, fps: number): ResultAsync<VideoOptions, NetworkError | UnknownError> {
     return this.fileStore
-      .getBackgroundVideoLocations()
+      .listFiles()
       .andThen((backgroundVideoLocations) => this.createVideoOptions(spokenQuote, backgroundVideoLocations, fps))
       .andThen(this.createVideoQueue.enqueue);
   }

@@ -36,7 +36,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     const backgroundVideoLocations = ["backgroundVideoFile1.mp4", "backgroundVideoFile2.mp4"];
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoLocations.mockReturnValue(okAsync(backgroundVideoLocations));
+      fileStore.listFiles.mockReturnValue(okAsync(backgroundVideoLocations));
     });
 
     describe("AND the VideoOptions is successfully created", () => {
@@ -71,7 +71,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
           test("THEN the FileStore should be called to get the background video locations", async () => {
             await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
-            expect(fileStore.getBackgroundVideoLocations).toHaveBeenCalledTimes(1);
+            expect(fileStore.listFiles).toHaveBeenCalledTimes(1);
           });
 
           test("THEN the VideoOptions should be created", async () => {
@@ -118,7 +118,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     const networkError = new NetworkError("Network error");
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoLocations.mockReturnValue(errAsync(networkError));
+      fileStore.listFiles.mockReturnValue(errAsync(networkError));
     });
 
     test("THEN the execution should return the NetworkError", async () => {
@@ -132,7 +132,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     const unknownError = new UnknownError();
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoLocations.mockReturnValue(errAsync(unknownError));
+      fileStore.listFiles.mockReturnValue(errAsync(unknownError));
     });
 
     test("THEN the execution should return the UnknownError", async () => {
