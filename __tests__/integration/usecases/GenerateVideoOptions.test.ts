@@ -32,11 +32,11 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
 
   const fps = 30;
 
-  describe("GIVEN the FileStore returns a list of background video files", () => {
-    const backgroundVideoFiles = ["backgroundVideoFile1.mp4", "backgroundVideoFile2.mp4"];
+  describe("GIVEN the FileStore returns a list of background video locations", () => {
+    const backgroundVideoLocations = ["backgroundVideoFile1.mp4", "backgroundVideoFile2.mp4"];
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoFiles.mockReturnValue(okAsync(backgroundVideoFiles));
+      fileStore.getBackgroundVideoLocations.mockReturnValue(okAsync(backgroundVideoLocations));
     });
 
     describe("AND the VideoOptions is successfully created", () => {
@@ -68,10 +68,10 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
         });
 
         describe("WHEN the Use Case is executed with a SpokenQuote and FPS", () => {
-          test("THEN the FileStore should be called to get the background video files", async () => {
+          test("THEN the FileStore should be called to get the background video locations", async () => {
             await generateVideoOptionsUseCase.execute(spokenQuote, fps);
 
-            expect(fileStore.getBackgroundVideoFiles).toHaveBeenCalledTimes(1);
+            expect(fileStore.getBackgroundVideoLocations).toHaveBeenCalledTimes(1);
           });
 
           test("THEN the VideoOptions should be created", async () => {
@@ -79,7 +79,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
 
             expect(generateVideoOptionsUseCase.createVideoOptions).toHaveBeenCalledWith(
               spokenQuote,
-              backgroundVideoFiles,
+              backgroundVideoLocations,
               fps,
             );
           });
@@ -114,11 +114,11 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
   });
 
-  describe("GIVEN the FileStore fails to return a list of background video files, due to a NetworkError", () => {
+  describe("GIVEN the FileStore fails to return a list of background video locations, due to a NetworkError", () => {
     const networkError = new NetworkError("Network error");
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoFiles.mockReturnValue(errAsync(networkError));
+      fileStore.getBackgroundVideoLocations.mockReturnValue(errAsync(networkError));
     });
 
     test("THEN the execution should return the NetworkError", async () => {
@@ -128,11 +128,11 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
   });
 
-  describe("GIVEN the FileStore fails to return a list of background video files, due to an UnknownError", () => {
+  describe("GIVEN the FileStore fails to return a list of background video locations, due to an UnknownError", () => {
     const unknownError = new UnknownError();
 
     beforeEach(() => {
-      fileStore.getBackgroundVideoFiles.mockReturnValue(errAsync(unknownError));
+      fileStore.getBackgroundVideoLocations.mockReturnValue(errAsync(unknownError));
     });
 
     test("THEN the execution should return the UnknownError", async () => {
