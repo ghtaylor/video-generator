@@ -1,10 +1,11 @@
 import { NetworkError } from "@core/errors/NetworkError";
+import { ParseError } from "@core/errors/ParseError";
 import { UnknownError } from "@core/errors/UnknownError";
+import { ValidationError } from "@core/errors/ValidationError";
 import { Queue } from "@core/queue";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { Quote } from "@domain/Quote";
-import { QuoteChunksInvalidError } from "@domain/errors/Quote";
 import { mock } from "jest-mock-extended";
 import { err, errAsync, ok, okAsync } from "neverthrow";
 
@@ -55,7 +56,8 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
 
       describe("WHEN the GenerateQuote Use Case is executed", () => {
         test("THEN the execution should return a NetworkError", async () => {
-          await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(networkError));
+          const result = await generateQuoteUseCase.execute();
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
         });
       });
     });
@@ -69,30 +71,9 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
 
       describe("WHEN the GenerateQuote Use Case is executed", () => {
         test("THEN the execution should return an UnknownError", async () => {
-          await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(unknownError));
+          const result = await generateQuoteUseCase.execute();
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(UnknownError);
         });
-      });
-    });
-  });
-
-  describe("GIVEN the QuoteService generates an invalid Quote", () => {
-    const invalidQuote: Quote = {
-      text: "This is an example, a good one.",
-      chunks: ["This is an example,", "a bad one."],
-    };
-
-    beforeEach(() => {
-      quoteService.generateQuote.mockReturnValue(okAsync(invalidQuote));
-    });
-
-    describe("WHEN the GenerateQuote Use Case is executed", () => {
-      test("THEN the QuoteQueue should not be called", async () => {
-        await generateQuoteUseCase.execute();
-        expect(quoteQueue.enqueue).not.toHaveBeenCalled();
-      });
-
-      test("THEN the execution should return a QuoteChunksInvalidError", async () => {
-        await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(new QuoteChunksInvalidError()));
       });
     });
   });
@@ -111,7 +92,8 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
       });
 
       test("THEN the execution should return a NetworkError", async () => {
-        await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(networkError));
+        const result = await generateQuoteUseCase.execute();
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
       });
     });
   });
@@ -130,7 +112,48 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
       });
 
       test("THEN the execution should return an UnknownError", async () => {
-        await expect(generateQuoteUseCase.execute()).resolves.toEqual(err(unknownError));
+        const result = await generateQuoteUseCase.execute();
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(UnknownError);
+      });
+    });
+  });
+
+  describe("GIVEN the QuoteService fails to generate a Quote due to a ParseError", () => {
+    const parseError = new ParseError("Parse error");
+
+    beforeEach(() => {
+      quoteService.generateQuote.mockReturnValue(errAsync(parseError));
+    });
+
+    describe("WHEN the GenerateQuote Use Case is executed", () => {
+      test("THEN the QuoteQueue should not be called", async () => {
+        await generateQuoteUseCase.execute();
+        expect(quoteQueue.enqueue).not.toHaveBeenCalled();
+      });
+
+      test("THEN the execution should return an ParseError", async () => {
+        const result = await generateQuoteUseCase.execute();
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(ParseError);
+      });
+    });
+  });
+
+  describe("GIVEN the QuoteService fails to generate a Quote due to a ValidationError", () => {
+    const validationError = new ValidationError("Validation error");
+
+    beforeEach(() => {
+      quoteService.generateQuote.mockReturnValue(errAsync(validationError));
+    });
+
+    describe("WHEN the GenerateQuote Use Case is executed", () => {
+      test("THEN the QuoteQueue should not be called", async () => {
+        await generateQuoteUseCase.execute();
+        expect(quoteQueue.enqueue).not.toHaveBeenCalled();
+      });
+
+      test("THEN the execution should return a ValidationError", async () => {
+        const result = await generateQuoteUseCase.execute();
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
       });
     });
   });

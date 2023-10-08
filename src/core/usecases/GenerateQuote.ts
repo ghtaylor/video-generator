@@ -1,10 +1,11 @@
 import { NetworkError } from "@core/errors/NetworkError";
+import { ParseError } from "@core/errors/ParseError";
 import { UnknownError } from "@core/errors/UnknownError";
+import { ValidationError } from "@core/errors/ValidationError";
 import { Queue } from "@core/queue";
 import { QuoteService } from "@core/quoteService";
 import { Quote } from "@domain/Quote";
-import { QuoteChunksInvalidError } from "@domain/errors/Quote";
-import { Result, ResultAsync, err, ok } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
 export class GenerateQuoteUseCase {
   constructor(
@@ -12,12 +13,7 @@ export class GenerateQuoteUseCase {
     private readonly quoteQueue: Queue<Quote>,
   ) {}
 
-  validateQuote(quote: Quote): Result<Quote, QuoteChunksInvalidError> {
-    if (quote.chunks.join(" ") !== quote.text) return err(new QuoteChunksInvalidError());
-    return ok(quote);
-  }
-
-  execute(): ResultAsync<Quote, QuoteChunksInvalidError | NetworkError | UnknownError> {
-    return this.quoteService.generateQuote().andThen(this.validateQuote).andThen(this.quoteQueue.enqueue);
+  execute(): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
+    return this.quoteService.generateQuote().andThen(this.quoteQueue.enqueue);
   }
 }

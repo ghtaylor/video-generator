@@ -16,7 +16,7 @@ export class OpenAIQuoteService implements QuoteService {
     return ok(quote);
   }
 
-  parseChatResponse(response: ChatCompletion): Result<Quote, UnknownError> {
+  parseChatResponse(response: ChatCompletion): Result<Quote, ParseError> {
     const safeJsonParse = fromThrowable(
       JSON.parse,
       (error) => new ParseError("Invalid JSON provided by OpenAI", error instanceof Error ? error : undefined),
@@ -32,7 +32,7 @@ export class OpenAIQuoteService implements QuoteService {
     return safeJsonParse(quoteJsonString).andThen(safeQuoteParse);
   }
 
-  generateQuote(): ResultAsync<Quote, ParseError | NetworkError | UnknownError> {
+  generateQuote(): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError> {
     console.log("Generating quote");
 
     return fromPromise(
