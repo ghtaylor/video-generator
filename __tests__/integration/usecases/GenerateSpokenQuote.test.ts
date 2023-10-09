@@ -87,7 +87,7 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
 
             test("THEN the FileStore should be called to store the Speech audio", async () => {
               await generateSpokenQuoteUseCase.execute(quote);
-              expect(fileStore.store).toHaveBeenCalledWith(speech.audio);
+              expect(fileStore.store).toHaveBeenCalledWith(expect.stringContaining("speeches/"), speech.audio);
             });
 
             test("THEN `createSpokenQuote` should be called to create the SpokenQuote", async () => {

@@ -62,12 +62,16 @@ export class GenerateSpokenQuoteUseCase {
     });
   }
 
+  private getSpeechAudioFileLocation(): FileLocation {
+    return `speeches/${new Date().getTime()}.mp3`;
+  }
+
   execute(quote: Quote): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | NetworkError | UnknownError> {
     return this.speechService
       .generateSpeech(quote.text)
       .andThen((speech) =>
         this.fileStore
-          .store(speech.audio)
+          .store(this.getSpeechAudioFileLocation(), speech.audio)
           .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
       )
       .andThen(this.spokenQuoteQueue.enqueue);

@@ -1,8 +1,9 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
-import { FileStore } from "@core/fileStore";
+import { FileLocation, FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
+import { SpokenQuote } from "@domain/SpokenQuote";
 import { VideoOptions } from "@domain/Video";
 import { mock } from "jest-mock-extended";
 import { err, errAsync, ok, okAsync } from "neverthrow";
@@ -13,7 +14,7 @@ const createVideoQueue = mock<Queue<VideoOptions>>();
 const generateVideoOptionsUseCase = new GenerateVideoOptionsUseCase(fileStore, createVideoQueue);
 
 describe("GenerateVideoOptions Use Case - Integration Tests", () => {
-  const spokenQuote = {
+  const spokenQuote: SpokenQuote = {
     text: "This is an example, a good one.",
     chunks: [
       {
@@ -31,6 +32,8 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
   };
 
   const fps = 30;
+
+  const backgroundVideosLocation: FileLocation = "backgroundVideosLocation";
 
   describe("GIVEN the FileStore returns a list of background video locations", () => {
     const backgroundVideoLocations = ["backgroundVideoFile1.mp4", "backgroundVideoFile2.mp4"];
@@ -69,13 +72,13 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
 
         describe("WHEN the Use Case is executed with a SpokenQuote and FPS", () => {
           test("THEN the FileStore should be called to get the background video locations", async () => {
-            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
             expect(fileStore.listFiles).toHaveBeenCalledTimes(1);
           });
 
           test("THEN the VideoOptions should be created", async () => {
-            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
             expect(generateVideoOptionsUseCase.createVideoOptions).toHaveBeenCalledWith(
               spokenQuote,
@@ -85,13 +88,13 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
           });
 
           test("THEN the VideoOptions should be enqueued", async () => {
-            await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+            await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
             expect(createVideoQueue.enqueue).toHaveBeenCalledWith(videoOptions);
           });
 
           test("THEN the execution should return the VideoOptions, meaning success", async () => {
-            const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+            const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
             expect(result).toEqual(ok(videoOptions));
           });
@@ -107,7 +110,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
       });
 
       test("THEN the execution should return the UnknownError", async () => {
-        const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+        const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
         expect(result).toEqual(err(unknownError));
       });
@@ -122,7 +125,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
 
     test("THEN the execution should return the NetworkError", async () => {
-      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
       expect(result).toEqual(err(networkError));
     });
@@ -136,7 +139,7 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
     });
 
     test("THEN the execution should return the UnknownError", async () => {
-      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps);
+      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
       expect(result).toEqual(err(unknownError));
     });

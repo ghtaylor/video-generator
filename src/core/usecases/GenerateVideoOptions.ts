@@ -45,9 +45,13 @@ export class GenerateVideoOptionsUseCase {
     });
   }
 
-  execute(spokenQuote: SpokenQuote, fps: number): ResultAsync<VideoOptions, NetworkError | UnknownError> {
+  execute(
+    spokenQuote: SpokenQuote,
+    fps: number,
+    backgroundVideosLocation: FileLocation,
+  ): ResultAsync<VideoOptions, NetworkError | UnknownError> {
     return this.fileStore
-      .listFiles()
+      .listFiles(backgroundVideosLocation)
       .andThen((backgroundVideoLocations) => this.createVideoOptions(spokenQuote, backgroundVideoLocations, fps))
       .andThen(this.createVideoQueue.enqueue);
   }
