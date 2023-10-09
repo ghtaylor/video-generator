@@ -1,140 +1,162 @@
-import { ListObjectsV2CommandOutput, PutObjectCommandOutput, S3Client, S3ServiceException } from "@aws-sdk/client-s3";
+import {
+  CreateBucketCommand,
+  DeleteBucketCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { NetworkError } from "@core/errors/NetworkError";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
-import { mockDeep } from "jest-mock-extended";
 import { ok } from "neverthrow";
+import { GenericContainer, StartedTestContainer } from "testcontainers";
 
 const bucketName = "test-bucket";
-const s3Client = mockDeep<S3Client>();
-
-const s3FileStore = new S3FileStore(s3Client, bucketName);
 
 describe("S3FileStore - Integration Tests", () => {
-  describe("WHEN storing a Buffer at a given path", () => {
-    const path = "example/test-path.txt";
-    const buffer = Buffer.from("test-buffer");
+  let s3Client: S3Client;
+  let container: StartedTestContainer;
+  let s3FileStore: S3FileStore;
 
-    describe("GIVEN the S3Client successfully stores the Buffer", () => {
-      const putObjectOutput: Partial<PutObjectCommandOutput> = {
-        $metadata: {
-          httpStatusCode: 200,
-        },
-      };
+  beforeAll(async () => {
+    container = await new GenericContainer("adobe/s3mock:3.1.0").withExposedPorts(9090).start();
 
-      beforeEach(() => {
-        s3Client.send.mockResolvedValue(putObjectOutput as never);
-      });
-
-      test("THEN the S3Client should be called to store the Buffer", async () => {
-        await s3FileStore.store(path, buffer);
-        expect(s3Client.send).toHaveBeenCalledTimes(1);
-      });
-      test("THEN the stored file location should be returned", async () => {
-        await expect(s3FileStore.store(path, buffer)).resolves.toEqual(ok(path));
-      });
+    s3Client = new S3Client({
+      region: "eu-west-1",
+      endpoint: `http://${container.getHost()}:${container.getMappedPort(9090)}`,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: "accessKeyId",
+        secretAccessKey: "secretAccessKey",
+      },
     });
 
-    describe("GIVEN the S3Client throws an S3ServiceException when storing the Buffer", () => {
-      const s3ServiceException = new S3ServiceException({
-        name: "S3ServiceException",
-        $fault: "server",
-        $metadata: {
-          httpStatusCode: 500,
-        },
-      });
-
-      beforeEach(() => {
-        s3Client.send.mockRejectedValue(s3ServiceException as never);
-      });
-
-      test("THEN a NetworkError should be returned, containing the S3ServiceException", async () => {
-        const result = await s3FileStore.store(path, buffer);
-        const resultError = result._unsafeUnwrapErr();
-        expect(resultError).toBeInstanceOf(NetworkError);
-        expect((resultError as NetworkError).originalError).toBeInstanceOf(S3ServiceException);
-      });
-    });
+    s3FileStore = new S3FileStore(s3Client, bucketName);
   });
 
-  describe("WHEN listing items at a given path", () => {
-    const path = "example/";
+  afterAll(async () => {
+    s3Client.destroy();
+    await container.stop();
+  });
 
-    describe("GIVEN the S3Client successfully lists objects at the given path", () => {
-      const listObjectsOutput: Partial<ListObjectsV2CommandOutput> = {
-        $metadata: {
-          httpStatusCode: 200,
-        },
-        Contents: [
-          {
-            Key: "example/test-path.txt",
-          },
-          {
-            Key: "example/test-path-2.txt",
-          },
-        ],
-      };
-
-      beforeEach(() => {
-        s3Client.send.mockResolvedValue(listObjectsOutput as never);
+  describe(`GIVEN a bucket exists with the name "${bucketName}"`, () => {
+    beforeAll(async () => {
+      const createBucketCommand = new CreateBucketCommand({
+        Bucket: bucketName,
       });
 
-      test("THEN the S3Client should be called to list objects at the given path", async () => {
-        await s3FileStore.listFiles(path);
-        expect(s3Client.send).toHaveBeenCalledTimes(1);
+      await s3Client.send(createBucketCommand);
+    });
+
+    afterAll(async () => {
+      const deleteBucketCommand = new DeleteBucketCommand({
+        Bucket: bucketName,
       });
-      test("THEN the list of files should be returned", async () => {
-        await expect(s3FileStore.listFiles(path)).resolves.toEqual(
-          ok(["example/test-path.txt", "example/test-path-2.txt"]),
+
+      await s3Client.send(deleteBucketCommand);
+    });
+
+    describe(`WHEN storing a Buffer at "example/test-path.txt"`, () => {
+      afterEach(async () => {
+        const deleteObjectCommand = new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: "example/test-path.txt",
+        });
+
+        await s3Client.send(deleteObjectCommand);
+      });
+
+      test("THEN the file should be stored at the given path", async () => {
+        await s3FileStore.store("example/test-path.txt", Buffer.from("test-buffer"));
+
+        const listObjectsCommand = new ListObjectsV2Command({
+          Bucket: bucketName,
+          Prefix: "example/test-path.txt",
+        });
+
+        const listObjectsOutput = await s3Client.send(listObjectsCommand);
+
+        expect(listObjectsOutput.Contents?.length).toEqual(1);
+      });
+
+      test("THEN the stored file location should be returned", async () => {
+        await expect(s3FileStore.store("example/test-path.txt", Buffer.from("test-buffer"))).resolves.toEqual(
+          ok("example/test-path.txt"),
         );
       });
     });
 
-    describe("GIVEN the S3Client successfully lists objects at the given path that do not have a Key", () => {
-      const listObjectsOutput: Partial<ListObjectsV2CommandOutput> = {
-        $metadata: {
-          httpStatusCode: 200,
-        },
-        Contents: [
-          {
-            Key: undefined,
-          },
-          {
-            Key: undefined,
-          },
-        ],
-      };
+    describe("AND GIVEN two files exist with the prefix 'example/'", () => {
+      beforeAll(async () => {
+        const putObjectCommand1 = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: "example/test-path-1.txt",
+          Body: Buffer.from("test-buffer"),
+        });
 
-      beforeEach(() => {
-        s3Client.send.mockResolvedValue(listObjectsOutput as never);
+        const putObjectCommand2 = new PutObjectCommand({
+          Bucket: bucketName,
+          Key: "example/test-path-2.txt",
+          Body: Buffer.from("test-buffer"),
+        });
+
+        await s3Client.send(putObjectCommand1);
+        await s3Client.send(putObjectCommand2);
       });
 
-      test("THEN the S3Client should be called to list objects at the given path", async () => {
-        await s3FileStore.listFiles(path);
-        expect(s3Client.send).toHaveBeenCalledTimes(1);
+      afterAll(async () => {
+        const deleteObjectCommand1 = new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: "example/test-path-1.txt",
+        });
+
+        const deleteObjectCommand2 = new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: "example/test-path-2.txt",
+        });
+
+        await s3Client.send(deleteObjectCommand1);
+        await s3Client.send(deleteObjectCommand2);
       });
-      test("THEN the list of files should be returned as empty", async () => {
-        await expect(s3FileStore.listFiles(path)).resolves.toEqual(ok([]));
+
+      describe("WHEN listing files with the prefix 'example/'", () => {
+        test("THEN the two file paths should be returned", async () => {
+          const filePaths = await s3FileStore.listFiles("example/");
+
+          expect(filePaths).toEqual(ok(["example/test-path-1.txt", "example/test-path-2.txt"]));
+        });
       });
     });
 
-    describe("GIVEN the S3Client throws an S3ServiceException when listing objects at the given path", () => {
-      const s3ServiceException = new S3ServiceException({
-        name: "S3ServiceException",
-        $fault: "server",
-        $metadata: {
-          httpStatusCode: 500,
-        },
-      });
+    describe("AND GIVEN no files exist with the prefix 'example/'", () => {
+      describe("WHEN listing files with the prefix 'example/'", () => {
+        test("THEN an empty array should be returned", async () => {
+          const filePaths = await s3FileStore.listFiles("example/");
 
-      beforeEach(() => {
-        s3Client.send.mockRejectedValue(s3ServiceException as never);
+          expect(filePaths).toEqual(ok([]));
+        });
       });
+    });
+  });
 
-      test("THEN a NetworkError should be returned, containing the S3ServiceException", async () => {
-        const result = await s3FileStore.listFiles(path);
-        const resultError = result._unsafeUnwrapErr();
-        expect(resultError).toBeInstanceOf(NetworkError);
-        expect((resultError as NetworkError).originalError).toBeInstanceOf(S3ServiceException);
+  describe(`GIVEN a bucket does not exist with the name "${bucketName}"`, () => {
+    describe("WHEN storing a Buffer at 'example/test-path.txt'", () => {
+      test("THEN an NetworkError should be returned", async () => {
+        const result = await s3FileStore.store("example/test-path.txt", Buffer.from("test-buffer"));
+
+        const error = result._unsafeUnwrapErr();
+        expect(error).toBeInstanceOf(NetworkError);
+        expect(error.message).toEqual(expect.stringContaining("Failed to store file"));
+      });
+    });
+
+    describe("WHEN listing files with the prefix 'example/'", () => {
+      test("THEN a NetworkError should be returned", async () => {
+        const result = await s3FileStore.listFiles("example/");
+
+        const error = result._unsafeUnwrapErr();
+        expect(error).toBeInstanceOf(NetworkError);
+        expect(error.message).toEqual(expect.stringContaining("Failed to list files"));
       });
     });
   });

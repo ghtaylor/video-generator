@@ -38,6 +38,7 @@
     "openai": "^4.11.1",
     "react": "^18.2.0",
     "remotion": "^4.0.42",
+    "testcontainers": "^10.2.1",
     "zod": "^3.22.2"
   }
 }
