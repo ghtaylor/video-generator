@@ -1,0 +1,59 @@
+import { PollyClient } from "@aws-sdk/client-polly";
+import { S3Client } from "@aws-sdk/client-s3";
+import { SQSClient } from "@aws-sdk/client-sqs";
+import { ValidationError } from "@core/errors/ValidationError";
+import { QuoteService } from "@core/quoteService";
+import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
+import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
+import { Quote } from "@domain/Quote";
+import { SpokenQuote } from "@domain/SpokenQuote";
+import { OpenAIQuoteService } from "@infrastructure/adapters/openAIQuoteService";
+import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
+import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
+import { SQSQueue } from "@infrastructure/adapters/sqsQueue";
+import { SQSEvent } from "aws-lambda";
+import { Result, fromThrowable } from "neverthrow";
+import OpenAI from "openai";
+import { Bucket } from "sst/node/bucket";
+import { Config } from "sst/node/config";
+import { Queue } from "sst/node/queue";
+
+export class GenerateSpokenQuoteHandler {
+  constructor(private readonly generateSpokenQuoteUseCase: GenerateSpokenQuoteUseCase) {}
+
+  static build(bucketName: string, spokenQuoteQueueUrl: string) {
+    const pollyClient = new PollyClient({});
+    const speechService = new PollySpeechService(pollyClient);
+
+    const s3Client = new S3Client({});
+    const s3FileStore = new S3FileStore(s3Client, bucketName);
+
+    const sqsClient = new SQSClient({});
+    const spokenQuoteQueue = new SQSQueue<SpokenQuote>(sqsClient, spokenQuoteQueueUrl);
+
+    const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, s3FileStore, spokenQuoteQueue);
+
+    return new GenerateSpokenQuoteHandler(generateSpokenQuoteUseCase);
+  }
+
+  parseMessage(message: string): Result<Quote, ValidationError> {
+    return fromThrowable(
+      () => Quote.parse(JSON.parse(message)),
+      (error) => new ValidationError("Failed to parse message", error instanceof Error ? error : undefined),
+    )();
+  }
+
+  async handle(event: SQSEvent) {
+    for (const record of event.Records) {
+      const result = await this.parseMessage(record.body).asyncAndThen(
+        this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase),
+      );
+
+      console.log(result);
+    }
+  }
+}
+
+const handlerInstance = GenerateSpokenQuoteHandler.build(Bucket.Bucket.bucketName, Queue.SpokenQuotes.queueUrl);
+
+export default handlerInstance.handle.bind(handlerInstance);

@@ -3,6 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "baseUrl": "./src",
+    "moduleResolution": "node",
+    "lib": ["ESNext"],
     "paths": {
       "@domain/*": ["domain/*"],
       "@infrastructure/*": ["infrastructure/*"],

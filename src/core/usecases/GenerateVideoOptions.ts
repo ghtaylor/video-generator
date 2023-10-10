@@ -53,6 +53,6 @@ export class GenerateVideoOptionsUseCase {
     return this.fileStore
       .listFiles(backgroundVideosLocation)
       .andThen((backgroundVideoLocations) => this.createVideoOptions(spokenQuote, backgroundVideoLocations, fps))
-      .andThen(this.createVideoQueue.enqueue);
+      .andThen(this.createVideoQueue.enqueue.bind(this.createVideoQueue));
   }
 }

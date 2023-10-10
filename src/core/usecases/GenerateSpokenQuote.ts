@@ -74,6 +74,6 @@ export class GenerateSpokenQuoteUseCase {
           .store(this.getSpeechAudioFileLocation(), speech.audio)
           .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
       )
-      .andThen(this.spokenQuoteQueue.enqueue);
+      .andThen(this.spokenQuoteQueue.enqueue.bind(this.spokenQuoteQueue));
   }
 }

@@ -14,6 +14,6 @@ export class GenerateQuoteUseCase {
   ) {}
 
   execute(): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
-    return this.quoteService.generateQuote().andThen(this.quoteQueue.enqueue);
+    return this.quoteService.generateQuote().andThen(this.quoteQueue.enqueue.bind(this.quoteQueue));
   }
 }

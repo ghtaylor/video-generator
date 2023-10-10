@@ -1,6 +1,9 @@
 # Videos
 *.mp4
 
+# SST
+.sst
+
 # Logs
 logs
 *.log

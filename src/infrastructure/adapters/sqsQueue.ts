@@ -15,8 +15,6 @@ export class SQSQueue<TMessage> implements Queue<TMessage> {
       MessageBody: JSON.stringify(message),
     });
 
-    SQSServiceException;
-
     return fromPromise(
       this.sqsClient.send(sendMessageCommand),
       (error) => new NetworkError("Failed to send message", error instanceof Error ? error : undefined),
