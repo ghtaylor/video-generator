@@ -1,4 +1,4 @@
-import { QuoteInput } from "./QuoteInput";
+ximport { QuoteInput } from "./QuoteInput";
 
 export const exampleData: QuoteInput = {
   quote:
