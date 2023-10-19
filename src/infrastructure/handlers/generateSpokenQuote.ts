@@ -2,20 +2,15 @@ import { PollyClient } from "@aws-sdk/client-polly";
 import { S3Client } from "@aws-sdk/client-s3";
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { ValidationError } from "@core/errors/ValidationError";
-import { QuoteService } from "@core/quoteService";
-import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@domain/Quote";
 import { SpokenQuote } from "@domain/SpokenQuote";
-import { OpenAIQuoteService } from "@infrastructure/adapters/openAIQuoteService";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { SQSQueue } from "@infrastructure/adapters/sqsQueue";
 import { SQSEvent } from "aws-lambda";
 import { Result, fromThrowable } from "neverthrow";
-import OpenAI from "openai";
 import { Bucket } from "sst/node/bucket";
-import { Config } from "sst/node/config";
 import { Queue } from "sst/node/queue";
 
 export class GenerateSpokenQuoteHandler {
