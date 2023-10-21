@@ -1,5 +1,5 @@
 export class UnknownError extends Error {
-  name = "UnknownError";
+  readonly name = "UnknownError";
 
   constructor(originalError?: Error) {
     const message = "An unknown error occurred";

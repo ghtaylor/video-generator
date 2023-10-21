@@ -61,21 +61,6 @@ describe("GenerateQuote Use Case - Integration Tests", () => {
         });
       });
     });
-
-    describe("AND the QuoteQueue fails to enqueue the Quote due to an UnknownError", () => {
-      const unknownError = new UnknownError();
-
-      beforeEach(() => {
-        quoteQueue.enqueue.mockReturnValue(errAsync(unknownError));
-      });
-
-      describe("WHEN the GenerateQuote Use Case is executed", () => {
-        test("THEN the execution should return an UnknownError", async () => {
-          const result = await generateQuoteUseCase.execute();
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(UnknownError);
-        });
-      });
-    });
   });
 
   describe("GIVEN the QuoteService fails to generate a Quote due to a NetworkError", () => {

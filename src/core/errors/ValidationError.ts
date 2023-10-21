@@ -1,5 +1,5 @@
 export class ValidationError extends Error {
-  name = "ValidationError";
+  readonly name = "ValidationError";
 
   constructor(message: string, originalError?: Error) {
     super(originalError ? `${message}: ${originalError.message}` : message);

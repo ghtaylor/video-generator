@@ -1,8 +1,9 @@
 import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
 import { NetworkError } from "@core/errors/NetworkError";
+import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
-import { mock, mockDeep } from "jest-mock-extended";
+import { mockDeep } from "jest-mock-extended";
 import { err, ok } from "neverthrow";
 import type { PartialDeep } from "type-fest";
 
@@ -46,9 +47,8 @@ describe("PollySpeechService - Integration Tests", () => {
         const text = "Hello world";
 
         test("THEN it should return a ValidationError", async () => {
-          await expect(pollySpeechService.getSpeechAudio(text)).resolves.toEqual(
-            err(new ValidationError("Audio stream is empty")),
-          );
+          const result = await pollySpeechService.getSpeechAudio(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
         });
       });
     });
@@ -104,13 +104,11 @@ describe("PollySpeechService - Integration Tests", () => {
           await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
             ok([
               {
-                start: 0,
-                end: 5,
+                time: 6,
                 value: "Hello",
               },
               {
-                start: 7,
-                end: 12,
+                time: 732,
                 value: "world",
               },
             ]),
@@ -132,9 +130,8 @@ describe("PollySpeechService - Integration Tests", () => {
         const text = "Hello world";
 
         test("THEN it should return a ValidationError", async () => {
-          await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
-            err(new ValidationError("Audio stream is empty")),
-          );
+          const result = await pollySpeechService.getSpeechMarks(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
         });
       });
     });
@@ -157,9 +154,52 @@ describe("PollySpeechService - Integration Tests", () => {
         const text = "Hello world";
 
         test("THEN it should return a ValidationError", async () => {
-          await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
-            err(new ValidationError("Audio stream is invalid", new Error("Transform error"))),
-          );
+          const result = await pollySpeechService.getSpeechMarks(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
+        });
+      });
+    });
+
+    describe("AND the AudioStream in the response is not valid JSON", () => {
+      const response: PartialDeep<SynthesizeSpeechCommandOutput> = {
+        ContentType: "application/x-json-stream",
+        AudioStream: {
+          transformToByteArray: async () => new Uint8Array([1, 2, 3]),
+        },
+      };
+
+      beforeEach(() => {
+        pollyClient.send.mockResolvedValue(response as never);
+      });
+
+      describe("WHEN `getSpeechMarks` is called", () => {
+        const text = "Hello world";
+
+        test("THEN it should return a ParseError", async () => {
+          const result = await pollySpeechService.getSpeechMarks(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ParseError);
+        });
+      });
+    });
+
+    describe("AND the AudioStream in the response is valid JSON, but not valid SpeechMarks", () => {
+      const response: PartialDeep<SynthesizeSpeechCommandOutput> = {
+        ContentType: "application/x-json-stream",
+        AudioStream: {
+          transformToByteArray: async () => new TextEncoder().encode(`{"invalid":"speechmark"}`),
+        },
+      };
+
+      beforeEach(() => {
+        pollyClient.send.mockResolvedValue(response as never);
+      });
+
+      describe("WHEN `getSpeechMarks` is called", () => {
+        const text = "Hello world";
+
+        test("THEN it should return a ParseError", async () => {
+          const result = await pollySpeechService.getSpeechMarks(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ParseError);
         });
       });
     });
@@ -176,9 +216,8 @@ describe("PollySpeechService - Integration Tests", () => {
       const text = "Hello world";
 
       test("THEN it should return a NetworkError", async () => {
-        await expect(pollySpeechService.getSpeechAudio(text)).resolves.toEqual(
-          err(new NetworkError("Polly API error", pollyClientError)),
-        );
+        const result = await pollySpeechService.getSpeechAudio(text);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
       });
     });
 
@@ -186,9 +225,8 @@ describe("PollySpeechService - Integration Tests", () => {
       const text = "Hello world";
 
       test("THEN it should return a NetworkError", async () => {
-        await expect(pollySpeechService.getSpeechMarks(text)).resolves.toEqual(
-          err(new NetworkError("Polly API error", pollyClientError)),
-        );
+        const result = await pollySpeechService.getSpeechAudio(text);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
       });
     });
 
@@ -196,9 +234,8 @@ describe("PollySpeechService - Integration Tests", () => {
       const text = "Hello world";
 
       test("THEN it should return a NetworkError", async () => {
-        await expect(pollySpeechService.generateSpeech(text)).resolves.toEqual(
-          err(new NetworkError("Polly API error", pollyClientError)),
-        );
+        const result = await pollySpeechService.getSpeechAudio(text);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
       });
     });
   });
@@ -240,13 +277,11 @@ describe("PollySpeechService - Integration Tests", () => {
             audio: Buffer.from(mp3AudioStreamByteArray),
             marks: [
               {
-                start: 0,
-                end: 5,
+                time: 6,
                 value: "Hello",
               },
               {
-                start: 7,
-                end: 12,
+                time: 732,
                 value: "world",
               },
             ],

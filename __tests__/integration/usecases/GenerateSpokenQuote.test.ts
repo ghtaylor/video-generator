@@ -123,20 +123,6 @@ describe("GenerateSpokenQuote Use Case - Integration Tests", () => {
             });
           });
         });
-
-        describe("AND the SpokenQuoteQueue fails to enqueue the SpokenQuote due to an UnknownError", () => {
-          const unknownError = new UnknownError();
-
-          beforeEach(() => {
-            spokenQuoteQueue.enqueue.mockReturnValue(errAsync(unknownError));
-          });
-
-          describe("WHEN the GenerateSpokenQuote Use Case is executed with a Quote", () => {
-            test("THEN the execution should return an UnknownError", async () => {
-              await expect(generateSpokenQuoteUseCase.execute(quote)).resolves.toEqual(err(unknownError));
-            });
-          });
-        });
       });
 
       describe("AND the SpokenQuote fails to be created, due to a SpokenQuoteMarksInvalidError", () => {

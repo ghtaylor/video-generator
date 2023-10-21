@@ -1,5 +1,5 @@
 export class NetworkError extends Error {
-  name = "NetworkError";
+  readonly name = "NetworkError";
   originalError?: Error;
 
   constructor(message: string, originalError?: Error) {

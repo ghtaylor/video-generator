@@ -38,7 +38,7 @@ export class PollySpeechService implements SpeechService {
     ).map((byteArray) => Buffer.from(byteArray));
   }
 
-  getSpeechMarks(text: string): ResultAsync<SpeechMark[], NetworkError | ValidationError> {
+  getSpeechMarks(text: string): ResultAsync<SpeechMark[], NetworkError | ParseError | ValidationError> {
     const command = new SynthesizeSpeechCommand({
       OutputFormat: "json",
       SpeechMarkTypes: ["word"],
@@ -65,7 +65,7 @@ export class PollySpeechService implements SpeechService {
       .andThen(this.getBufferFromAudioStream);
   }
 
-  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError> {
+  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError | ParseError> {
     return ResultAsync.combine([this.getSpeechAudio(text), this.getSpeechMarks(text)]).map(([audio, marks]) => ({
       audio,
       marks,
