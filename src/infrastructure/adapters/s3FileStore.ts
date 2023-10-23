@@ -10,7 +10,7 @@ export class S3FileStore implements FileStore {
     private readonly bucketName: string,
   ) {}
 
-  store(path: FileLocation, buffer: Buffer): ResultAsync<string, NetworkError | UnknownError> {
+  store(path: FileLocation, buffer: Buffer): ResultAsync<string, NetworkError> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -23,7 +23,7 @@ export class S3FileStore implements FileStore {
     ).map(() => path);
   }
 
-  listFiles(path: FileLocation): ResultAsync<string[], NetworkError | UnknownError> {
+  listFiles(path: FileLocation): ResultAsync<string[], NetworkError> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucketName,
       Prefix: path,

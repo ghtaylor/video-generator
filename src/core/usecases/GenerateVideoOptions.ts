@@ -16,7 +16,7 @@ export class GenerateVideoOptionsUseCase {
     spokenQuote: SpokenQuote,
     backgroundVideoLocations: FileLocation[],
     fps: number,
-  ): Result<VideoOptions, UnknownError> {
+  ): Result<VideoOptions, never> {
     const videoSections: VideoSection[] = [];
 
     for (let i = 0; i < spokenQuote.chunks.length; i++) {
@@ -49,7 +49,7 @@ export class GenerateVideoOptionsUseCase {
     spokenQuote: SpokenQuote,
     fps: number,
     backgroundVideosLocation: FileLocation,
-  ): ResultAsync<VideoOptions, NetworkError | UnknownError> {
+  ): ResultAsync<VideoOptions, NetworkError> {
     return this.fileStore
       .listFiles(backgroundVideosLocation)
       .andThen((backgroundVideoLocations) => this.createVideoOptions(spokenQuote, backgroundVideoLocations, fps))
