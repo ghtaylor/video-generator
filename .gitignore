@@ -1,6 +1,9 @@
 # Videos
 *.mp4
 
+# Remotion
+remotion-build/
+
 # SST
 .sst
 
