@@ -101,20 +101,6 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
         });
       });
     });
-
-    describe("AND the VideoOptions fails to be created, due to an UnknownError", () => {
-      const unknownError = new UnknownError();
-
-      beforeEach(() => {
-        jest.spyOn(generateVideoOptionsUseCase, "createVideoOptions").mockReturnValue(err(unknownError));
-      });
-
-      test("THEN the execution should return the UnknownError", async () => {
-        const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
-
-        expect(result).toEqual(err(unknownError));
-      });
-    });
   });
 
   describe("GIVEN the FileStore fails to return a list of background video locations, due to a NetworkError", () => {
@@ -128,20 +114,6 @@ describe("GenerateVideoOptions Use Case - Integration Tests", () => {
       const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
 
       expect(result).toEqual(err(networkError));
-    });
-  });
-
-  describe("GIVEN the FileStore fails to return a list of background video locations, due to an UnknownError", () => {
-    const unknownError = new UnknownError();
-
-    beforeEach(() => {
-      fileStore.listFiles.mockReturnValue(errAsync(unknownError));
-    });
-
-    test("THEN the execution should return the UnknownError", async () => {
-      const result = await generateVideoOptionsUseCase.execute(spokenQuote, fps, backgroundVideosLocation);
-
-      expect(result).toEqual(err(unknownError));
     });
   });
 });

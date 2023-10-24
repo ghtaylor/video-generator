@@ -26,13 +26,13 @@ export class GenerateVideoOptionsUseCase {
       const nextSpokenQuoteChunk = spokenQuote.chunks[i + 1];
 
       if (!nextSpokenQuoteChunk) {
-        const durationInFrames = Math.round((spokenQuoteChunk.end - spokenQuoteChunk.start) / fps);
+        const durationInFrames = Math.round(((spokenQuoteChunk.end - spokenQuoteChunk.start) / 1000) * fps);
         const text = spokenQuoteChunk.value;
         videoSections.push({ text, durationInFrames, backgroundVideoLocation });
         continue;
       }
 
-      const durationInFrames = Math.round((nextSpokenQuoteChunk.start - spokenQuoteChunk.start) / fps);
+      const durationInFrames = Math.round(((nextSpokenQuoteChunk.start - spokenQuoteChunk.start) / 1000) * fps);
       const text = spokenQuoteChunk.value;
       videoSections.push({ text, durationInFrames, backgroundVideoLocation });
     }
