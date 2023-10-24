@@ -43,7 +43,8 @@ export class PollySpeechService implements SpeechService {
       OutputFormat: "json",
       SpeechMarkTypes: ["word"],
       Text: text,
-      VoiceId: "Joanna",
+      VoiceId: "Stephen",
+      Engine: "neural",
     });
 
     return this.sendPollyCommand(command)
@@ -57,7 +58,8 @@ export class PollySpeechService implements SpeechService {
     const command = new SynthesizeSpeechCommand({
       OutputFormat: "mp3",
       Text: text,
-      VoiceId: "Joanna",
+      VoiceId: "Stephen",
+      Engine: "neural",
     });
 
     return this.sendPollyCommand(command)
