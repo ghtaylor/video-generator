@@ -264,6 +264,78 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
       ],
+      [
+        {
+          text: "This is an example. There are three chunks, yes, three!",
+          chunks: ["This is an example.", "There are three chunks,", "yes, three!"],
+        },
+        {
+          audio: Buffer.from("audio"),
+          marks: [
+            {
+              value: "this",
+              time: 0,
+            },
+            {
+              value: "is",
+              time: 120,
+            },
+            {
+              value: "an",
+              time: 240,
+            },
+            {
+              value: "example",
+              time: 360,
+            },
+            {
+              value: "There",
+              time: 490,
+            },
+            {
+              value: "are",
+              time: 610,
+            },
+            {
+              value: "three",
+              time: 730,
+            },
+            {
+              value: "chunks",
+              time: 850,
+            },
+            {
+              value: "yes",
+              time: 1020,
+            },
+            {
+              value: "three",
+              time: 1100,
+            },
+          ],
+        },
+        {
+          text: "This is an example. There are three chunks, yes, three!",
+          audioLocation: "audioLocation",
+          chunks: [
+            {
+              value: "This is an example.",
+              start: 0,
+              end: 490,
+            },
+            {
+              value: "There are three chunks,",
+              start: 490,
+              end: 1020,
+            },
+            {
+              value: "yes, three!",
+              start: 1020,
+              end: 1100 + endDelay,
+            },
+          ],
+        },
+      ],
     ])("GIVEN a Quote and Speech that are valid", (quote, speech, expectedResult) => {
       test("THEN `createSpokenQuote` should return a Result.ok with a SpokenQuote", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation, endDelay);
