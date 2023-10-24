@@ -1,27 +1,23 @@
-import { AbsoluteFill, RandomSeed, Series, Video, random, staticFile } from "remotion";
-import { exampleData } from "./example";
+import { VideoOptions } from "@domain/Video";
+import { AbsoluteFill, Audio, OffthreadVideo, Series, staticFile } from "remotion";
 
-export const MyComposition: React.FC = () => {
-  const videoUrls = ["1.mp4", "2.mp4", "3.mp4", "4.mp4"];
-
-  const getRandomVideoUrl = (seed: RandomSeed) => {
-    const randomIndex = Math.floor(random(seed) * videoUrls.length);
-    return videoUrls[randomIndex];
-  };
-
+export const MyComposition: React.FC<VideoOptions> = ({ sections, speechAudioLocation }) => {
   return (
-    <Series>
-      {exampleData.chunks.map((quoteChunk) => (
-        <Series.Sequence key={quoteChunk} durationInFrames={60} className="items-center justify-center">
-          <AbsoluteFill className="-z-50">
-            <Video src={staticFile(getRandomVideoUrl(quoteChunk))} />
-          </AbsoluteFill>
+    <>
+      <Series>
+        {sections.map(({ text, durationInFrames, backgroundVideoLocation }) => (
+          <Series.Sequence key={text} durationInFrames={durationInFrames} className="items-center justify-center">
+            <AbsoluteFill className="-z-50">
+              <OffthreadVideo src={backgroundVideoLocation} />
+            </AbsoluteFill>
 
-          <h1 className="text-7xl tracking-wider font-bold text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
-            {quoteChunk}
-          </h1>
-        </Series.Sequence>
-      ))}
-    </Series>
+            <h1 className="text-7xl tracking-wider font-bold text-white text-center drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+              {text}
+            </h1>
+          </Series.Sequence>
+        ))}
+      </Series>
+      <Audio src={speechAudioLocation} />
+    </>
   );
 };
