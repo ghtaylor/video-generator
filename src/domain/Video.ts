@@ -3,13 +3,13 @@ import { z } from "zod";
 export const VideoSection = z.object({
   text: z.string(),
   durationInFrames: z.number(),
-  backgroundVideoLocation: z.string(),
+  backgroundVideoUrl: z.string(),
 });
 
 export const VideoOptions = z.object({
   fps: z.number(),
   description: z.string(), // quote text and hashtags
-  speechAudioLocation: z.string(),
+  speechAudioUrl: z.string(),
   sections: z.array(VideoSection),
 });
 

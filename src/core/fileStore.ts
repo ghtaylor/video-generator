@@ -7,4 +7,5 @@ export type FileUrl = string;
 export interface FileStore {
   store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError>;
   listFiles(path: FileLocation): ResultAsync<FileLocation[], NetworkError>;
+  getUrl(path: FileLocation): ResultAsync<FileUrl, NetworkError>;
 }

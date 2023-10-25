@@ -1,6 +1,6 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
-import { FileLocation, FileStore } from "@core/fileStore";
+import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { VideoOptions, VideoSection } from "@domain/Video";
@@ -14,13 +14,13 @@ export class GenerateVideoOptionsUseCase {
 
   createVideoOptions(
     spokenQuote: SpokenQuote,
-    backgroundVideoLocations: FileLocation[],
+    backgroundVideoUrls: FileUrl[],
     fps: number,
   ): Result<VideoOptions, never> {
     const videoSections: VideoSection[] = [];
 
     for (let i = 0; i < spokenQuote.chunks.length; i++) {
-      const backgroundVideoLocation = backgroundVideoLocations[i % backgroundVideoLocations.length];
+      const backgroundVideoUrl = backgroundVideoUrls[i % backgroundVideoUrls.length];
 
       const spokenQuoteChunk = spokenQuote.chunks[i];
       const nextSpokenQuoteChunk = spokenQuote.chunks[i + 1];
@@ -28,21 +28,25 @@ export class GenerateVideoOptionsUseCase {
       if (!nextSpokenQuoteChunk) {
         const durationInFrames = Math.round(((spokenQuoteChunk.end - spokenQuoteChunk.start) / 1000) * fps);
         const text = spokenQuoteChunk.value;
-        videoSections.push({ text, durationInFrames, backgroundVideoLocation });
+        videoSections.push({ text, durationInFrames, backgroundVideoUrl });
         continue;
       }
 
       const durationInFrames = Math.round(((nextSpokenQuoteChunk.start - spokenQuoteChunk.start) / 1000) * fps);
       const text = spokenQuoteChunk.value;
-      videoSections.push({ text, durationInFrames, backgroundVideoLocation });
+      videoSections.push({ text, durationInFrames, backgroundVideoUrl });
     }
 
     return ok({
       fps,
       description: spokenQuote.text,
-      speechAudioLocation: spokenQuote.audioLocation,
+      speechAudioUrl: spokenQuote.audioUrl,
       sections: videoSections,
     });
+  }
+
+  private getFileUrls(backgroundVideoLocations: FileLocation[]): ResultAsync<FileUrl[], NetworkError> {
+    return ResultAsync.combine(backgroundVideoLocations.map(this.fileStore.getUrl));
   }
 
   execute(
@@ -52,7 +56,8 @@ export class GenerateVideoOptionsUseCase {
   ): ResultAsync<VideoOptions, NetworkError> {
     return this.fileStore
       .listFiles(backgroundVideosLocation)
-      .andThen((backgroundVideoLocations) => this.createVideoOptions(spokenQuote, backgroundVideoLocations, fps))
+      .andThen(this.getFileUrls.bind(this))
+      .andThen((backgroundVideoUrls) => this.createVideoOptions(spokenQuote, backgroundVideoUrls, fps))
       .andThen(this.createVideoQueue.enqueue.bind(this.createVideoQueue));
   }
 }

@@ -17,7 +17,6 @@ module.exports = {
   transform: {
     "^.+\\.ts$": "ts-jest",
   },
+  testRegex: ["\\.test\\.ts$", "\\.spec\\.ts$"],
   transformIgnorePatterns: [],
-  restoreMocks: true,
-  clearMocks: true,
 };

@@ -1,6 +1,6 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
-import { FileLocation, FileStore } from "@core/fileStore";
+import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
 import { Quote } from "@domain/Quote";
@@ -19,9 +19,10 @@ export class GenerateSpokenQuoteUseCase {
   createSpokenQuote(
     quote: Quote,
     speech: Speech,
-    audioLocation: FileLocation,
+    audioUrl: FileUrl,
     endDelay: number = 1000,
   ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
+    const _speech = Object.assign({}, speech);
     const chunks: SpokenQuoteChunk[] = [];
 
     for (let chunkIndex = 0; chunkIndex < quote.chunks.length; chunkIndex++) {
@@ -34,17 +35,17 @@ export class GenerateSpokenQuoteUseCase {
       for (let wordIndex = 0; wordIndex < wordsOfChunk.length; wordIndex++) {
         const word = wordsOfChunk[wordIndex];
 
-        if (word.toLowerCase() !== speech.marks[wordIndex].value.toLowerCase())
+        if (word.toLowerCase() !== _speech.marks[wordIndex]?.value.toLowerCase())
           return err(new SpokenQuoteMarksInvalidError());
 
         if (wordIndex === 0 && chunkIndex === 0) start = 0;
-        else if (wordIndex === 0) start = speech.marks[wordIndex].time;
+        else if (wordIndex === 0) start = _speech.marks[wordIndex].time;
 
         if (wordIndex === wordsOfChunk.length - 1)
-          end = speech.marks[wordIndex + 1]?.time ?? speech.marks[wordIndex].time + endDelay;
+          end = _speech.marks[wordIndex + 1]?.time ?? _speech.marks[wordIndex].time + endDelay;
       }
 
-      speech.marks = speech.marks.slice(wordsOfChunk.length);
+      _speech.marks = _speech.marks.slice(wordsOfChunk.length);
 
       chunks.push({
         value: chunk,
@@ -53,12 +54,12 @@ export class GenerateSpokenQuoteUseCase {
       });
     }
 
-    if (speech.marks.length > 0) return err(new SpokenQuoteMarksInvalidError());
+    if (_speech.marks.length > 0) return err(new SpokenQuoteMarksInvalidError());
 
     return ok({
       text: quote.text,
       chunks,
-      audioLocation,
+      audioUrl,
     });
   }
 
@@ -72,6 +73,7 @@ export class GenerateSpokenQuoteUseCase {
       .andThen((speech) =>
         this.fileStore
           .store(this.getSpeechAudioFileLocation(), speech.audio)
+          .andThen(this.fileStore.getUrl.bind(this.fileStore))
           .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
       )
       .andThen(this.spokenQuoteQueue.enqueue.bind(this.spokenQuoteQueue));

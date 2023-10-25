@@ -14,24 +14,38 @@ import { GenericContainer, StartedTestContainer } from "testcontainers";
 const bucketName = "test-bucket";
 
 describe("S3FileStore - Integration Tests", () => {
+  jest.setTimeout(60_000);
+
   let s3Client: S3Client;
   let container: StartedTestContainer;
   let s3FileStore: S3FileStore;
 
   beforeAll(async () => {
-    container = await new GenericContainer("adobe/s3mock:3.1.0").withExposedPorts(9090).start();
+    try {
+      container = await new GenericContainer("minio/minio:RELEASE.2023-10-25T06-33-25Z")
+        .withExposedPorts(9000)
+        .withCommand(["server", "/data"])
+        .withLogConsumer((stream) => {
+          stream.on("data", (line) => console.log(line));
+          stream.on("err", (line) => console.error(line));
+          stream.on("end", () => console.log("Stream closed"));
+        })
+        .start();
 
-    s3Client = new S3Client({
-      region: "eu-west-1",
-      endpoint: `http://${container.getHost()}:${container.getMappedPort(9090)}`,
-      forcePathStyle: true,
-      credentials: {
-        accessKeyId: "accessKeyId",
-        secretAccessKey: "secretAccessKey",
-      },
-    });
+      s3Client = new S3Client({
+        region: "eu-west-1",
+        endpoint: `http://${container.getHost()}:${container.getMappedPort(9000)}`,
+        credentials: {
+          accessKeyId: "minioadmin",
+          secretAccessKey: "minioadmin",
+        },
+        forcePathStyle: true,
+      });
 
-    s3FileStore = new S3FileStore(s3Client, bucketName);
+      s3FileStore = new S3FileStore(s3Client, bucketName);
+    } catch (err) {
+      console.log("Error: ", err);
+    }
   });
 
   afterAll(async () => {
@@ -123,7 +137,17 @@ describe("S3FileStore - Integration Tests", () => {
         test("THEN the two file paths should be returned", async () => {
           const filePaths = await s3FileStore.listFiles("example/");
 
+          console.log(filePaths);
+
           expect(filePaths).toEqual(ok(["example/test-path-1.txt", "example/test-path-2.txt"]));
+        });
+      });
+
+      describe("WHEN getting a URL for the file 'example/test-path-1.txt'", () => {
+        test("THEN a URL should be returned", async () => {
+          const result = await s3FileStore.getUrl("example/test-path-1.txt");
+          const url = result._unsafeUnwrap();
+          expect(url).toEqual(expect.stringContaining("example/test-path-1.txt"));
         });
       });
     });

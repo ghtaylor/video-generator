@@ -1,23 +1,25 @@
+import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@domain/Quote";
-import { SpokenQuote } from "@domain/SpokenQuote";
 import { Speech } from "@domain/Speech";
+import { SpokenQuote } from "@domain/SpokenQuote";
 import { SpokenQuoteMarksInvalidError } from "@domain/errors/SpokenQuote";
 import { mock } from "jest-mock-extended";
-
-const speechService = mock<SpeechService>();
-const fileStore = mock<FileStore>();
-const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
-
-const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteQueue);
+import { errAsync, okAsync } from "neverthrow";
 
 describe("GenerateSpokenQuote Use Case", () => {
+  const speechService = mock<SpeechService>();
+  const fileStore = mock<FileStore>();
+  const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
+
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteQueue);
+
   describe("`createSpokenQuote`", () => {
-    const audioLocation = "audioLocation";
-    const endDelay = 1000;
+    const VALID_AUDIO_URL = "https://bucket.aws.com/audioLocation";
+    const END_DELAY = 1000;
 
     describe.each<[Quote, Speech, SpokenQuote]>([
       [
@@ -60,7 +62,7 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
         {
           text: "This is an example, a good one.",
-          audioLocation: "audioLocation",
+          audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
             {
               value: "This is an example,",
@@ -70,7 +72,7 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "a good one.",
               start: 490,
-              end: 730 + endDelay,
+              end: 730 + END_DELAY,
             },
           ],
         },
@@ -119,7 +121,7 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
         {
           text: "This is an example, and there's an apostrophe.",
-          audioLocation: "audioLocation",
+          audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
             {
               value: "This is an example,",
@@ -129,7 +131,7 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "and there's an apostrophe.",
               start: 490,
-              end: 850 + endDelay,
+              end: 850 + END_DELAY,
             },
           ],
         },
@@ -182,7 +184,7 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
         {
           text: "This is an example. Speech marks have capital letters.",
-          audioLocation: "audioLocation",
+          audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
             {
               value: "This is an example.",
@@ -192,7 +194,7 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "Speech marks have capital letters.",
               start: 490,
-              end: 970 + endDelay,
+              end: 970 + END_DELAY,
             },
           ],
         },
@@ -249,7 +251,7 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
         {
           text: "This is an example. Speech marks start later than zero.",
-          audioLocation: "audioLocation",
+          audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
             {
               value: "This is an example.",
@@ -259,7 +261,7 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "Speech marks start later than zero.",
               start: 490,
-              end: 1090 + endDelay,
+              end: 1090 + END_DELAY,
             },
           ],
         },
@@ -316,7 +318,7 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
         {
           text: "This is an example. There are three chunks, yes, three!",
-          audioLocation: "audioLocation",
+          audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
             {
               value: "This is an example.",
@@ -331,16 +333,16 @@ describe("GenerateSpokenQuote Use Case", () => {
             {
               value: "yes, three!",
               start: 1020,
-              end: 1100 + endDelay,
+              end: 1100 + END_DELAY,
             },
           ],
         },
       ],
-    ])("GIVEN a Quote and Speech that are valid", (quote, speech, expectedResult) => {
-      test("THEN `createSpokenQuote` should return a Result.ok with a SpokenQuote", () => {
-        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation, endDelay);
+    ])("GIVEN a Quote and Speech that are valid", (quote, speech, expectedSpokenQuote) => {
+      test("THEN `createSpokenQuote` should return a result with the SpokenQuote", () => {
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, VALID_AUDIO_URL, END_DELAY);
 
-        expect(result._unsafeUnwrap()).toEqual(expectedResult);
+        expect(result._unsafeUnwrap()).toEqual(expectedSpokenQuote);
       });
     });
 
@@ -440,10 +442,131 @@ describe("GenerateSpokenQuote Use Case", () => {
         },
       ],
     ])("GIVEN a Quote, but the Speech has marks that do not match the Quote", (quote, speech) => {
-      test("THEN `createSpokenQuote` should return a Result.err with a SpokenQuoteMarksInvalidError", () => {
-        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, audioLocation, endDelay);
+      test("THEN `createSpokenQuote` should return a result with a SpokenQuoteMarksInvalidError", () => {
+        const result = generateSpokenQuoteUseCase.createSpokenQuote(quote, speech, VALID_AUDIO_URL, END_DELAY);
 
-        expect(result._unsafeUnwrapErr()).toEqual(new SpokenQuoteMarksInvalidError());
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(SpokenQuoteMarksInvalidError);
+      });
+    });
+  });
+
+  describe("WHEN the `execute` method is called", () => {
+    const VALID_QUOTE: Quote = {
+      text: "This is an example, a good one.",
+      chunks: ["This is an example,", "a good one."],
+    };
+
+    const VALID_SPEECH: Speech = {
+      audio: Buffer.from("audio"),
+      marks: [
+        {
+          value: "this",
+          time: 0,
+        },
+        {
+          value: "is",
+          time: 120,
+        },
+        {
+          value: "an",
+          time: 240,
+        },
+        {
+          value: "example",
+          time: 360,
+        },
+        {
+          value: "a",
+          time: 490,
+        },
+        {
+          value: "good",
+          time: 610,
+        },
+        {
+          value: "one",
+          time: 730,
+        },
+      ],
+    };
+
+    const VALID_SPOKEN_QUOTE: SpokenQuote = {
+      text: "This is an example, a good one.",
+      audioUrl: "https://bucket.aws.com/audioLocation",
+      chunks: [
+        {
+          value: "This is an example,",
+          start: 0,
+          end: 490,
+        },
+        {
+          value: "a good one.",
+          start: 490,
+          end: 730,
+        },
+      ],
+    };
+
+    describe("GIVEN all integrations are successful", () => {
+      beforeEach(() => {
+        speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
+        fileStore.store.mockReturnValue(okAsync("speechAudioLocation"));
+        fileStore.getUrl.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE.audioUrl));
+        spokenQuoteQueue.enqueue.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE));
+      });
+
+      test("THEN `execute` should return a successful result", async () => {
+        const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+
+        expect(result.isOk()).toBe(true);
+      });
+
+      describe("EXCEPT enqueuing the SpokenQuote fails due to a NetworkError", () => {
+        beforeEach(() => {
+          spokenQuoteQueue.enqueue.mockResolvedValue(errAsync(new NetworkError("Failed to enqueue spoken quote.")));
+        });
+
+        test("THEN `execute` should return a NetworkError", async () => {
+          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        });
+      });
+
+      describe("EXCEPT getting the Speech audio URL fails due to a NetworkError", () => {
+        beforeEach(() => {
+          fileStore.getUrl.mockReturnValue(errAsync(new NetworkError("Failed to get speech audio URL.")));
+        });
+
+        test("THEN `execute` should return a NetworkError", async () => {
+          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        });
+      });
+
+      describe("EXCEPT storing the Speech audio fails due to a NetworkError", () => {
+        beforeEach(() => {
+          fileStore.store.mockReturnValue(errAsync(new NetworkError("Failed to store speech audio.")));
+        });
+
+        test("THEN `execute` should return a NetworkError", async () => {
+          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        });
+      });
+
+      describe("EXCEPT generating the Speech fails due to a NetworkError", () => {
+        beforeEach(() => {
+          speechService.generateSpeech.mockReturnValue(errAsync(new NetworkError("Failed to generate speech.")));
+        });
+
+        test("THEN `execute` should return a NetworkError", async () => {
+          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        });
       });
     });
   });

@@ -1,7 +1,7 @@
-import { ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NetworkError } from "@core/errors/NetworkError";
-import { UnknownError } from "@core/errors/UnknownError";
-import { FileLocation, FileStore } from "@core/fileStore";
+import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { ResultAsync, fromPromise } from "neverthrow";
 
 export class S3FileStore implements FileStore {
@@ -10,7 +10,7 @@ export class S3FileStore implements FileStore {
     private readonly bucketName: string,
   ) {}
 
-  store(path: FileLocation, buffer: Buffer): ResultAsync<string, NetworkError> {
+  store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -23,7 +23,7 @@ export class S3FileStore implements FileStore {
     ).map(() => path);
   }
 
-  listFiles(path: FileLocation): ResultAsync<string[], NetworkError> {
+  listFiles(path: FileLocation): ResultAsync<FileLocation[], NetworkError> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucketName,
       Prefix: path,
@@ -39,5 +39,17 @@ export class S3FileStore implements FileStore {
         (key): key is string => key !== undefined,
       );
     });
+  }
+
+  getUrl(path: string): ResultAsync<FileUrl, NetworkError> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: path,
+    });
+
+    return fromPromise(
+      getSignedUrl(this.s3Client, command),
+      (error) => new NetworkError("Failed to get file url", error instanceof Error ? error : undefined),
+    );
   }
 }
