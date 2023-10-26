@@ -9,7 +9,7 @@ import { Result, fromThrowable, ok } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { StaticSite } from "sst/node/site";
 
-class GenerateVideoHandler {
+class RenderVideoHandler {
   constructor(private readonly renderVideoUseCase: RenderVideoUseCase) {}
 
   static build(
@@ -17,7 +17,7 @@ class GenerateVideoHandler {
     serveUrl: string,
     videoId: string,
     chromiumExecutablePath: string,
-  ): GenerateVideoHandler {
+  ): RenderVideoHandler {
     const videoRenderer = new RemotionVideoRenderer(serveUrl, videoId, chromiumExecutablePath);
 
     const s3Client = new S3Client({});
@@ -25,7 +25,7 @@ class GenerateVideoHandler {
 
     const generateVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore);
 
-    return new GenerateVideoHandler(generateVideoUseCase);
+    return new RenderVideoHandler(generateVideoUseCase);
   }
 
   private parseMessage(message: string): Result<VideoOptions, ValidationError> {
@@ -49,7 +49,7 @@ class GenerateVideoHandler {
   }
 }
 
-const handlerInstance = GenerateVideoHandler.build(
+const handlerInstance = RenderVideoHandler.build(
   Bucket.Bucket.bucketName,
   StaticSite.RemotionApp.url,
   "video",

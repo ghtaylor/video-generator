@@ -15,9 +15,9 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const bucket = new Bucket(stack, "Bucket");
 
-  const quoteQueue = new Queue(stack, "Quotes");
-  const spokenQuoteQueue = new Queue(stack, "SpokenQuotes");
-  const createVideoQueue = new Queue(stack, "CreateVideos", {
+  const quoteQueue = new Queue(stack, "QuoteQueue");
+  const spokenQuoteQueue = new Queue(stack, "SpokenQuoteQueue");
+  const renderVideoQueue = new Queue(stack, "RenderVideoQueue", {
     cdk: {
       queue: {
         visibilityTimeout: Duration.minutes(15),
@@ -39,11 +39,11 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const generateVideoOptionsFunction = new Function(stack, "GenerateVideoOptions", {
     handler: "src/infrastructure/handlers/generateVideoOptions.default",
-    bind: [bucket, createVideoQueue],
+    bind: [bucket, renderVideoQueue],
   });
 
-  const generateVideoFunction = new Function(stack, "GenerateVideo", {
-    handler: "src/infrastructure/handlers/generateVideo.default",
+  const renderVideoFunction = new Function(stack, "RenderVideo", {
+    handler: "src/infrastructure/handlers/renderVideo.default",
     bind: [bucket, remotionApp],
     retryAttempts: 0,
     architecture: "arm_64",
@@ -66,5 +66,5 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   quoteQueue.addConsumer(stack, generateSpokenQuoteFunction);
   spokenQuoteQueue.addConsumer(stack, generateVideoOptionsFunction);
-  createVideoQueue.addConsumer(stack, generateVideoFunction);
+  renderVideoQueue.addConsumer(stack, renderVideoFunction);
 }
