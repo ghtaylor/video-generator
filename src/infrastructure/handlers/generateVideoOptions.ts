@@ -36,11 +36,9 @@ export class GenerateVideoOptionsHandler {
 
   async handle(event: SQSEvent) {
     for (const record of event.Records) {
-      const result = await this.parseMessage(record.body).asyncAndThen((spokenQuote) =>
+      await this.parseMessage(record.body).asyncAndThen((spokenQuote) =>
         this.useCase.execute(spokenQuote, 30, "videos/"),
       );
-
-      console.log(result);
     }
   }
 }

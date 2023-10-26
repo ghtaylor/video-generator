@@ -1,5 +1,5 @@
 import { VideoOptions } from "@domain/Video";
-import { AbsoluteFill, Audio, OffthreadVideo, Series, staticFile } from "remotion";
+import { AbsoluteFill, Audio, OffthreadVideo, Series } from "remotion";
 
 export const MyComposition: React.FC<VideoOptions> = ({ sections, speechAudioUrl }) => {
   return (

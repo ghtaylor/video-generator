@@ -48,7 +48,9 @@ export class S3FileStore implements FileStore {
     });
 
     return fromPromise(
-      getSignedUrl(this.s3Client, command),
+      getSignedUrl(this.s3Client, command, {
+        expiresIn: 60 * 60,
+      }),
       (error) => new NetworkError("Failed to get file url", error instanceof Error ? error : undefined),
     );
   }

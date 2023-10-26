@@ -46,7 +46,7 @@ export class GenerateVideoOptionsUseCase {
   }
 
   private getFileUrls(backgroundVideoLocations: FileLocation[]): ResultAsync<FileUrl[], NetworkError> {
-    return ResultAsync.combine(backgroundVideoLocations.map(this.fileStore.getUrl));
+    return ResultAsync.combine(backgroundVideoLocations.map(this.fileStore.getUrl.bind(this.fileStore)));
   }
 
   execute(
