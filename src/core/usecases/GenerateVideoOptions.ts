@@ -4,6 +4,7 @@ import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { VideoOptions, VideoSection } from "@domain/Video";
+import shuffle from "lodash.shuffle";
 import { Result, ResultAsync, ok } from "neverthrow";
 
 export class GenerateVideoOptionsUseCase {
@@ -18,6 +19,8 @@ export class GenerateVideoOptionsUseCase {
     fps: number,
   ): Result<VideoOptions, never> {
     const videoSections: VideoSection[] = [];
+
+    backgroundVideoUrls = shuffle(backgroundVideoUrls);
 
     for (let i = 0; i < spokenQuote.chunks.length; i++) {
       const backgroundVideoUrl = backgroundVideoUrls[i % backgroundVideoUrls.length];
