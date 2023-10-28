@@ -31,6 +31,6 @@ export class GenerateQuoteHandler {
   }
 }
 
-const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY, Queue.Quotes.queueUrl);
+const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY, Queue.QuoteQueue.queueUrl);
 
 export default handlerInstance.handle.bind(handlerInstance);

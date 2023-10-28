@@ -49,6 +49,6 @@ export class GenerateSpokenQuoteHandler {
   }
 }
 
-const handlerInstance = GenerateSpokenQuoteHandler.build(Bucket.Bucket.bucketName, Queue.SpokenQuotes.queueUrl);
+const handlerInstance = GenerateSpokenQuoteHandler.build(Bucket.Bucket.bucketName, Queue.SpokenQuoteQueue.queueUrl);
 
 export default handlerInstance.handle.bind(handlerInstance);

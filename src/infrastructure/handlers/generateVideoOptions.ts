@@ -43,6 +43,6 @@ export class GenerateVideoOptionsHandler {
   }
 }
 
-const handlerInstance = GenerateVideoOptionsHandler.build(Bucket.Bucket.bucketName, Queue.CreateVideos.queueUrl);
+const handlerInstance = GenerateVideoOptionsHandler.build(Bucket.Bucket.bucketName, Queue.RenderVideoQueue.queueUrl);
 
 export default handlerInstance.handle.bind(handlerInstance);
