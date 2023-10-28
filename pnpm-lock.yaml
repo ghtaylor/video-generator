@@ -19,12 +19,18 @@ dependencies:
   '@remotion/cli':
     specifier: 4.0.56
     version: 4.0.56(react-dom@18.2.0)(react@18.2.0)
+  '@remotion/google-fonts':
+    specifier: ^4.0.56
+    version: 4.0.56(react-dom@18.2.0)(react@18.2.0)
   '@remotion/renderer':
     specifier: 4.0.56
     version: 4.0.56(react-dom@18.2.0)(react@18.2.0)
   '@remotion/tailwind':
     specifier: 4.0.56
     version: 4.0.56(@remotion/bundler@4.0.56)(ts-node@10.9.1)(typescript@5.2.2)(webpack@5.89.0)
+  lodash.shuffle:
+    specifier: ^4.2.0
+    version: 4.2.0
   neverthrow:
     specifier: ^6.0.0
     version: 6.0.0
@@ -60,6 +66,9 @@ devDependencies:
   '@types/jest':
     specifier: ^29.5.5
     version: 29.5.5
+  '@types/lodash.shuffle':
+    specifier: ^4.2.8
+    version: 4.2.8
   '@types/node':
     specifier: ^20.7.0
     version: 20.7.0
@@ -3483,6 +3492,15 @@ packages:
     dev: false
     optional: true
 
+  /@remotion/google-fonts@4.0.56(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-iRYwq1lNQLzxxqHWF5fLb3ECNGPMbYd3NvfmszOk8U0zyYtqqjoJ3Qrh4GdBDU+L3F7NZt8wDm3rC+D4Kg/nFw==}
+    dependencies:
+      remotion: 4.0.56(react-dom@18.2.0)(react@18.2.0)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+    dev: false
+
   /@remotion/media-utils@4.0.56(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-Ui7LwbnahmAGnkIKYhFnH+T+TTMMdJzvZEIxbBR6pKSEJ/lL4h/tvN2xsV1E+eawl53q6egG7EsS3VFUmBUTSA==}
     peerDependencies:
@@ -4239,6 +4257,16 @@ packages:
 
   /@types/json-schema@7.0.14:
     resolution: {integrity: sha512-U3PUjAudAdJBeC2pgN8uTIKgxrb4nlDF3SF0++EldXQvQBGkpFZMSnwQiIoDU77tv45VgNkl/L4ouD+rEomujw==}
+
+  /@types/lodash.shuffle@4.2.8:
+    resolution: {integrity: sha512-IMZzAlMw9pLqdDAfghhFXD2syBJx91oFCEfn1UcD4J/4jMtPSsFGR9wJywxb0NiN7Gd51rK9Y2g4y3oMmhSatA==}
+    dependencies:
+      '@types/lodash': 4.14.200
+    dev: true
+
+  /@types/lodash@4.14.200:
+    resolution: {integrity: sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==}
+    dev: true
 
   /@types/node-fetch@2.6.7:
     resolution: {integrity: sha512-lX17GZVpJ/fuCjguZ5b3TjEbSENxmEk1B2z02yoXSK9WMEWRivhdSY73wWMn6bpcCDAOh6qAdktpKHIlkDk2lg==}
@@ -7681,6 +7709,10 @@ packages:
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
+
+  /lodash.shuffle@4.2.0:
+    resolution: {integrity: sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==}
+    dev: false
 
   /lodash.sortby@4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}

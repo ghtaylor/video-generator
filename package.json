@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "type:check": "tsc --noEmit",
-    "build:remotion": "ts-node -r tsconfig-paths/register --project tsconfig.json src/core/video/bundle.ts"
+    "build:remotion": "ts-node -r tsconfig-paths/register --project tsconfig.json src/core/video/bundle.ts",
+    "remotion:studio": "remotion studio src/core/video/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "@tsconfig/recommended": "^1.0.3",
     "@types/aws-lambda": "^8.10.124",
     "@types/jest": "^29.5.5",
+    "@types/lodash.shuffle": "^4.2.8",
     "@types/node": "^20.7.0",
     "@types/react": "^18.2.23",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
@@ -39,8 +41,10 @@
     "@aws-sdk/s3-request-presigner": "^3.427.0",
     "@remotion/bundler": "4.0.56",
     "@remotion/cli": "4.0.56",
+    "@remotion/google-fonts": "^4.0.56",
     "@remotion/renderer": "4.0.56",
     "@remotion/tailwind": "4.0.56",
+    "lodash.shuffle": "^4.2.0",
     "neverthrow": "^6.0.0",
     "openai": "^4.11.1",
     "react": "^18.2.0",
