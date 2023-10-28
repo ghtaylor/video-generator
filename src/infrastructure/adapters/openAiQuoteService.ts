@@ -42,12 +42,12 @@ export class OpenAIQuoteService implements QuoteService {
           {
             role: "system",
             content:
-              'You will respond STRICTLY using the following JSON schema, paying attention to the description of the properties:\n\n---\n\n{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"text":{"type":"string","description":"The quote"},"chunks":{"type":"array","items":{"type":"string","description":"The entire quote split into natural chunks. Maximum of 6 words"}}},"required":["text","chunks"]}',
+              'You will respond STRICTLY using the following JSON schema, paying attention to the description of the properties:\n\n---\n\n{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"text":{"type":"string","description":"The quote"},"chunks":{"type":"array","items":{"type":"string","description":"The entire quote split into small, meaningful chunks, ending each segment at periods, commas, or clear sentence breaks, as though someone were reading it bit-by-bit"}}},"required":["text","chunks"]}',
           },
           {
             role: "user",
             content:
-              "Create a motivational quote, approximately 50 words long, that is focused on personal growth in the second-person but doesn't mention personal growth directly. Use simple English.",
+              "Provide a motivational message that's not only inspirational but also substantial, one that resonates deeply and encourages action.",
           },
         ],
       }),
