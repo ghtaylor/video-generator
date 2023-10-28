@@ -12,7 +12,7 @@ export class RenderVideoUseCase {
   ) {}
 
   private getFileLocation(): string {
-    return `/rendered/${new Date().getTime()}.mp4`;
+    return `rendered/${new Date().getTime()}.mp4`;
   }
 
   private getVideoDetails(
