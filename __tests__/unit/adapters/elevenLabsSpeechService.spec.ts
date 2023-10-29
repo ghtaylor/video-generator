@@ -1,9 +1,12 @@
 import { SpeechMark } from "@domain/Speech";
+import { ElevenLabsClient } from "@infrastructure/adapters/elevenLabs/elevenLabsClient";
 import { ElevenLabsSpeechService } from "@infrastructure/adapters/elevenLabs/elevenLabsSpeechService";
 import { ElevenLabsNormalizedAlignment } from "@infrastructure/adapters/elevenLabs/schema";
+import { mock } from "jest-mock-extended";
 import { ok } from "neverthrow";
 
-const elevenLabsSpeechService = new ElevenLabsSpeechService();
+const elevenLabsClient = mock<ElevenLabsClient>();
+const elevenLabsSpeechService = new ElevenLabsSpeechService(elevenLabsClient);
 
 type TestDescription = string;
 

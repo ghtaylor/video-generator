@@ -3,10 +3,13 @@ import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
 import { Speech, SpeechMark } from "@domain/Speech";
-import { Result, ResultAsync, errAsync, ok } from "neverthrow";
+import { Result, ResultAsync, err, errAsync, ok } from "neverthrow";
 import { ElevenLabsNormalizedAlignment } from "./schema";
+import { ElevenLabsClient } from "./elevenLabsClient";
 
 export class ElevenLabsSpeechService implements SpeechService {
+  constructor(private readonly client: ElevenLabsClient) {}
+
   speechMarksFrom({ chars, charStartTimesMs }: ElevenLabsNormalizedAlignment): Result<SpeechMark[], never> {
     function isLetter(char: string): boolean {
       return /[A-Za-z]/.test(char);
@@ -42,6 +45,9 @@ export class ElevenLabsSpeechService implements SpeechService {
   }
 
   generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError | ParseError> {
-    return errAsync(new NetworkError("Not implemented"));
+    return this.client.getWebSocketResponses(text).andThen((responses) => {
+      console.log("RESPONSES:", JSON.stringify(responses, null, 2));
+      return err(new NetworkError("Not implemented"));
+    });
   }
 }
