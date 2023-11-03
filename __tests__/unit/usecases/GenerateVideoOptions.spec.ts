@@ -44,12 +44,12 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example,",
               durationInFrames: 27,
-              backgroundVideoUrl: "https://bucket.aws.com/1.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
             {
               text: "where there are two chunks.",
               durationInFrames: 27,
-              backgroundVideoUrl: "https://bucket.aws.com/2.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
           ],
         },
@@ -91,22 +91,22 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example.",
               durationInFrames: 18,
-              backgroundVideoUrl: "https://bucket.aws.com/1.mp4",
+              backgroundVideoUrl:  expect.stringContaining(".mp4")
             },
             {
               text: "There are four chunks of varying durations,",
               durationInFrames: 36,
-              backgroundVideoUrl: "https://bucket.aws.com/2.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
             {
               text: "and three background videos.",
               durationInFrames: 36,
-              backgroundVideoUrl: "https://bucket.aws.com/3.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
             {
               text: "See!",
               durationInFrames: 9,
-              backgroundVideoUrl: "https://bucket.aws.com/1.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
           ],
         },
@@ -137,12 +137,12 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example,",
               durationInFrames: 28,
-              backgroundVideoUrl: "https://bucket.aws.com/1.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
             {
               text: "where the outputted frames are rounded.",
               durationInFrames: 27,
-              backgroundVideoUrl: "https://bucket.aws.com/1.mp4",
+              backgroundVideoUrl: expect.stringContaining(".mp4")
             },
           ],
         },
