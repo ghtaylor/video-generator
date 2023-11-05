@@ -14,6 +14,7 @@ export const VideoOptions = z.object({
 });
 
 export const VideoDetails = z.object({
+  title: z.string(),
   description: z.string(),
   tags: z.array(z.string()),
   videoLocation: z.string(),
