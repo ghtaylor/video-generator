@@ -7,6 +7,7 @@ import { Quote } from "@domain/Quote";
 import { Result, ResultAsync, err, fromPromise, fromThrowable, ok } from "neverthrow";
 import OpenAI, { OpenAIError } from "openai";
 import { ChatCompletion } from "openai/resources/chat";
+import zodToJsonSchema from "zod-to-json-schema";
 
 export class OpenAIQuoteService implements QuoteService {
   constructor(private readonly openAiClient: OpenAI) {}
@@ -41,8 +42,11 @@ export class OpenAIQuoteService implements QuoteService {
         messages: [
           {
             role: "system",
-            content:
-              'You will respond STRICTLY using the following JSON schema, paying attention to the description of the properties:\n\n---\n\n{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{"text":{"type":"string","description":"The quote"},"chunks":{"type":"array","items":{"type":"string","description":"The entire quote split into small, meaningful chunks, ending each segment at periods, commas, or clear sentence breaks, as though someone were reading it bit-by-bit"}}},"required":["text","chunks"]}',
+            content: `You will respond STRICTLY using the following JSON schema, paying attention to the description of the properties:
+            
+            ---
+            
+            '${JSON.stringify(zodToJsonSchema(Quote))}'`,
           },
           {
             role: "user",
