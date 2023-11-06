@@ -1,25 +1,29 @@
 import { z } from "zod";
 
-export const VideoSection = z.object({
+export const VideoMetadata = z.object({
+  title: z.string(),
+  description: z.string(),
+});
+
+export const RenderVideoSection = z.object({
   text: z.string(),
   durationInFrames: z.number(),
   backgroundVideoUrl: z.string(),
 });
 
-export const VideoOptions = z.object({
+export const RenderVideoParams = z.object({
   fps: z.number(),
-  description: z.string(), // quote text and hashtags
   speechAudioUrl: z.string(),
-  sections: z.array(VideoSection),
+  sections: z.array(RenderVideoSection),
+  metadata: VideoMetadata,
 });
 
-export const VideoDetails = z.object({
-  title: z.string(),
-  description: z.string(),
-  tags: z.array(z.string()),
+export const UploadVideoParams = z.object({
   videoLocation: z.string(),
+  metadata: VideoMetadata,
 });
 
-export type VideoSection = z.infer<typeof VideoSection>;
-export type VideoOptions = z.infer<typeof VideoOptions>;
-export type VideoDetails = z.infer<typeof VideoDetails>;
+export type VideoMetadata = z.infer<typeof VideoMetadata>;
+export type RenderVideoSection = z.infer<typeof RenderVideoSection>;
+export type RenderVideoParams = z.infer<typeof RenderVideoParams>;
+export type UploadVideoParams = z.infer<typeof UploadVideoParams>;

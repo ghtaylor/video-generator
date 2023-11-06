@@ -57,6 +57,7 @@ export class GenerateSpokenQuoteUseCase {
     if (_speech.marks.length > 0) return err(new SpokenQuoteMarksInvalidError());
 
     return ok({
+      title: quote.title,
       text: quote.text,
       chunks,
       audioUrl,

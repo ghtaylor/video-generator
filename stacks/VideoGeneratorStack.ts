@@ -37,8 +37,8 @@ export function VideoGeneratorStack({ stack }: StackContext) {
     permissions: ["polly:SynthesizeSpeech"],
   });
 
-  const generateVideoOptionsFunction = new Function(stack, "GenerateVideoOptions", {
-    handler: "src/infrastructure/handlers/generateVideoOptions.default",
+  const generateRenderVideoParamsFunction = new Function(stack, "GenerateRenderVideoParams", {
+    handler: "src/infrastructure/handlers/generateRenderVideoParams.default",
     bind: [bucket, renderVideoQueue],
   });
 
@@ -65,6 +65,6 @@ export function VideoGeneratorStack({ stack }: StackContext) {
   });
 
   quoteQueue.addConsumer(stack, generateSpokenQuoteFunction);
-  spokenQuoteQueue.addConsumer(stack, generateVideoOptionsFunction);
+  spokenQuoteQueue.addConsumer(stack, generateRenderVideoParamsFunction);
   renderVideoQueue.addConsumer(stack, renderVideoFunction);
 }

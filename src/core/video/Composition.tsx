@@ -1,10 +1,10 @@
-import { VideoOptions } from "@domain/Video";
+import { RenderVideoParams } from "@domain/Video";
 import { loadFont } from "@remotion/google-fonts/Playfair";
 import { AbsoluteFill, Audio, OffthreadVideo, Series } from "remotion";
 
 const { fontFamily } = loadFont();
 
-export const MyComposition: React.FC<VideoOptions> = ({ sections, speechAudioUrl }) => {
+export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAudioUrl }) => {
   return (
     <>
       <Series>

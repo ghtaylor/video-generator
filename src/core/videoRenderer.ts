@@ -1,7 +1,7 @@
-import { VideoOptions } from "@domain/Video";
+import { RenderVideoParams } from "@domain/Video";
 import { ResultAsync } from "neverthrow";
 import { VideoRenderError } from "./errors/VideoRenderError";
 
 export interface VideoRenderer {
-  renderVideo(options: VideoOptions): ResultAsync<Buffer, VideoRenderError>;
+  renderVideo(params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError>;
 }

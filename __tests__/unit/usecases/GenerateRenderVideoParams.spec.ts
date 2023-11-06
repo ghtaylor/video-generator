@@ -1,25 +1,26 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
-import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
+import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { SpokenQuote } from "@domain/SpokenQuote";
-import { VideoOptions } from "@domain/Video";
+import { RenderVideoParams } from "@domain/Video";
 import { mock } from "jest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";
 
-describe("GenerateVideoOptions Use Case", () => {
+describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const FPS = 30;
   const BACKGROUND_VIDEOS_LOCATION = "backgroundVideosLocation";
 
   const fileStore = mock<FileStore>();
-  const createVideoQueue = mock<Queue<VideoOptions>>();
+  const renderVideoQueue = mock<Queue<RenderVideoParams>>();
 
-  const generateVideoOptionsUseCase = new GenerateVideoOptionsUseCase(fileStore, createVideoQueue);
+  const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore, renderVideoQueue);
 
-  describe("`createVideoOptions`", () => {
-    describe.each<[SpokenQuote, FileUrl[], VideoOptions]>([
+  describe("`renderVideoParamsFrom`", () => {
+    describe.each<[SpokenQuote, FileUrl[], RenderVideoParams]>([
       [
         {
+          title: "A Title",
           text: "This is an example, where there are two chunks.",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -38,7 +39,6 @@ describe("GenerateVideoOptions Use Case", () => {
         ["https://bucket.aws.com/1.mp4", "https://bucket.aws.com/2.mp4"],
         {
           fps: FPS,
-          description: "This is an example, where there are two chunks.",
           speechAudioUrl: "https://bucket.aws.com/audioLocation",
           sections: [
             {
@@ -52,10 +52,15 @@ describe("GenerateVideoOptions Use Case", () => {
               backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
+          metadata: {
+            title: "A Title",
+            description: "This is an example, where there are two chunks.",
+          },
         },
       ],
       [
         {
+          title: "A Title",
           text: "This is an example. There are four chunks of varying durations, and three background videos. See!",
           audioUrl: "https://bucket.aws.com/speechAudioLocation",
           chunks: [
@@ -84,8 +89,6 @@ describe("GenerateVideoOptions Use Case", () => {
         ["https://bucket.aws.com/1.mp4", "https://bucket.aws.com/2.mp4", "https://bucket.aws.com/3.mp4"],
         {
           fps: FPS,
-          description:
-            "This is an example. There are four chunks of varying durations, and three background videos. See!",
           speechAudioUrl: "https://bucket.aws.com/speechAudioLocation",
           sections: [
             {
@@ -109,10 +112,16 @@ describe("GenerateVideoOptions Use Case", () => {
               backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
+          metadata: {
+            title: "A Title",
+            description:
+              "This is an example. There are four chunks of varying durations, and three background videos. See!",
+          },
         },
       ],
       [
         {
+          title: "A Title",
           text: "This is an example, where the outputted frames are rounded.",
           audioUrl: "https://bucket.aws.com/speechAudioLocation",
           chunks: [
@@ -131,7 +140,6 @@ describe("GenerateVideoOptions Use Case", () => {
         ["https://bucket.aws.com/1.mp4"],
         {
           fps: FPS,
-          description: "This is an example, where the outputted frames are rounded.",
           speechAudioUrl: "https://bucket.aws.com/speechAudioLocation",
           sections: [
             {
@@ -145,15 +153,19 @@ describe("GenerateVideoOptions Use Case", () => {
               backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
+          metadata: {
+            title: "A Title",
+            description: "This is an example, where the outputted frames are rounded.",
+          },
         },
       ],
     ])(
       "GIVEN a SpokenQuote and background video locations",
-      (spokenQuote, backgroundVideoUrls, expectedVideoOptions) => {
-        test("THEN `createVideoOptions` should return a result with the expected VideoOptions", () => {
-          const result = generateVideoOptionsUseCase.createVideoOptions(spokenQuote, backgroundVideoUrls, FPS);
+      (spokenQuote, backgroundVideoUrls, expectedRenderVideoParams) => {
+        test("THEN `renderVideoParamsFrom` should return a result with the expected RenderVideoParams", () => {
+          const result = generateRenderVideoParamsUseCase.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, FPS);
 
-          expect(result._unsafeUnwrap()).toEqual(expectedVideoOptions);
+          expect(result._unsafeUnwrap()).toEqual(expectedRenderVideoParams);
         });
       },
     );
@@ -161,6 +173,7 @@ describe("GenerateVideoOptions Use Case", () => {
 
   describe("WHEN the `execute` method is called", () => {
     const VALID_SPOKEN_QUOTE: SpokenQuote = {
+      title: "A Title",
       text: "This is an example, where there are two chunks.",
       audioUrl: "https://bucket.aws.com/audioLocation",
       chunks: [
@@ -181,22 +194,32 @@ describe("GenerateVideoOptions Use Case", () => {
       beforeEach(() => {
         fileStore.listFiles.mockReturnValue(okAsync(["1.mp4", "2.mp4"]));
         fileStore.getUrl.mockImplementation((fileLocation) => okAsync(`https://${fileLocation}`));
-        createVideoQueue.enqueue.mockImplementation((videoOptions) => okAsync(videoOptions));
+        renderVideoQueue.enqueue.mockImplementation((renderVideoParams) => okAsync(renderVideoParams));
       });
 
       test("THEN `execute` should return a successful result", async () => {
-        const result = await generateVideoOptionsUseCase.execute(VALID_SPOKEN_QUOTE, FPS, BACKGROUND_VIDEOS_LOCATION);
+        const result = await generateRenderVideoParamsUseCase.execute(
+          VALID_SPOKEN_QUOTE,
+          FPS,
+          BACKGROUND_VIDEOS_LOCATION,
+        );
 
         expect(result.isOk()).toBe(true);
       });
 
-      describe("EXCEPT enqueueing the video options fails due to a NetworkError", () => {
+      describe("EXCEPT enqueueing the RenderVideoParams fails due to a NetworkError", () => {
         beforeEach(() => {
-          createVideoQueue.enqueue.mockResolvedValue(errAsync(new NetworkError("Failed to enqueue video options.")));
+          renderVideoQueue.enqueue.mockResolvedValue(
+            errAsync(new NetworkError("Failed to enqueue RenderVideoParams.")),
+          );
         });
 
         test("THEN `execute` should return a NetworkError", async () => {
-          const result = await generateVideoOptionsUseCase.execute(VALID_SPOKEN_QUOTE, FPS, BACKGROUND_VIDEOS_LOCATION);
+          const result = await generateRenderVideoParamsUseCase.execute(
+            VALID_SPOKEN_QUOTE,
+            FPS,
+            BACKGROUND_VIDEOS_LOCATION,
+          );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
         });
@@ -208,7 +231,11 @@ describe("GenerateVideoOptions Use Case", () => {
         });
 
         test("THEN `execute` should return a NetworkError", async () => {
-          const result = await generateVideoOptionsUseCase.execute(VALID_SPOKEN_QUOTE, FPS, BACKGROUND_VIDEOS_LOCATION);
+          const result = await generateRenderVideoParamsUseCase.execute(
+            VALID_SPOKEN_QUOTE,
+            FPS,
+            BACKGROUND_VIDEOS_LOCATION,
+          );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
         });
@@ -220,7 +247,11 @@ describe("GenerateVideoOptions Use Case", () => {
         });
 
         test("THEN `execute` should return a NetworkError", async () => {
-          const result = await generateVideoOptionsUseCase.execute(VALID_SPOKEN_QUOTE, FPS, BACKGROUND_VIDEOS_LOCATION);
+          const result = await generateRenderVideoParamsUseCase.execute(
+            VALID_SPOKEN_QUOTE,
+            FPS,
+            BACKGROUND_VIDEOS_LOCATION,
+          );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
         });

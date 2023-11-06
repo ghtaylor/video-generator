@@ -1,6 +1,6 @@
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { VideoRenderer } from "@core/videoRenderer";
-import { VideoOptions } from "@domain/Video";
+import { RenderVideoParams } from "@domain/Video";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import { ResultAsync, errAsync, fromPromise, okAsync } from "neverthrow";
 import { VideoConfig } from "remotion";
@@ -12,11 +12,11 @@ export class RemotionVideoRenderer implements VideoRenderer {
     private readonly chromiumExecutablePath?: string,
   ) {}
 
-  private selectComposition(videoOptions: VideoOptions): ResultAsync<VideoConfig, VideoRenderError> {
+  private selectComposition(params: RenderVideoParams): ResultAsync<VideoConfig, VideoRenderError> {
     console.log(
       "Selecting composition",
       JSON.stringify(
-        { videoOptions, serveUrl: this.serveUrl, browserExecutable: this.chromiumExecutablePath, id: this.videoId },
+        { params, serveUrl: this.serveUrl, browserExecutable: this.chromiumExecutablePath, id: this.videoId },
         null,
         2,
       ),
@@ -27,13 +27,13 @@ export class RemotionVideoRenderer implements VideoRenderer {
         serveUrl: this.serveUrl,
         browserExecutable: this.chromiumExecutablePath,
         id: this.videoId,
-        inputProps: videoOptions,
+        inputProps: params,
       }),
       (error) => new VideoRenderError("Failed to select composition", error instanceof Error ? error : undefined),
     );
   }
 
-  private renderMedia(composition: VideoConfig, videoOptions: VideoOptions): ResultAsync<Buffer, VideoRenderError> {
+  private renderMedia(composition: VideoConfig, params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError> {
     console.log(
       "Rendering media",
       JSON.stringify(
@@ -49,7 +49,7 @@ export class RemotionVideoRenderer implements VideoRenderer {
         serveUrl: this.serveUrl,
         browserExecutable: this.chromiumExecutablePath,
         codec: "h264",
-        inputProps: videoOptions,
+        inputProps: params,
         outputLocation: null,
         onProgress: ({ progress }) => {
           console.log("Progress:", progress);
@@ -62,7 +62,7 @@ export class RemotionVideoRenderer implements VideoRenderer {
     });
   }
 
-  renderVideo(options: VideoOptions): ResultAsync<Buffer, VideoRenderError> {
-    return this.selectComposition(options).andThen((composition) => this.renderMedia(composition, options));
+  renderVideo(params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError> {
+    return this.selectComposition(params).andThen((composition) => this.renderMedia(composition, params));
   }
 }

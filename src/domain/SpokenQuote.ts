@@ -7,6 +7,7 @@ export const SpokenQuoteChunk = z.object({
 });
 
 export const SpokenQuote = z.object({
+  title: z.string(),
   text: z.string(),
   audioUrl: z.string(),
   chunks: z.array(SpokenQuoteChunk),

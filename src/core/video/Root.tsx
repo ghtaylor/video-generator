@@ -12,14 +12,17 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
-        calculateMetadata={({ props: videoOptions }) => ({
-          durationInFrames: videoOptions.sections.reduce((acc, { durationInFrames }) => acc + durationInFrames, 0),
+        calculateMetadata={({ props: renderVideoParams }) => ({
+          durationInFrames: renderVideoParams.sections.reduce((acc, { durationInFrames }) => acc + durationInFrames, 0),
         })}
         defaultProps={{
           fps: 30,
-          description: "",
           speechAudioUrl: "",
           sections: [],
+          metadata: {
+            title: "",
+            description: ""
+          }
         }}
       />
     </>

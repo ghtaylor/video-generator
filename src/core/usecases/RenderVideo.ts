@@ -2,7 +2,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileLocation, FileStore } from "@core/fileStore";
 import { VideoRenderer } from "@core/videoRenderer";
-import { VideoDetails, VideoOptions } from "@domain/Video";
+import { UploadVideoParams, RenderVideoParams } from "@domain/Video";
 import { Result, ResultAsync, ok } from "neverthrow";
 
 export class RenderVideoUseCase {
@@ -15,21 +15,20 @@ export class RenderVideoUseCase {
     return `rendered/${new Date().getTime()}.mp4`;
   }
 
-  private getVideoDetails(
-    videoOptions: VideoOptions,
+  private uploadVideoParamsFrom(
+    renderVideoParams: RenderVideoParams,
     renderedVideoLocation: FileLocation,
-  ): Result<VideoDetails, never> {
+  ): Result<UploadVideoParams, never> {
     return ok({
       videoLocation: renderedVideoLocation,
-      description: videoOptions.description,
-      tags: [],
+      metadata: renderVideoParams.metadata,
     });
   }
 
-  execute(videoOptions: VideoOptions): ResultAsync<VideoDetails, VideoRenderError | NetworkError> {
+  execute(renderVideoParams: RenderVideoParams): ResultAsync<UploadVideoParams, VideoRenderError | NetworkError> {
     return this.videoRenderer
-      .renderVideo(videoOptions)
+      .renderVideo(renderVideoParams)
       .andThen((videoBuffer) => this.fileStore.store(this.getFileLocation(), videoBuffer))
-      .andThen((fileLocation) => this.getVideoDetails(videoOptions, fileLocation));
+      .andThen((fileLocation) => this.uploadVideoParamsFrom(renderVideoParams, fileLocation));
   }
 }

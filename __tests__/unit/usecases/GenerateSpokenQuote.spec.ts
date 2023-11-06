@@ -10,7 +10,7 @@ import { SpokenQuoteMarksInvalidError } from "@domain/errors/SpokenQuote";
 import { mock } from "jest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";
 
-describe("GenerateSpokenQuote Use Case", () => {
+describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
   const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
@@ -24,6 +24,7 @@ describe("GenerateSpokenQuote Use Case", () => {
     describe.each<[Quote, Speech, SpokenQuote]>([
       [
         {
+          title: "A Title",
           text: "This is an example, a good one.",
           chunks: ["This is an example,", "a good one."],
         },
@@ -61,6 +62,7 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
         {
+          title: "A Title",
           text: "This is an example, a good one.",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -79,6 +81,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       ],
       [
         {
+          title: "A Title",
           text: "This is an example, and there's an apostrophe.",
           chunks: ["This is an example,", "and there's an apostrophe."],
         },
@@ -120,6 +123,7 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
         {
+          title: "A Title",
           text: "This is an example, and there's an apostrophe.",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -138,6 +142,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       ],
       [
         {
+          title: "A Title",
           text: "This is an example. Speech marks have capital letters.",
           chunks: ["This is an example.", "Speech marks have capital letters."],
         },
@@ -183,6 +188,7 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
         {
+          title: "A Title",
           text: "This is an example. Speech marks have capital letters.",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -201,6 +207,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       ],
       [
         {
+          title: "A Title",
           text: "This is an example. Speech marks start later than zero.",
           chunks: ["This is an example.", "Speech marks start later than zero."],
         },
@@ -250,6 +257,7 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
         {
+          title: "A Title",
           text: "This is an example. Speech marks start later than zero.",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -268,6 +276,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       ],
       [
         {
+          title: "A Title",
           text: "This is an example. There are three chunks, yes, three!",
           chunks: ["This is an example.", "There are three chunks,", "yes, three!"],
         },
@@ -317,6 +326,7 @@ describe("GenerateSpokenQuote Use Case", () => {
           ],
         },
         {
+          title: "A Title",
           text: "This is an example. There are three chunks, yes, three!",
           audioUrl: "https://bucket.aws.com/audioLocation",
           chunks: [
@@ -349,6 +359,7 @@ describe("GenerateSpokenQuote Use Case", () => {
     describe.each<[Quote, Speech]>([
       [
         {
+          title: "A Title",
           text: "This is an example, a bad one because the marks don't match.",
           chunks: ["This is an example,", "a bad one because the marks don't match."],
         },
@@ -380,6 +391,7 @@ describe("GenerateSpokenQuote Use Case", () => {
       ],
       [
         {
+          title: "A Title",
           text: "This is a bad example, because there are more marks than words.",
           chunks: ["This is a bad example,", "because there are more marks than words."],
         },
@@ -452,6 +464,7 @@ describe("GenerateSpokenQuote Use Case", () => {
 
   describe("WHEN the `execute` method is called", () => {
     const VALID_QUOTE: Quote = {
+      title: "A Title",
       text: "This is an example, a good one.",
       chunks: ["This is an example,", "a good one."],
     };
@@ -491,6 +504,7 @@ describe("GenerateSpokenQuote Use Case", () => {
     };
 
     const VALID_SPOKEN_QUOTE: SpokenQuote = {
+      title: "A Title",
       text: "This is an example, a good one.",
       audioUrl: "https://bucket.aws.com/audioLocation",
       chunks: [

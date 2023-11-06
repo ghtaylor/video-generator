@@ -2,22 +2,22 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpokenQuote } from "@domain/SpokenQuote";
-import { VideoOptions, VideoSection } from "@domain/Video";
+import { RenderVideoParams, RenderVideoSection } from "@domain/Video";
 import shuffle from "lodash.shuffle";
 import { Result, ResultAsync, ok } from "neverthrow";
 
-export class GenerateVideoOptionsUseCase {
+export class GenerateRenderVideoParamsUseCase {
   constructor(
     private readonly fileStore: FileStore,
-    private readonly createVideoQueue: Queue<VideoOptions>,
+    private readonly renderVideoQueue: Queue<RenderVideoParams>,
   ) {}
 
-  createVideoOptions(
+  renderVideoParamsFrom(
     spokenQuote: SpokenQuote,
     backgroundVideoUrls: FileUrl[],
     fps: number,
-  ): Result<VideoOptions, never> {
-    const videoSections: VideoSection[] = [];
+  ): Result<RenderVideoParams, never> {
+    const videoSections: RenderVideoSection[] = [];
 
     backgroundVideoUrls = shuffle(backgroundVideoUrls);
 
@@ -41,9 +41,12 @@ export class GenerateVideoOptionsUseCase {
 
     return ok({
       fps,
-      description: spokenQuote.text,
       speechAudioUrl: spokenQuote.audioUrl,
       sections: videoSections,
+      metadata: {
+        title: spokenQuote.title,
+        description: spokenQuote.text,
+      },
     });
   }
 
@@ -55,11 +58,11 @@ export class GenerateVideoOptionsUseCase {
     spokenQuote: SpokenQuote,
     fps: number,
     backgroundVideosLocation: FileLocation,
-  ): ResultAsync<VideoOptions, NetworkError> {
+  ): ResultAsync<RenderVideoParams, NetworkError> {
     return this.fileStore
       .listFiles(backgroundVideosLocation)
       .andThen(this.getFileUrls.bind(this))
-      .andThen((backgroundVideoUrls) => this.createVideoOptions(spokenQuote, backgroundVideoUrls, fps))
-      .andThen(this.createVideoQueue.enqueue.bind(this.createVideoQueue));
+      .andThen((backgroundVideoUrls) => this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, fps))
+      .andThen(this.renderVideoQueue.enqueue.bind(this.renderVideoQueue));
   }
 }
