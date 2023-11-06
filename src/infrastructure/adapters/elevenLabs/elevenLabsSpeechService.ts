@@ -3,9 +3,9 @@ import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
 import { Speech, SpeechMark } from "@domain/Speech";
-import { Result, ResultAsync, err, errAsync, ok } from "neverthrow";
-import { ElevenLabsNormalizedAlignment } from "./schema";
+import { Result, ResultAsync, err, ok } from "neverthrow";
 import { ElevenLabsClient } from "./elevenLabsClient";
+import { ElevenLabsNormalizedAlignment } from "./schema";
 
 export class ElevenLabsSpeechService implements SpeechService {
   constructor(private readonly client: ElevenLabsClient) {}

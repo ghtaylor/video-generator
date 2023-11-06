@@ -1,4 +1,4 @@
-import { SQSClient, SQSServiceException, SendMessageCommand } from "@aws-sdk/client-sqs";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { NetworkError } from "@core/errors/NetworkError";
 import { Queue } from "@core/queue";
 import { ResultAsync, fromPromise } from "neverthrow";

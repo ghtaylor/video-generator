@@ -1,5 +1,5 @@
-import { Bucket, Config, Function, Queue, StackContext, StaticSite } from "sst/constructs";
 import { Duration } from "aws-cdk-lib";
+import { Bucket, Config, Function, Queue, StackContext, StaticSite } from "sst/constructs";
 
 export function VideoGeneratorStack({ stack }: StackContext) {
   const remotionApp = new StaticSite(stack, "RemotionApp", {
@@ -25,7 +25,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
     },
   });
 
-  const generateQuoteFunction = new Function(stack, "GenerateQuote", {
+  new Function(stack, "GenerateQuote", {
     handler: "src/infrastructure/handlers/generateQuote.default",
     bind: [OPENAI_API_KEY, quoteQueue],
     timeout: "30 seconds",

@@ -42,7 +42,7 @@ class RenderVideoHandler {
 
   async handle(event: SQSEvent): Promise<void> {
     for (const record of event.Records) {
-      const result = await this.parseMessage(record.body)
+      await this.parseMessage(record.body)
         .andThen(this.logInput.bind(this))
         .asyncAndThen(this.renderVideoUseCase.execute.bind(this.renderVideoUseCase));
     }

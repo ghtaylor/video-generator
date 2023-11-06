@@ -2,7 +2,6 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { ValidationError } from "@core/errors/ValidationError";
 import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions";
-import { Quote } from "@domain/Quote";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { VideoOptions } from "@domain/Video";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";

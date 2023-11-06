@@ -7,7 +7,7 @@ import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { Quote } from "@domain/Quote";
 import { mock } from "jest-mock-extended";
-import { err, errAsync, ok, okAsync } from "neverthrow";
+import { errAsync, ok, okAsync } from "neverthrow";
 
 const quoteService = mock<QuoteService>();
 const quoteQueue = mock<Queue<Quote>>();

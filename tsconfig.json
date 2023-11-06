@@ -12,5 +12,7 @@
       "@common/*": ["common/*"]
     },
     "rootDirs": ["./src", "./__tests__"]
-  }
+  },
+  "exclude": ["node_modules", "remotion-build", ".sst"]
 }
+ 

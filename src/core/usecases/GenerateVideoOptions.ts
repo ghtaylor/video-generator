@@ -1,5 +1,4 @@
 import { NetworkError } from "@core/errors/NetworkError";
-import { UnknownError } from "@core/errors/UnknownError";
 import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpokenQuote } from "@domain/SpokenQuote";

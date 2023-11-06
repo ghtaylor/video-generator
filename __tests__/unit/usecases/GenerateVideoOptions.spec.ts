@@ -5,7 +5,7 @@ import { GenerateVideoOptionsUseCase } from "@core/usecases/GenerateVideoOptions
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { VideoOptions } from "@domain/Video";
 import { mock } from "jest-mock-extended";
-import { errAsync, ok, okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 
 describe("GenerateVideoOptions Use Case", () => {
   const FPS = 30;
@@ -44,12 +44,12 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example,",
               durationInFrames: 27,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
             {
               text: "where there are two chunks.",
               durationInFrames: 27,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
         },
@@ -91,22 +91,22 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example.",
               durationInFrames: 18,
-              backgroundVideoUrl:  expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
             {
               text: "There are four chunks of varying durations,",
               durationInFrames: 36,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
             {
               text: "and three background videos.",
               durationInFrames: 36,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
             {
               text: "See!",
               durationInFrames: 9,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
         },
@@ -137,12 +137,12 @@ describe("GenerateVideoOptions Use Case", () => {
             {
               text: "This is an example,",
               durationInFrames: 28,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
             {
               text: "where the outputted frames are rounded.",
               durationInFrames: 27,
-              backgroundVideoUrl: expect.stringContaining(".mp4")
+              backgroundVideoUrl: expect.stringContaining(".mp4"),
             },
           ],
         },
