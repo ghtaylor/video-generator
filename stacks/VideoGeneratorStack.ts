@@ -1,5 +1,5 @@
 import { Duration } from "aws-cdk-lib";
-import { Bucket, Config, Function, Queue, StackContext, StaticSite } from "sst/constructs";
+import { Bucket, Config, Function, Queue, StackContext, StaticSite, Topic } from "sst/constructs";
 
 export function VideoGeneratorStack({ stack }: StackContext) {
   const remotionApp = new StaticSite(stack, "RemotionApp", {
@@ -21,6 +21,23 @@ export function VideoGeneratorStack({ stack }: StackContext) {
     cdk: {
       queue: {
         visibilityTimeout: Duration.minutes(15),
+      },
+    },
+  });
+
+  const uploadVideoToYoutubeQueue = new Queue(stack, "UploadVideoToYoutubeQueue", {
+    cdk: {
+      queue: {
+        visibilityTimeout: Duration.minutes(15),
+      },
+    },
+  });
+
+  new Topic(stack, "UploadVideoTopic", {
+    subscribers: {
+      youtubeQueueSubscriber: {
+        type: "queue",
+        queue: uploadVideoToYoutubeQueue,
       },
     },
   });
@@ -64,7 +81,14 @@ export function VideoGeneratorStack({ stack }: StackContext) {
     },
   });
 
+  const uploadVideoFunction = new Function(stack, "UploadVideo", {
+    handler: "src/infrastructure/handlers/uploadVideo.default",
+    bind: [bucket, uploadVideoToYoutubeQueue],
+    timeout: "15 minutes",
+  });
+
   quoteQueue.addConsumer(stack, generateSpokenQuoteFunction);
   spokenQuoteQueue.addConsumer(stack, generateRenderVideoParamsFunction);
   renderVideoQueue.addConsumer(stack, renderVideoFunction);
+  uploadVideoToYoutubeQueue.addConsumer(stack, uploadVideoFunction);
 }
