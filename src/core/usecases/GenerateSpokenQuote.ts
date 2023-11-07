@@ -1,8 +1,9 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
-import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
+import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { SpeechService } from "@core/speechService";
+import { FileUrl, FileLocation } from "@domain/FIle";
 import { Quote } from "@domain/Quote";
 import { Speech } from "@domain/Speech";
 import { SpokenQuote, SpokenQuoteChunk } from "@domain/SpokenQuote";

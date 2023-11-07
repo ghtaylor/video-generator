@@ -1,7 +1,8 @@
 import { NetworkError } from "@core/errors/NetworkError";
-import { FileStore, FileUrl } from "@core/fileStore";
+import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
+import { FileUrl } from "@domain/FIle";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { RenderVideoParams } from "@domain/Video";
 import { mock } from "jest-mock-extended";

@@ -1,6 +1,7 @@
 import { NetworkError } from "@core/errors/NetworkError";
-import { FileLocation, FileStore } from "@core/fileStore";
+import { FileStore } from "@core/fileStore";
 import { SocialMediaUploader, VideoId } from "@core/socialMediaUploader";
+import { FileLocation } from "@domain/FIle";
 import { UploadVideoParams, VideoData, VideoDataKind } from "@domain/Video";
 import { ResultAsync } from "neverthrow";
 

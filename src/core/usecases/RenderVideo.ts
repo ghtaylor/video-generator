@@ -1,7 +1,8 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
-import { FileLocation, FileStore } from "@core/fileStore";
+import { FileStore } from "@core/fileStore";
 import { VideoRenderer } from "@core/videoRenderer";
+import { FileLocation } from "@domain/FIle";
 import { UploadVideoParams, RenderVideoParams } from "@domain/Video";
 import { Result, ResultAsync, ok } from "neverthrow";
 

@@ -1,7 +1,8 @@
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NetworkError } from "@core/errors/NetworkError";
-import { FileLocation, FileStore, FileUrl } from "@core/fileStore";
+import { FileStore } from "@core/fileStore";
+import { FileLocation, FileUrl } from "@domain/FIle";
 import { ResultAsync, errAsync, fromPromise } from "neverthrow";
 
 export class S3FileStore implements FileStore {
