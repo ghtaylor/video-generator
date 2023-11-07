@@ -1,10 +1,10 @@
-import { OpenAIQuoteService } from "@infrastructure/adapters/openAIQuoteService";
 import { mockDeep } from "jest-mock-extended";
 import OpenAI from "openai";
 import { buildChatCompletion } from "../../helpers/openAi";
 import { err, ok } from "neverthrow";
 import { ParseError } from "@core/errors/ParseError";
 import { NetworkError } from "@core/errors/NetworkError";
+import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 
 const openAIClient = mockDeep<OpenAI>();
 const openAIQuoteService = new OpenAIQuoteService(openAIClient);

@@ -1,7 +1,7 @@
 import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { Quote } from "@domain/Quote";
-import { OpenAIQuoteService } from "@infrastructure/adapters/openAIQuoteService";
+import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { mock } from "jest-mock-extended";
 import { ok } from "neverthrow";
 import OpenAI from "openai";

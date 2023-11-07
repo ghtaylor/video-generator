@@ -3,7 +3,7 @@ import { ValidationError } from "@core/errors/ValidationError";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { Quote } from "@domain/Quote";
-import { OpenAIQuoteService } from "@infrastructure/adapters/openAIQuoteService";
+import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { SQSQueue } from "@infrastructure/adapters/sqsQueue";
 import OpenAI from "openai";
 import { Config } from "sst/node/config";
