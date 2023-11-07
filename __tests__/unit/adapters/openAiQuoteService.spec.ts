@@ -15,11 +15,13 @@ describe("OpenAiQuoteService - Unit Tests", () => {
   describe("`validateQuote`", () => {
     describe.each<Quote>([
       {
+        title: "A Title",
         text: "This is an example, a good one.",
         chunks: ["This is an example,", "a good one."],
       },
 
       {
+        title: "A Title",
         text: "This is another example, it's a bit longer, don't you think?",
         chunks: ["This is another example,", "it's a bit longer,", "don't you think?"],
       },
@@ -33,14 +35,17 @@ describe("OpenAiQuoteService - Unit Tests", () => {
 
     describe.each<Quote>([
       {
+        title: "A Title",
         text: "This is a bad example, because the last chunk doesn't end with a full stop.",
         chunks: ["This is a bad example,", "because the last chunk", "doesn't end with a full stop"],
       },
       {
+        title: "A Title",
         text: "This is a bad example.",
         chunks: ["BAD"],
       },
       {
+        title: "A Title",
         text: "This is a bad example.",
         chunks: [],
       },
