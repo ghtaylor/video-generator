@@ -17,6 +17,7 @@ const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, quoteQueue);
 describe("GenerateQuote Use Case - Integration Tests", () => {
   describe("GIVEN the QuoteService generates a valid Quote", () => {
     const validQuote: Quote = {
+      title: "A Title",
       text: "This is an example, a good one.",
       chunks: ["This is an example,", "a good one."],
     };
