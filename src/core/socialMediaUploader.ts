@@ -1,9 +1,9 @@
-import { UploadVideoParams } from "@domain/Video";
+import { VideoData, VideoMetadata } from "@domain/Video";
 import { ResultAsync } from "neverthrow";
 import { NetworkError } from "./errors/NetworkError";
 
-export type UrlString = string;
+export type VideoId = string;
 
 export interface SocialMediaUploader {
-  upload(params: UploadVideoParams): ResultAsync<UrlString, NetworkError>;
+  upload(data: VideoData, metadata: VideoMetadata): ResultAsync<VideoId, NetworkError>;
 }
