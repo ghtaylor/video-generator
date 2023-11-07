@@ -1,13 +1,16 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import { SNSClient } from "@aws-sdk/client-sns";
 import { ValidationError } from "@core/errors/ValidationError";
 import { RenderVideoUseCase } from "@core/usecases/RenderVideo";
-import { RenderVideoParams } from "@domain/Video";
+import { RenderVideoParams, UploadVideoParams } from "@domain/Video";
 import { RemotionVideoRenderer } from "@infrastructure/adapters/remotionVideoRenderer";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
+import { SNSMessageSender } from "@infrastructure/adapters/snsMessageSender";
 import { SQSEvent } from "aws-lambda";
 import { Result, fromThrowable, ok } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { StaticSite } from "sst/node/site";
+import { Topic } from "sst/node/topic";
 
 class RenderVideoHandler {
   constructor(private readonly renderVideoUseCase: RenderVideoUseCase) {}
@@ -17,13 +20,17 @@ class RenderVideoHandler {
     serveUrl: string,
     videoId: string,
     chromiumExecutablePath: string,
+    uploadVideoTopicArn: string,
   ): RenderVideoHandler {
     const videoRenderer = new RemotionVideoRenderer(serveUrl, videoId, chromiumExecutablePath);
 
     const s3Client = new S3Client({});
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
-    const generateVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore);
+    const snsClient = new SNSClient({});
+    const uploadVideoMessageSender = new SNSMessageSender<UploadVideoParams>(snsClient, uploadVideoTopicArn);
+
+    const generateVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore, uploadVideoMessageSender);
 
     return new RenderVideoHandler(generateVideoUseCase);
   }
@@ -54,6 +61,7 @@ const handlerInstance = RenderVideoHandler.build(
   StaticSite.RemotionApp.url,
   "video",
   process.env.CHROMIUM_EXECUTABLE_PATH!,
+  Topic.UploadVideoTopic.topicArn,
 );
 
 export default handlerInstance.handle.bind(handlerInstance);

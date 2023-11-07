@@ -2,7 +2,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { ParseError } from "@core/errors/ParseError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { ValidationError } from "@core/errors/ValidationError";
-import { Queue } from "@core/queue";
+import { MessageSender } from "@core/messageSender";
 import { QuoteService } from "@core/quoteService";
 import { Quote } from "@domain/Quote";
 import { ResultAsync } from "neverthrow";
@@ -10,10 +10,10 @@ import { ResultAsync } from "neverthrow";
 export class GenerateQuoteUseCase {
   constructor(
     private readonly quoteService: QuoteService,
-    private readonly quoteQueue: Queue<Quote>,
+    private readonly quoteMessageSender: MessageSender<Quote>,
   ) {}
 
   execute(): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
-    return this.quoteService.generateQuote().andThen(this.quoteQueue.enqueue.bind(this.quoteQueue));
+    return this.quoteService.generateQuote().andThen(this.quoteMessageSender.send.bind(this.quoteMessageSender));
   }
 }

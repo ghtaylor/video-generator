@@ -17,9 +17,9 @@ export class GenerateQuoteHandler {
     const quoteService: QuoteService = new OpenAIQuoteService(openAIClient);
 
     const sqsClient = new SQSClient({});
-    const sqsQueue = new SQSQueue<Quote>(sqsClient, quoteQueueUrl);
+    const quoteMessageSender = new SQSQueue<Quote>(sqsClient, quoteQueueUrl);
 
-    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, sqsQueue);
+    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, quoteMessageSender);
 
     return new GenerateQuoteHandler(generateQuoteUseCase);
   }

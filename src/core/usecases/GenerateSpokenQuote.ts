@@ -1,7 +1,7 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
-import { Queue } from "@core/queue";
+import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
 import { FileUrl, FileLocation } from "@domain/File";
 import { Quote } from "@domain/Quote";
@@ -14,7 +14,7 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly spokenQuoteQueue: Queue<SpokenQuote>,
+    private readonly spokenQuoteMessageSender: MessageSender<SpokenQuote>,
   ) {}
 
   createSpokenQuote(
@@ -78,6 +78,6 @@ export class GenerateSpokenQuoteUseCase {
           .andThen(this.fileStore.getUrl.bind(this.fileStore))
           .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
       )
-      .andThen(this.spokenQuoteQueue.enqueue.bind(this.spokenQuoteQueue));
+      .andThen(this.spokenQuoteMessageSender.send.bind(this.spokenQuoteMessageSender));
   }
 }

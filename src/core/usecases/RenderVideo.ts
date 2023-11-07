@@ -1,6 +1,7 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileStore } from "@core/fileStore";
+import { MessageSender } from "@core/messageSender";
 import { VideoRenderer } from "@core/videoRenderer";
 import { FileLocation } from "@domain/File";
 import { UploadVideoParams, RenderVideoParams } from "@domain/Video";
@@ -10,6 +11,7 @@ export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
+    private readonly uploadVideoMessageSender: MessageSender<UploadVideoParams>,
   ) {}
 
   private getFileLocation(): string {
@@ -30,6 +32,7 @@ export class RenderVideoUseCase {
     return this.videoRenderer
       .renderVideo(renderVideoParams)
       .andThen((videoBuffer) => this.fileStore.store(this.getFileLocation(), videoBuffer))
-      .andThen((fileLocation) => this.uploadVideoParamsFrom(renderVideoParams, fileLocation));
+      .andThen((fileLocation) => this.uploadVideoParamsFrom(renderVideoParams, fileLocation))
+      .andThen(this.uploadVideoMessageSender.send.bind(this.uploadVideoMessageSender));
   }
 }

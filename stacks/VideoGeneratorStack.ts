@@ -28,7 +28,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const uploadVideoToYoutubeQueue = new Queue(stack, "UploadVideoToYoutubeQueue");
 
-  new Topic(stack, "UploadVideoTopic", {
+  const uploadVideoTopic = new Topic(stack, "UploadVideoTopic", {
     subscribers: {
       youtubeQueueSubscriber: {
         type: "queue",
@@ -56,7 +56,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const renderVideoFunction = new Function(stack, "RenderVideo", {
     handler: "src/infrastructure/handlers/renderVideo.default",
-    bind: [bucket, remotionApp],
+    bind: [bucket, remotionApp, uploadVideoTopic],
     retryAttempts: 0,
     architecture: "arm_64",
     runtime: "nodejs18.x",

@@ -24,9 +24,13 @@ export class GenerateSpokenQuoteHandler {
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
     const sqsClient = new SQSClient({});
-    const spokenQuoteQueue = new SQSQueue<SpokenQuote>(sqsClient, spokenQuoteQueueUrl);
+    const spokenQuoteMessageSender = new SQSQueue<SpokenQuote>(sqsClient, spokenQuoteQueueUrl);
 
-    const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, s3FileStore, spokenQuoteQueue);
+    const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(
+      speechService,
+      s3FileStore,
+      spokenQuoteMessageSender,
+    );
 
     return new GenerateSpokenQuoteHandler(generateSpokenQuoteUseCase);
   }

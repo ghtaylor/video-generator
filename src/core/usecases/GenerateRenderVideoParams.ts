@@ -1,6 +1,6 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
-import { Queue } from "@core/queue";
+import { MessageSender } from "@core/messageSender";
 import { FileUrl, FileLocation } from "@domain/File";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { RenderVideoParams, RenderVideoSection } from "@domain/Video";
@@ -10,7 +10,7 @@ import { Result, ResultAsync, ok } from "neverthrow";
 export class GenerateRenderVideoParamsUseCase {
   constructor(
     private readonly fileStore: FileStore,
-    private readonly renderVideoQueue: Queue<RenderVideoParams>,
+    private readonly renderVideoMessageSender: MessageSender<RenderVideoParams>,
   ) {}
 
   renderVideoParamsFrom(
@@ -64,6 +64,6 @@ export class GenerateRenderVideoParamsUseCase {
       .listFiles(backgroundVideosLocation)
       .andThen(this.getFileUrls.bind(this))
       .andThen((backgroundVideoUrls) => this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, fps))
-      .andThen(this.renderVideoQueue.enqueue.bind(this.renderVideoQueue));
+      .andThen(this.renderVideoMessageSender.send.bind(this.renderVideoMessageSender));
   }
 }

@@ -1,6 +1,6 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
-import { Queue } from "@core/queue";
+import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@domain/Quote";
@@ -13,9 +13,9 @@ import { errAsync, okAsync } from "neverthrow";
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
-  const spokenQuoteQueue = mock<Queue<SpokenQuote>>();
+  const spokenQuoteMessageSender = mock<MessageSender<SpokenQuote>>();
 
-  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteQueue);
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteMessageSender);
 
   describe("`createSpokenQuote`", () => {
     const VALID_AUDIO_URL = "https://bucket.aws.com/audioLocation";
@@ -526,7 +526,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
         fileStore.store.mockReturnValue(okAsync("speechAudioLocation"));
         fileStore.getUrl.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE.audioUrl));
-        spokenQuoteQueue.enqueue.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE));
+        spokenQuoteMessageSender.send.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE));
       });
 
       test("THEN `execute` should return a successful result", async () => {
@@ -535,9 +535,9 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         expect(result.isOk()).toBe(true);
       });
 
-      describe("EXCEPT enqueuing the SpokenQuote fails due to a NetworkError", () => {
+      describe("EXCEPT sending the SpokenQuote message fails due to a NetworkError", () => {
         beforeEach(() => {
-          spokenQuoteQueue.enqueue.mockResolvedValue(errAsync(new NetworkError("Failed to enqueue spoken quote.")));
+          spokenQuoteMessageSender.send.mockResolvedValue(errAsync(new NetworkError("Failed to send spoken quote.")));
         });
 
         test("THEN `execute` should return a NetworkError", async () => {

@@ -1,6 +1,6 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
-import { Queue } from "@core/queue";
+import { MessageSender } from "@core/messageSender";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { FileUrl } from "@domain/File";
 import { SpokenQuote } from "@domain/SpokenQuote";
@@ -13,9 +13,9 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const BACKGROUND_VIDEOS_LOCATION = "backgroundVideosLocation";
 
   const fileStore = mock<FileStore>();
-  const renderVideoQueue = mock<Queue<RenderVideoParams>>();
+  const renderVideoMessageSender = mock<MessageSender<RenderVideoParams>>();
 
-  const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore, renderVideoQueue);
+  const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore, renderVideoMessageSender);
 
   describe("`renderVideoParamsFrom`", () => {
     describe.each<[SpokenQuote, FileUrl[], RenderVideoParams]>([
@@ -195,7 +195,7 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
       beforeEach(() => {
         fileStore.listFiles.mockReturnValue(okAsync(["1.mp4", "2.mp4"]));
         fileStore.getUrl.mockImplementation((fileLocation) => okAsync(`https://${fileLocation}`));
-        renderVideoQueue.enqueue.mockImplementation((renderVideoParams) => okAsync(renderVideoParams));
+        renderVideoMessageSender.send.mockImplementation((renderVideoParams) => okAsync(renderVideoParams));
       });
 
       test("THEN `execute` should return a successful result", async () => {
@@ -208,10 +208,10 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         expect(result.isOk()).toBe(true);
       });
 
-      describe("EXCEPT enqueueing the RenderVideoParams fails due to a NetworkError", () => {
+      describe("EXCEPT sending the RenderVideoParams message fails due to a NetworkError", () => {
         beforeEach(() => {
-          renderVideoQueue.enqueue.mockResolvedValue(
-            errAsync(new NetworkError("Failed to enqueue RenderVideoParams.")),
+          renderVideoMessageSender.send.mockResolvedValue(
+            errAsync(new NetworkError("Failed to send RenderVideoParams.")),
           );
         });
 
