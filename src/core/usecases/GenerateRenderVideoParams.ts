@@ -1,7 +1,7 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
 import { Queue } from "@core/queue";
-import { FileUrl, FileLocation } from "@domain/FIle";
+import { FileUrl, FileLocation } from "@domain/File";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { RenderVideoParams, RenderVideoSection } from "@domain/Video";
 import shuffle from "lodash.shuffle";

@@ -1,36 +1,25 @@
 import { NetworkError } from "@core/errors/NetworkError";
+import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
-import { SocialMediaUploader, VideoId } from "@core/socialMediaUploader";
-import { FileLocation } from "@domain/FIle";
-import { UploadVideoParams, VideoData, VideoDataKind } from "@domain/Video";
+import { VideoId, VideoUploader } from "@core/videoUploader";
+import { FileLocation } from "@domain/File";
+import { UploadVideoParams, UploadVideoPlatform, VideoData } from "@domain/Video";
 import { ResultAsync } from "neverthrow";
 
 export class UploadVideoUseCase {
   constructor(
-    private readonly socialMediaUploader: SocialMediaUploader,
+    private readonly videoUploader: VideoUploader<UploadVideoPlatform>,
     private readonly fileStore: FileStore,
   ) {}
 
-  getVideoData(kind: VideoDataKind, videoLocation: FileLocation): ResultAsync<VideoData, NetworkError> {
-    if (kind === VideoDataKind.Buffer) {
-      return this.fileStore.getBuffer(videoLocation).map((buffer) => ({
-        kind: VideoDataKind.Buffer,
-        buffer,
-      }));
-    }
+  private getVideoData(videoLocation: FileLocation): ResultAsync<VideoData, NetworkError> {
+    // if (this.videoUploader.platform === UploadVideoPlatform.YouTube)
+    return this.fileStore.getBuffer(videoLocation);
 
-    return this.fileStore.getUrl(videoLocation).map((url) => ({
-      kind: VideoDataKind.Url,
-      url,
-    }));
+    // return this.fileStore.getUrl(videoLocation);
   }
 
-  execute(
-    { videoLocation, metadata }: UploadVideoParams,
-    videoDataKind: VideoDataKind,
-  ): ResultAsync<VideoId, NetworkError> {
-    return this.getVideoData(videoDataKind, videoLocation).andThen((videoData) =>
-      this.socialMediaUploader.upload(videoData, metadata),
-    );
+  execute({ videoLocation, metadata }: UploadVideoParams): ResultAsync<VideoId, NetworkError | ValidationError> {
+    return this.getVideoData(videoLocation).andThen((videoData) => this.videoUploader.upload(videoData, metadata));
   }
 }

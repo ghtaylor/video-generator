@@ -1,6 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import { NetworkError } from "./errors/NetworkError";
-import { FileLocation, FileUrl } from "@domain/FIle";
+import { FileLocation, FileUrl } from "@domain/File";
 
 export interface FileStore {
   store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError>;

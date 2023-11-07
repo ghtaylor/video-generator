@@ -12,6 +12,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
   });
 
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
+  const YOUTUBE_CREDENTIALS = new Config.Secret(stack, "YOUTUBE_CREDENTIALS");
 
   const bucket = new Bucket(stack, "Bucket");
 
@@ -25,13 +26,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
     },
   });
 
-  const uploadVideoToYoutubeQueue = new Queue(stack, "UploadVideoToYoutubeQueue", {
-    cdk: {
-      queue: {
-        visibilityTimeout: Duration.minutes(15),
-      },
-    },
-  });
+  const uploadVideoToYoutubeQueue = new Queue(stack, "UploadVideoToYoutubeQueue");
 
   new Topic(stack, "UploadVideoTopic", {
     subscribers: {
@@ -83,8 +78,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const uploadVideoFunction = new Function(stack, "UploadVideo", {
     handler: "src/infrastructure/handlers/uploadVideo.default",
-    bind: [bucket, uploadVideoToYoutubeQueue],
-    timeout: "15 minutes",
+    bind: [YOUTUBE_CREDENTIALS, uploadVideoToYoutubeQueue, bucket],
   });
 
   quoteQueue.addConsumer(stack, generateSpokenQuoteFunction);

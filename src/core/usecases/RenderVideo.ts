@@ -2,7 +2,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileStore } from "@core/fileStore";
 import { VideoRenderer } from "@core/videoRenderer";
-import { FileLocation } from "@domain/FIle";
+import { FileLocation } from "@domain/File";
 import { UploadVideoParams, RenderVideoParams } from "@domain/Video";
 import { Result, ResultAsync, ok } from "neverthrow";
 
