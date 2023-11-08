@@ -3,7 +3,7 @@ export class NetworkError extends Error {
   originalError?: Error;
 
   constructor(message: string, originalError?: Error) {
-    super(originalError ? `${message}: ${originalError.message}` : message);
+    super(originalError ? `${message} (${originalError.message})` : message);
 
     this.originalError = originalError;
 
