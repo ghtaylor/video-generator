@@ -43,7 +43,6 @@ class RenderVideoHandler {
   }
 
   private logInput(renderVideoParams: RenderVideoParams): Result<RenderVideoParams, never> {
-    console.log("Input:", JSON.stringify(renderVideoParams, null, 2));
     return ok(renderVideoParams);
   }
 

@@ -32,8 +32,6 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
   }
 
   private insertYoutubeVideo(insert: youtube_v3.Params$Resource$Videos$Insert): ResultAsync<string, NetworkError> {
-    console.log("Uploading video to YouTube...");
-
     return fromPromise(
       google.youtube("v3").videos.insert(insert),
       (error) => new NetworkError("Error uploading video to YouTube", error instanceof Error ? error : undefined),

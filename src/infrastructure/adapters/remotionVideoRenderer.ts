@@ -13,15 +13,6 @@ export class RemotionVideoRenderer implements VideoRenderer {
   ) {}
 
   private selectComposition(params: RenderVideoParams): ResultAsync<VideoConfig, VideoRenderError> {
-    console.log(
-      "Selecting composition",
-      JSON.stringify(
-        { params, serveUrl: this.serveUrl, browserExecutable: this.chromiumExecutablePath, id: this.videoId },
-        null,
-        2,
-      ),
-    );
-
     return fromPromise(
       selectComposition({
         serveUrl: this.serveUrl,
@@ -34,15 +25,6 @@ export class RemotionVideoRenderer implements VideoRenderer {
   }
 
   private renderMedia(composition: VideoConfig, params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError> {
-    console.log(
-      "Rendering media",
-      JSON.stringify(
-        { composition, serveUrl: this.serveUrl, browserExecutable: this.chromiumExecutablePath, id: this.videoId },
-        null,
-        2,
-      ),
-    );
-
     return fromPromise(
       renderMedia({
         composition,

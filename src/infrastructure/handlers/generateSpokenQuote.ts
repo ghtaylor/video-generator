@@ -44,11 +44,9 @@ export class GenerateSpokenQuoteHandler {
 
   async handle(event: SQSEvent) {
     for (const record of event.Records) {
-      const result = await this.parseMessage(record.body).asyncAndThen(
+      await this.parseMessage(record.body).asyncAndThen(
         this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase),
       );
-
-      console.log(result);
     }
   }
 }

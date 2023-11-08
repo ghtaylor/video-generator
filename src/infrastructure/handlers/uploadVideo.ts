@@ -49,7 +49,6 @@ class UploadVideoHandler {
           return new UploadVideoHandler(useCase);
         },
         (error) => {
-          console.log(error);
           return null;
         },
       );
@@ -71,11 +70,7 @@ class UploadVideoHandler {
   }
 
   async handle(record: SQSRecord): Promise<void> {
-    const result = await this.parseMessage(record.body).asyncAndThen(
-      this.uploadVideoUseCase.execute.bind(this.uploadVideoUseCase),
-    );
-
-    console.log("Result: ", JSON.stringify(result, null, 2));
+    await this.parseMessage(record.body).asyncAndThen(this.uploadVideoUseCase.execute.bind(this.uploadVideoUseCase));
   }
 }
 

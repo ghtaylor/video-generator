@@ -34,8 +34,6 @@ export class OpenAIQuoteService implements QuoteService {
   }
 
   generateQuote(): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError> {
-    console.log("Generating quote");
-
     return fromPromise(
       this.openAiClient.chat.completions.create({
         model: "gpt-4-0314",
