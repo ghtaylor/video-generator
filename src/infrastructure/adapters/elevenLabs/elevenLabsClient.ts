@@ -45,7 +45,7 @@ export class ElevenLabsClient {
         ws.send(JSON.stringify(bosMessage));
 
         const textMessage = {
-          text: "Test",
+          text,
           try_trigger_generation: true,
         };
 
@@ -68,11 +68,11 @@ export class ElevenLabsClient {
       };
 
       ws.onclose = () => {
-        resolve(responses); // Resolve the Promise when the WebSocket connection is closed
+        resolve(responses);
       };
 
       ws.onerror = (error) => {
-        reject(error); // Reject the Promise if there's an error
+        reject(error);
       };
     });
   }

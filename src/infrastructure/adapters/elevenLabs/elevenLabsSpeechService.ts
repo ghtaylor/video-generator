@@ -3,16 +3,16 @@ import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
 import { Speech, SpeechMark } from "@domain/Speech";
-import { Result, ResultAsync, err, ok } from "neverthrow";
+import { Result, ResultAsync, ok } from "neverthrow";
 import { ElevenLabsClient } from "./elevenLabsClient";
-import { ElevenLabsNormalizedAlignment } from "./schema";
+import { ElevenLabsNormalizedAlignment, ElevenLabsWSResponse } from "./schema";
 
 export class ElevenLabsSpeechService implements SpeechService {
   constructor(private readonly client: ElevenLabsClient) {}
 
   speechMarksFrom({ chars, charStartTimesMs }: ElevenLabsNormalizedAlignment): Result<SpeechMark[], never> {
     function isLetter(char: string): boolean {
-      return /[A-Za-z]/.test(char);
+      return /[A-Za-z']/.test(char);
     }
 
     const speechMarks: SpeechMark[] = [];
@@ -25,6 +25,10 @@ export class ElevenLabsSpeechService implements SpeechService {
       const previousChar = chars[i - 1];
       const isLastChar = i === chars.length - 1;
 
+      if (isLastChar && isLetter(currentChar)) {
+        word += currentChar;
+      }
+
       if (!isLetter(previousChar) || isLastChar) {
         if (word.length > 0) {
           speechMarks.push({
@@ -36,6 +40,7 @@ export class ElevenLabsSpeechService implements SpeechService {
         time = charStartTimesMs[i];
         word = "";
       }
+
       if (isLetter(currentChar)) {
         word += currentChar;
       }
@@ -44,10 +49,58 @@ export class ElevenLabsSpeechService implements SpeechService {
     return ok(speechMarks);
   }
 
+  normalizedAlignmentFrom(
+    responses: ElevenLabsWSResponse[],
+    estimatedGapMs: number,
+  ): Result<ElevenLabsNormalizedAlignment, never> {
+    const normalizedAlignment: ElevenLabsNormalizedAlignment = {
+      chars: [],
+      charStartTimesMs: [],
+    };
+
+    let previousNormalizedAlignmentEndCharMs = 0;
+
+    for (const response of responses) {
+      if (!response.isFinal && response.normalizedAlignment !== null) {
+        normalizedAlignment.chars = normalizedAlignment.chars.concat(response.normalizedAlignment.chars);
+        normalizedAlignment.charStartTimesMs = normalizedAlignment.charStartTimesMs.concat(
+          response.normalizedAlignment.charStartTimesMs.map(
+            (charStartTimeMs) => charStartTimeMs + previousNormalizedAlignmentEndCharMs,
+          ),
+        );
+
+        previousNormalizedAlignmentEndCharMs =
+          response.normalizedAlignment.charStartTimesMs[response.normalizedAlignment.charStartTimesMs.length - 1] +
+          previousNormalizedAlignmentEndCharMs +
+          estimatedGapMs;
+      }
+    }
+
+    return ok(normalizedAlignment);
+  }
+
+  audioBufferFrom(responses: ElevenLabsWSResponse[]): Result<Buffer, never> {
+    const buffers: Buffer[] = [];
+
+    for (const response of responses) {
+      if (!response.isFinal) buffers.push(Buffer.from(response.audio, "base64"));
+    }
+
+    return ok(Buffer.concat(buffers));
+  }
+
   generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError | ParseError> {
-    return this.client.getWebSocketResponses(text).andThen((responses) => {
-      console.log("RESPONSES:", JSON.stringify(responses, null, 2));
-      return err(new NetworkError("Not implemented"));
-    });
+    return this.client
+      .getWebSocketResponses(text)
+      .andThen((responses) =>
+        Result.combine([
+          this.audioBufferFrom(responses),
+          this.normalizedAlignmentFrom(responses, 90).andThen(this.speechMarksFrom),
+        ]),
+      )
+      .map<Speech>(([audio, marks]) => ({
+        audio,
+        marks,
+      }));
   }
 }
