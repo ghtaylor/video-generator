@@ -3,15 +3,10 @@ import { ParseError } from "@core/errors/ParseError";
 import { ResultAsync, fromPromise } from "neverthrow";
 import { WebSocket } from "ws";
 import { ElevenLabsWSResponse } from "./schema";
-
-export type ElevenLabsClientConfig = {
-  apiKey: string;
-  voiceId: string;
-  modelId: string;
-};
+import { ElevenLabsConfig } from "./config";
 
 export class ElevenLabsClient {
-  constructor(private readonly config: ElevenLabsClientConfig) {}
+  constructor(private readonly config: ElevenLabsConfig) {}
 
   getWebSocketResponses(text: string): ResultAsync<ElevenLabsWSResponse[], NetworkError | ParseError> {
     return fromPromise(

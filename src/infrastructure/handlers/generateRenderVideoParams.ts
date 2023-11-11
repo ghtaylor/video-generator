@@ -1,25 +1,22 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { SQSClient } from "@aws-sdk/client-sqs";
-import { ValidationError } from "@core/errors/ValidationError";
+import { parseJsonString } from "@common/parseJsonString";
+import { Logger } from "@core/logger";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { SpokenQuote } from "@domain/SpokenQuote";
 import { RenderVideoParams } from "@domain/Video";
+import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { SQSQueue } from "@infrastructure/adapters/sqsQueue";
 import { SQSEvent } from "aws-lambda";
-import { Result, fromThrowable } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { Queue } from "sst/node/queue";
 
 export class GenerateRenderVideoParamsHandler {
-  constructor(private readonly useCase: GenerateRenderVideoParamsUseCase) {}
-
-  parseMessage(message: string): Result<SpokenQuote, ValidationError> {
-    return fromThrowable(
-      () => SpokenQuote.parse(JSON.parse(message)),
-      (error) => new ValidationError("Failed to parse message", error instanceof Error ? error : undefined),
-    )();
-  }
+  constructor(
+    private readonly useCase: GenerateRenderVideoParamsUseCase,
+    private readonly logger: Logger,
+  ) {}
 
   static build(bucketName: string, renderVideoQueueUrl: string) {
     const s3Client = new S3Client({});
@@ -30,14 +27,18 @@ export class GenerateRenderVideoParamsHandler {
 
     const useCase = new GenerateRenderVideoParamsUseCase(s3FileStore, renderVideoMessageSender);
 
-    return new GenerateRenderVideoParamsHandler(useCase);
+    const logger = PinoLogger.build();
+
+    return new GenerateRenderVideoParamsHandler(useCase, logger);
   }
 
   async handle(event: SQSEvent) {
     for (const record of event.Records) {
-      await this.parseMessage(record.body).asyncAndThen((spokenQuote) =>
+      const result = await parseJsonString(record.body, SpokenQuote).asyncAndThen((spokenQuote) =>
         this.useCase.execute(spokenQuote, 30, "videos/"),
       );
+
+      this.logger.logResult(result);
     }
   }
 }

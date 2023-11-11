@@ -13,6 +13,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
   const YOUTUBE_CREDENTIALS = new Config.Secret(stack, "YOUTUBE_CREDENTIALS");
+  const ELEVEN_LABS_CONFIG = new Config.Secret(stack, "ELEVEN_LABS_CONFIG");
 
   const bucket = new Bucket(stack, "Bucket");
 
@@ -45,8 +46,9 @@ export function VideoGeneratorStack({ stack }: StackContext) {
 
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: "src/infrastructure/handlers/generateSpokenQuote.default",
-    bind: [spokenQuoteQueue, bucket],
-    permissions: ["polly:SynthesizeSpeech"],
+    bind: [spokenQuoteQueue, bucket, ELEVEN_LABS_CONFIG],
+    // Required for Polly
+    // permissions: ["polly:SynthesizeSpeech"],
   });
 
   const generateRenderVideoParamsFunction = new Function(stack, "GenerateRenderVideoParams", {

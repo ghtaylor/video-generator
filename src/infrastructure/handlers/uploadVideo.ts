@@ -1,22 +1,29 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import { parseJsonString } from "@common/parseJsonString";
 import { NotFoundError } from "@core/errors/NotFoundError";
 import { ParseError } from "@core/errors/ParseError";
-import { VideoUploader } from "@core/videoUploader";
+import { Logger } from "@core/logger";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
+import { VideoUploader } from "@core/videoUploader";
 import { UploadVideoParams, UploadVideoPlatform } from "@domain/Video";
+import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { YoutubeCredentials } from "@infrastructure/adapters/youtubeUploader/credentials";
 import { YoutubeUploader } from "@infrastructure/adapters/youtubeUploader/youtubeUploader";
+import { SNSMessage } from "@infrastructure/events/snsMessage";
 import { SQSEvent, SQSRecord } from "aws-lambda";
 import { Result, err, fromThrowable, ok } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
-import { z } from "zod";
 import { Config } from "sst/node/config";
+import { z } from "zod";
 
 type VideoUploaderCredentials = Record<UploadVideoPlatform, YoutubeCredentials>;
 
 class UploadVideoHandler {
-  constructor(private readonly uploadVideoUseCase: UploadVideoUseCase) {}
+  constructor(
+    private readonly uploadVideoUseCase: UploadVideoUseCase,
+    private readonly logger: Logger,
+  ) {}
 
   private static videoUploaderFrom(
     eventSourceARN: string,
@@ -36,22 +43,22 @@ class UploadVideoHandler {
     }));
   }
 
-  static build(eventSourceARN: string, bucketName: string, youtubeCredentials: string): UploadVideoHandler | null {
+  static build(
+    eventSourceARN: string,
+    bucketName: string,
+    youtubeCredentials: string,
+    logger: Logger = PinoLogger.build(),
+  ): Result<UploadVideoHandler, ParseError | NotFoundError> {
     return this.parseUploaderCredentials(youtubeCredentials)
       .andThen((uploaderCredentials) => this.videoUploaderFrom(eventSourceARN, uploaderCredentials))
-      .match(
-        (uploader) => {
-          const s3Client = new S3Client({});
-          const s3FileStore = new S3FileStore(s3Client, bucketName);
+      .map((uploader) => {
+        const s3Client = new S3Client({});
+        const s3FileStore = new S3FileStore(s3Client, bucketName);
 
-          const useCase = new UploadVideoUseCase(uploader, s3FileStore);
+        const useCase = new UploadVideoUseCase(uploader, s3FileStore);
 
-          return new UploadVideoHandler(useCase);
-        },
-        (error) => {
-          return null;
-        },
-      );
+        return new UploadVideoHandler(useCase, logger);
+      });
   }
 
   private parseMessage(message: string): Result<UploadVideoParams, ParseError> {
@@ -70,20 +77,25 @@ class UploadVideoHandler {
   }
 
   async handle(record: SQSRecord): Promise<void> {
-    await this.parseMessage(record.body).asyncAndThen(this.uploadVideoUseCase.execute.bind(this.uploadVideoUseCase));
+    const result = await parseJsonString(record.body, SNSMessage)
+      .andThen((snsMessage) => parseJsonString(snsMessage.Message, UploadVideoParams))
+      .asyncAndThen(this.uploadVideoUseCase.execute.bind(this.uploadVideoUseCase));
+
+    this.logger.logResult(result);
   }
 }
 
 export default async (event: SQSEvent): Promise<void> => {
+  const logger = PinoLogger.build();
+
   for (const record of event.Records) {
-    const handlerInstance = UploadVideoHandler.build(
-      record.eventSourceARN,
-      Bucket.Bucket.bucketName,
-      Config.YOUTUBE_CREDENTIALS,
+    await UploadVideoHandler.build(record.eventSourceARN, Bucket.Bucket.bucketName, Config.YOUTUBE_CREDENTIALS).match(
+      async (handlerInstance) => {
+        await handlerInstance.handle(record);
+      },
+      async (error) => {
+        logger.error("Failed to create handler", error);
+      },
     );
-
-    if (!handlerInstance) continue;
-
-    await handlerInstance.handle(record);
   }
 };
