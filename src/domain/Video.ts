@@ -14,6 +14,7 @@ export const RenderVideoSection = z.object({
 export const RenderVideoParams = z.object({
   fps: z.number(),
   speechAudioUrl: z.string(),
+  musicAudioUrl: z.string(),
   sections: z.array(RenderVideoSection),
   metadata: VideoMetadata,
 });

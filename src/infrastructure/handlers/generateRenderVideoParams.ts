@@ -35,7 +35,7 @@ export class GenerateRenderVideoParamsHandler {
   async handle(event: SQSEvent) {
     for (const record of event.Records) {
       const result = await parseJsonString(record.body, SpokenQuote).asyncAndThen((spokenQuote) =>
-        this.useCase.execute(spokenQuote, 30, "videos/"),
+        this.useCase.execute(spokenQuote, 30, "videos/", "music/"),
       );
 
       this.logger.logResult(result);

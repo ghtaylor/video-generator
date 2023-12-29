@@ -16,6 +16,7 @@ export class GenerateRenderVideoParamsUseCase {
   renderVideoParamsFrom(
     spokenQuote: SpokenQuote,
     backgroundVideoUrls: FileUrl[],
+    musicAudioUrls: FileUrl[],
     fps: number,
   ): Result<RenderVideoParams, never> {
     const videoSections: RenderVideoSection[] = [];
@@ -43,6 +44,7 @@ export class GenerateRenderVideoParamsUseCase {
     return ok({
       fps,
       speechAudioUrl: spokenQuote.audioUrl,
+      musicAudioUrl: musicAudioUrls[Math.floor(Math.random() * musicAudioUrls.length)],
       sections: videoSections,
       metadata: {
         title: spokenQuote.title,
@@ -59,11 +61,15 @@ export class GenerateRenderVideoParamsUseCase {
     spokenQuote: SpokenQuote,
     fps: number,
     backgroundVideosLocation: FileLocation,
+    musicAudiosLocation: FileLocation,
   ): ResultAsync<RenderVideoParams, NetworkError> {
-    return this.fileStore
-      .listFiles(backgroundVideosLocation)
-      .andThen(this.getFileUrls.bind(this))
-      .andThen((backgroundVideoUrls) => this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, fps))
+    return ResultAsync.combine([
+      this.fileStore.listFiles(backgroundVideosLocation).andThen(this.getFileUrls.bind(this)),
+      this.fileStore.listFiles(musicAudiosLocation).andThen(this.getFileUrls.bind(this)),
+    ])
+      .andThen(([backgroundVideoUrls, musicAudioUrls]) =>
+        this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, musicAudioUrls, fps),
+      )
       .andThen(this.renderVideoMessageSender.send.bind(this.renderVideoMessageSender));
   }
 }

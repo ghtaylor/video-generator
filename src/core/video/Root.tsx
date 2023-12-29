@@ -18,6 +18,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           fps: 30,
           speechAudioUrl: "",
+          musicAudioUrl: "",
           sections: [],
           metadata: {
             title: "",

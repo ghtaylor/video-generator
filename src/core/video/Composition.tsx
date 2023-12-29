@@ -4,7 +4,7 @@ import { AbsoluteFill, Audio, OffthreadVideo, Series } from "remotion";
 
 const { fontFamily } = loadFont();
 
-export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAudioUrl }) => {
+export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAudioUrl, musicAudioUrl }) => {
   return (
     <>
       <Series>
@@ -14,6 +14,7 @@ export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAud
               <OffthreadVideo
                 src={backgroundVideoUrl}
                 className="object-cover relative opacity-50 grayscale contrast-150"
+                muted={true}
               />
             </AbsoluteFill>
 
@@ -27,6 +28,7 @@ export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAud
         ))}
       </Series>
       <Audio src={speechAudioUrl} />
+      <Audio src={musicAudioUrl} volume={0.4} />
     </>
   );
 };
