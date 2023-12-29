@@ -21,7 +21,7 @@ export class GenerateSpokenQuoteUseCase {
     quote: Quote,
     speech: Speech,
     audioUrl: FileUrl,
-    endDelay: number = 1000,
+    endDelay: number = 2000,
   ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
     const _speech = Object.assign({}, speech);
     const chunks: SpokenQuoteChunk[] = [];
