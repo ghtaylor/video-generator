@@ -47,6 +47,7 @@ export function VideoGeneratorStack({ stack }: StackContext) {
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: "src/infrastructure/handlers/generateSpokenQuote.default",
     bind: [spokenQuoteQueue, bucket, ELEVEN_LABS_CONFIG],
+    timeout: "30 seconds",
     // Required for Polly
     // permissions: ["polly:SynthesizeSpeech"],
   });
