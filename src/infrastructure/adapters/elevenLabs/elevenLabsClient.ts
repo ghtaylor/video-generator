@@ -4,15 +4,16 @@ import { ResultAsync, fromPromise } from "neverthrow";
 import { WebSocket } from "ws";
 import { ElevenLabsWSResponse } from "./schema";
 import { ElevenLabsConfig } from "./config";
+import { ZodError } from "zod";
 
 export class ElevenLabsClient {
   constructor(private readonly config: ElevenLabsConfig) {}
 
   getWebSocketResponses(text: string): ResultAsync<ElevenLabsWSResponse[], NetworkError | ParseError> {
-    return fromPromise(
-      this.getWebSocketResponsesPromise(text),
-      (error) => new NetworkError("ElevenLabs API error", error instanceof Error ? error : undefined),
-    );
+    return fromPromise(this.getWebSocketResponsesPromise(text), (error) => {
+      if (error instanceof ZodError) return new ParseError("Failed to parse response", error);
+      return new NetworkError("ElevenLabs API error", error instanceof Error ? error : undefined);
+    });
   }
 
   getWebSocketResponsesPromise(text: string): Promise<ElevenLabsWSResponse[]> {
@@ -54,12 +55,30 @@ export class ElevenLabsClient {
       };
 
       ws.onmessage = (event) => {
-        const response = ElevenLabsWSResponse.parse(JSON.parse(event.data.toString()));
-        responses.push(response);
+        const parseResult = ElevenLabsWSResponse.safeParse(JSON.parse(event.data.toString()), {
+          errorMap: (issue, ctx) => {
+            if (issue.code === "invalid_union_discriminator")
+              return {
+                message: `Expected ${issue.options
+                  .map((val) => (typeof val === "string" ? `'${val}'` : val))
+                  .join(" | ")}, received: ${typeof ctx.data === "string" ? `'${ctx.data}'` : ctx.data}`,
+              };
+            return { message: ctx.defaultError };
+          },
+        });
+        if (parseResult.success) {
+          const { data: response } = parseResult;
 
-        if (response.isFinal) {
-          ws.close();
+          responses.push(response);
+
+          if (response.isFinal) {
+            ws.close();
+          }
+
+          return;
         }
+
+        reject(parseResult.error);
       };
 
       ws.onclose = () => {
