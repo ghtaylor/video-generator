@@ -1,13 +1,13 @@
 import { FileStore } from "@core/fileStore";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoUploader } from "@core/videoUploader";
-import { UploadVideoParams, UploadVideoPlatform, VideoData, VideoMetadata } from "@domain/Video";
+import { RenderedVideo, UploadVideoPlatform, VideoData, VideoMetadata } from "@domain/Video";
 import { mock } from "jest-mock-extended";
 import { okAsync } from "neverthrow";
 
 describe("UploadVideo Use Case - Unit Tests", () => {
   describe("WHEN the `execute` method is called", () => {
-    const VALID_UPLOAD_VIDEO_PARAMS: UploadVideoParams = {
+    const VALID_UPLOAD_VIDEO_PARAMS: RenderedVideo = {
       videoLocation: "video_location",
       metadata: {
         title: "video_title",

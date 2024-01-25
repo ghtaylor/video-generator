@@ -3,7 +3,7 @@ import { SNSClient } from "@aws-sdk/client-sns";
 import { parseJsonString } from "@common/parseJsonString";
 import { Logger } from "@core/logger";
 import { RenderVideoUseCase } from "@core/usecases/RenderVideo";
-import { RenderVideoParams, UploadVideoParams } from "@domain/Video";
+import { RenderVideoParams, RenderedVideo } from "@domain/Video";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { RemotionVideoRenderer } from "@infrastructure/adapters/remotionVideoRenderer";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
@@ -32,7 +32,7 @@ class RenderVideoHandler {
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
     const snsClient = new SNSClient({});
-    const uploadVideoMessageSender = new SNSMessageSender<UploadVideoParams>(snsClient, uploadVideoTopicArn);
+    const uploadVideoMessageSender = new SNSMessageSender<RenderedVideo>(snsClient, uploadVideoTopicArn);
 
     const renderVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore, uploadVideoMessageSender);
 

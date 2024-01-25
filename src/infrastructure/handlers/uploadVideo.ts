@@ -5,7 +5,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { Logger } from "@core/logger";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoUploader } from "@core/videoUploader";
-import { UploadVideoParams, UploadVideoPlatform } from "@domain/Video";
+import { RenderedVideo, UploadVideoPlatform } from "@domain/Video";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { YoutubeCredentials } from "@infrastructure/adapters/youtubeUploader/credentials";
@@ -61,7 +61,7 @@ class UploadVideoHandler {
       });
   }
 
-  private parseMessage(message: string): Result<UploadVideoParams, ParseError> {
+  private parseMessage(message: string): Result<RenderedVideo, ParseError> {
     return fromThrowable(
       () => {
         const container = z

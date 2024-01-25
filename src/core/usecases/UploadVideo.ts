@@ -3,7 +3,7 @@ import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
 import { VideoId, VideoUploader } from "@core/videoUploader";
 import { FileLocation } from "@domain/File";
-import { UploadVideoParams, UploadVideoPlatform, VideoData } from "@domain/Video";
+import { RenderedVideo, UploadVideoPlatform, VideoData } from "@domain/Video";
 import { ResultAsync } from "neverthrow";
 
 export class UploadVideoUseCase {
@@ -19,7 +19,7 @@ export class UploadVideoUseCase {
     // return this.fileStore.getUrl(videoLocation);
   }
 
-  execute({ videoLocation, metadata }: UploadVideoParams): ResultAsync<VideoId, NetworkError | ValidationError> {
+  execute({ videoLocation, metadata }: RenderedVideo): ResultAsync<VideoId, NetworkError | ValidationError> {
     return this.getVideoData(videoLocation).andThen((videoData) => this.videoUploader.upload(videoData, metadata));
   }
 }
