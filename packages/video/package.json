@@ -1,0 +1,22 @@
+{
+  "name": "@video-generator/video",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "type:check": "tsc --noEmit",
+    "build": "tsx --tsconfig tsconfig.json src/bundle.ts",
+    "remotion:studio": "remotion studio src/core/video/index.ts"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.42"
+  },
+  "dependencies": {
+    "@video-generator/domain": "workspace:*",
+    "@remotion/bundler": "4.0.56",
+    "@remotion/cli": "4.0.56",
+    "@remotion/google-fonts": "4.0.56",
+    "@remotion/tailwind": "4.0.56",
+    "react": "^18.2.0",
+    "remotion": "4.0.56"
+  }
+}
