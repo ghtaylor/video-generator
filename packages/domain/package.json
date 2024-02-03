@@ -2,10 +2,9 @@
   "name": "@video-generator/domain",
   "version": "1.0.0",
   "exports": {
-    "./*": "./dist/*.js"
+    "./*": "./src/*.ts"
   },
   "scripts": {
-    "build": "rimraf ./dist && tsc",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
