@@ -2,7 +2,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { Quote } from "@video-generator/domain/Quote";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
-import { mock } from "jest-mock-extended";
+import { mock } from "vitest-mock-extended";
 import { ok } from "neverthrow";
 import OpenAI from "openai";
 import { ChatCompletion } from "openai/resources/chat/completions";

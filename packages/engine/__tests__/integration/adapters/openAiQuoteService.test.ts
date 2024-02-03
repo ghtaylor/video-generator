@@ -2,7 +2,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { ParseError } from "@core/errors/ParseError";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { Quote } from "@video-generator/domain/Quote";
-import { mockDeep } from "jest-mock-extended";
+import { mockDeep } from "vitest-mock-extended";
 import { err } from "neverthrow";
 import OpenAI from "openai";
 import { buildChatCompletion } from "../../helpers/openAi";
@@ -19,7 +19,7 @@ describe("OpenAIQuoteService - Integration Tests", () => {
     });
     describe("WHEN `generateQuote` is called", () => {
       test("THEN it calls `parseChatResponse` with the ChatCompletion", async () => {
-        const parseChatResponseSpy = jest.spyOn(openAIQuoteService, "parseChatResponse");
+        const parseChatResponseSpy = vitest.spyOn(openAIQuoteService, "parseChatResponse");
 
         await openAIQuoteService.generateQuote();
 
@@ -29,7 +29,7 @@ describe("OpenAIQuoteService - Integration Tests", () => {
       });
 
       test("THEN it calls `validateQuote` with the Quote", async () => {
-        const validateQuoteSpy = jest.spyOn(openAIQuoteService, "validateQuote");
+        const validateQuoteSpy = vitest.spyOn(openAIQuoteService, "validateQuote");
 
         await openAIQuoteService.generateQuote();
 

@@ -5,7 +5,7 @@ import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderV
 import { FileUrl } from "@video-generator/domain/File";
 import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
 import { RenderVideoParams } from "@video-generator/domain/Video";
-import { mock } from "jest-mock-extended";
+import { mock } from "vitest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";
 
 describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {

@@ -3,7 +3,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
-import { mockDeep } from "jest-mock-extended";
+import { mockDeep } from "vitest-mock-extended";
 import { err, ok } from "neverthrow";
 import type { PartialDeep } from "type-fest";
 

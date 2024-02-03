@@ -2,7 +2,7 @@ import { FileStore } from "@core/fileStore";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoUploader } from "@core/videoUploader";
 import { UploadVideoParams, UploadVideoPlatform, VideoData, VideoMetadata } from "@video-generator/domain/Video";
-import { mock } from "jest-mock-extended";
+import { mock } from "vitest-mock-extended";
 import { okAsync } from "neverthrow";
 
 describe("UploadVideo Use Case - Unit Tests", () => {

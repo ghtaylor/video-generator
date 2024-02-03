@@ -7,7 +7,7 @@ import { Quote } from "@video-generator/domain/Quote";
 import { Speech } from "@video-generator/domain/Speech";
 import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
 import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
-import { mock } from "jest-mock-extended";
+import { mock } from "vitest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";
 
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {

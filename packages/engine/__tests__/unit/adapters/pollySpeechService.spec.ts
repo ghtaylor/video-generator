@@ -1,7 +1,7 @@
 import { PollyClient } from "@aws-sdk/client-polly";
 import { SpeechMark } from "@video-generator/domain/Speech";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
-import { mock } from "jest-mock-extended";
+import { mock } from "vitest-mock-extended";
 import { ok } from "neverthrow";
 
 const pollyClient = mock<PollyClient>();
