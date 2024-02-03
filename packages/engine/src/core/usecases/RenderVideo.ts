@@ -11,7 +11,7 @@ export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
-    private readonly uploadVideoMessageSender: MessageSender<UploadVideoParams>,
+    private readonly onComplete: MessageSender<UploadVideoParams>,
   ) {}
 
   private getFileLocation(): string {
@@ -33,6 +33,6 @@ export class RenderVideoUseCase {
       .renderVideo(renderVideoParams)
       .andThen((videoBuffer) => this.fileStore.store(this.getFileLocation(), videoBuffer))
       .andThen((fileLocation) => this.uploadVideoParamsFrom(renderVideoParams, fileLocation))
-      .andThen(this.uploadVideoMessageSender.send.bind(this.uploadVideoMessageSender));
+      .andThen(this.onComplete.send.bind(this.onComplete));
   }
 }

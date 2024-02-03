@@ -10,10 +10,10 @@ import { ResultAsync } from "neverthrow";
 export class GenerateQuoteUseCase {
   constructor(
     private readonly quoteService: QuoteService,
-    private readonly quoteMessageSender: MessageSender<Quote>,
+    private readonly onComplete: MessageSender<Quote>,
   ) {}
 
   execute(): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
-    return this.quoteService.generateQuote().andThen(this.quoteMessageSender.send.bind(this.quoteMessageSender));
+    return this.quoteService.generateQuote().andThen(this.onComplete.send.bind(this.onComplete));
   }
 }

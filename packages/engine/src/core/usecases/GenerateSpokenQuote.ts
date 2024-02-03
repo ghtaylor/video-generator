@@ -14,7 +14,7 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly spokenQuoteMessageSender: MessageSender<SpokenQuote>,
+    private readonly onComplete: MessageSender<SpokenQuote>,
   ) {}
 
   createSpokenQuote(
@@ -78,6 +78,6 @@ export class GenerateSpokenQuoteUseCase {
           .andThen(this.fileStore.getUrl.bind(this.fileStore))
           .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
       )
-      .andThen(this.spokenQuoteMessageSender.send.bind(this.spokenQuoteMessageSender));
+      .andThen(this.onComplete.send.bind(this.onComplete));
   }
 }

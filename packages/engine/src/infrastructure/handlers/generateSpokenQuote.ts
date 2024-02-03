@@ -26,7 +26,7 @@ export class GenerateSpokenQuoteHandler {
 
   static build(
     bucketName: string,
-    spokenQuoteQueueUrl: string,
+    generateRenderVideoParamsQueueUrl: string,
     elevenLabsConfig: string,
     logger: Logger = PinoLogger.build(),
   ): Result<GenerateSpokenQuoteHandler, ParseError> {
@@ -39,12 +39,12 @@ export class GenerateSpokenQuoteHandler {
       const s3FileStore = new S3FileStore(s3Client, bucketName);
 
       const sqsClient = new SQSClient({});
-      const spokenQuoteMessageSender = new SQSQueue<SpokenQuote>(sqsClient, spokenQuoteQueueUrl);
+      const generateRenderVideoParamsQueue = new SQSQueue<SpokenQuote>(sqsClient, generateRenderVideoParamsQueueUrl);
 
       const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(
         speechService,
         s3FileStore,
-        spokenQuoteMessageSender,
+        generateRenderVideoParamsQueue,
       );
 
       return new GenerateSpokenQuoteHandler(generateSpokenQuoteUseCase, logger);
@@ -67,7 +67,7 @@ export default async (event: SQSEvent): Promise<void> => {
 
   return GenerateSpokenQuoteHandler.build(
     Bucket.Bucket.bucketName,
-    Queue.SpokenQuoteQueue.queueUrl,
+    Queue.GenerateRenderVideoParamsQueue.queueUrl,
     Config.ELEVEN_LABS_CONFIG,
     logger,
   ).match(

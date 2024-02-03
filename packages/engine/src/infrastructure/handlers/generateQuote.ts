@@ -17,14 +17,14 @@ export class GenerateQuoteHandler {
     private readonly logger: Logger,
   ) {}
 
-  static build(openAiApiKey: string, quoteQueueUrl: string) {
+  static build(openAiApiKey: string, generateQuoteWithSpeechQueueUrl: string) {
     const openAIClient = new OpenAI({ apiKey: openAiApiKey });
     const quoteService: QuoteService = new OpenAIQuoteService(openAIClient);
 
     const sqsClient = new SQSClient({});
-    const quoteMessageSender = new SQSQueue<Quote>(sqsClient, quoteQueueUrl);
+    const generateQuoteWithSpeechQueue = new SQSQueue<Quote>(sqsClient, generateQuoteWithSpeechQueueUrl);
 
-    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, quoteMessageSender);
+    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, generateQuoteWithSpeechQueue);
 
     const logger = PinoLogger.build();
 
@@ -43,6 +43,6 @@ export class GenerateQuoteHandler {
   }
 }
 
-const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY, Queue.QuoteQueue.queueUrl);
+const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY, Queue.GenerateQuoteWithSpeechQueue.queueUrl);
 
 export default handlerInstance.handle.bind(handlerInstance);

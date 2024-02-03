@@ -13,8 +13,9 @@ export function EngineStack({ stack }: StackContext) {
 
   const bucket = new Bucket(stack, "Bucket");
 
-  const quoteQueue = new Queue(stack, "QuoteQueue");
-  const spokenQuoteQueue = new Queue(stack, "SpokenQuoteQueue");
+  const generateQuoteQueue = new Queue(stack, "GenerateQuoteQueue");
+  const generateQuoteWithSpeechQueue = new Queue(stack, "GenerateQuoteWithSpeechQueue");
+  const generateRenderVideoParamsQueue = new Queue(stack, "GenerateRenderVideoParamsQueue");
   const renderVideoQueue = new Queue(stack, "RenderVideoQueue", {
     cdk: {
       queue: {
@@ -34,15 +35,15 @@ export function EngineStack({ stack }: StackContext) {
     },
   });
 
-  new Function(stack, "GenerateQuote", {
+  const generateQuoteFunction = new Function(stack, "GenerateQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateQuote.default`,
-    bind: [OPENAI_API_KEY, quoteQueue],
+    bind: [OPENAI_API_KEY, generateQuoteWithSpeechQueue],
     timeout: "30 seconds",
   });
 
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateSpokenQuote.default`,
-    bind: [spokenQuoteQueue, bucket, ELEVEN_LABS_CONFIG],
+    bind: [generateRenderVideoParamsQueue, bucket, ELEVEN_LABS_CONFIG],
     timeout: "30 seconds",
     // Required for Polly
     // permissions: ["polly:SynthesizeSpeech"],
@@ -80,8 +81,9 @@ export function EngineStack({ stack }: StackContext) {
     bind: [YOUTUBE_CREDENTIALS, uploadVideoToYoutubeQueue, bucket],
   });
 
-  quoteQueue.addConsumer(stack, generateSpokenQuoteFunction);
-  spokenQuoteQueue.addConsumer(stack, generateRenderVideoParamsFunction);
+  generateQuoteQueue.addConsumer(stack, generateQuoteFunction);
+  generateQuoteWithSpeechQueue.addConsumer(stack, generateSpokenQuoteFunction);
+  generateRenderVideoParamsQueue.addConsumer(stack, generateRenderVideoParamsFunction);
   renderVideoQueue.addConsumer(stack, renderVideoFunction);
   uploadVideoToYoutubeQueue.addConsumer(stack, uploadVideoFunction);
 }

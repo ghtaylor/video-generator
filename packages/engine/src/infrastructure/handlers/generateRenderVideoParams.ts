@@ -23,9 +23,9 @@ export class GenerateRenderVideoParamsHandler {
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
     const sqsClient = new SQSClient({});
-    const renderVideoMessageSender = new SQSQueue<RenderVideoParams>(sqsClient, renderVideoQueueUrl);
+    const renderVideoQueue = new SQSQueue<RenderVideoParams>(sqsClient, renderVideoQueueUrl);
 
-    const useCase = new GenerateRenderVideoParamsUseCase(s3FileStore, renderVideoMessageSender);
+    const useCase = new GenerateRenderVideoParamsUseCase(s3FileStore, renderVideoQueue);
 
     const logger = PinoLogger.build();
 

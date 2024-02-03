@@ -10,7 +10,7 @@ import { Result, ResultAsync, ok } from "neverthrow";
 export class GenerateRenderVideoParamsUseCase {
   constructor(
     private readonly fileStore: FileStore,
-    private readonly renderVideoMessageSender: MessageSender<RenderVideoParams>,
+    private readonly onComplete: MessageSender<RenderVideoParams>,
   ) {}
 
   renderVideoParamsFrom(
@@ -70,6 +70,6 @@ export class GenerateRenderVideoParamsUseCase {
       .andThen(([backgroundVideoUrls, musicAudioUrls]) =>
         this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, musicAudioUrls, fps),
       )
-      .andThen(this.renderVideoMessageSender.send.bind(this.renderVideoMessageSender));
+      .andThen(this.onComplete.send.bind(this.onComplete));
   }
 }
