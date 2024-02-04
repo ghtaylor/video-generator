@@ -11,17 +11,19 @@ const openAIClient = mockDeep<OpenAI>();
 const openAIQuoteService = new OpenAIQuoteService(openAIClient);
 
 describe("OpenAIQuoteService - Integration Tests", () => {
+  const PROMPT = "Example prompt";
+
   describe("GIVEN the OpenAI Client returns a single message containing a valid JSON string representing a Quote", () => {
     beforeEach(() => {
       openAIClient.chat.completions.create.mockResolvedValue(
         buildChatCompletion('{"title":"Title example","text":"This is an example","chunks":["This is an example"]}'),
       );
     });
-    describe("WHEN `generateQuote` is called", () => {
+    describe("WHEN `generateQuote` is called with a prompt", () => {
       test("THEN it calls `parseChatResponse` with the ChatCompletion", async () => {
         const parseChatResponseSpy = vitest.spyOn(openAIQuoteService, "parseChatResponse");
 
-        await openAIQuoteService.generateQuote();
+        await openAIQuoteService.generateQuote(PROMPT);
 
         expect(parseChatResponseSpy).toHaveBeenCalledWith(
           buildChatCompletion('{"title":"Title example","text":"This is an example","chunks":["This is an example"]}'),
@@ -31,7 +33,7 @@ describe("OpenAIQuoteService - Integration Tests", () => {
       test("THEN it calls `validateQuote` with the Quote", async () => {
         const validateQuoteSpy = vitest.spyOn(openAIQuoteService, "validateQuote");
 
-        await openAIQuoteService.generateQuote();
+        await openAIQuoteService.generateQuote(PROMPT);
 
         expect(validateQuoteSpy).toHaveBeenCalledWith<[Quote]>({
           title: "Title example",
@@ -41,7 +43,7 @@ describe("OpenAIQuoteService - Integration Tests", () => {
       });
 
       test("THEN it returns a Quote", async () => {
-        const result = await openAIQuoteService.generateQuote();
+        const result = await openAIQuoteService.generateQuote(PROMPT);
 
         expect(result._unsafeUnwrap()).toEqual<Quote>({
           title: "Title example",
@@ -56,9 +58,9 @@ describe("OpenAIQuoteService - Integration Tests", () => {
     beforeEach(() => {
       openAIClient.chat.completions.create.mockResolvedValue(buildChatCompletion("This is not valid JSON"));
     });
-    describe("WHEN `generateQuote` is called", () => {
+    describe("WHEN `generateQuote` is called with a prompt", () => {
       test("THEN it returns a ParseError", async () => {
-        const result = await openAIQuoteService.generateQuote();
+        const result = await openAIQuoteService.generateQuote(PROMPT);
         expect(result._unsafeUnwrapErr()).toBeInstanceOf(ParseError);
       });
     });
@@ -70,7 +72,7 @@ describe("OpenAIQuoteService - Integration Tests", () => {
     });
     describe("WHEN `generateQuote` is called", () => {
       test("THEN it returns a ParseError", async () => {
-        const result = await openAIQuoteService.generateQuote();
+        const result = await openAIQuoteService.generateQuote(PROMPT);
         expect(result._unsafeUnwrapErr()).toBeInstanceOf(ParseError);
       });
     });
@@ -83,9 +85,9 @@ describe("OpenAIQuoteService - Integration Tests", () => {
       openAIClient.chat.completions.create.mockRejectedValue(openAIError);
     });
 
-    describe("WHEN `generateQuote` is called", () => {
+    describe("WHEN `generateQuote` is called with a prompt", () => {
       test("THEN it returns a NetworkError containing the OpenAIError", async () => {
-        await expect(openAIQuoteService.generateQuote()).resolves.toEqual(
+        await expect(openAIQuoteService.generateQuote(PROMPT)).resolves.toEqual(
           err(new NetworkError("OpenAI API error", openAIError)),
         );
       });

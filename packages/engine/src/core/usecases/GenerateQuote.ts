@@ -13,7 +13,7 @@ export class GenerateQuoteUseCase {
     private readonly onComplete: MessageSender<Quote>,
   ) {}
 
-  execute(): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
-    return this.quoteService.generateQuote().andThen(this.onComplete.send.bind(this.onComplete));
+  execute(prompt: string): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
+    return this.quoteService.generateQuote(prompt).andThen(this.onComplete.send.bind(this.onComplete));
   }
 }

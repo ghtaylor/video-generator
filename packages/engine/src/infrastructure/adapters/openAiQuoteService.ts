@@ -33,7 +33,7 @@ export class OpenAIQuoteService implements QuoteService {
     return safeJsonParse(quoteJsonString).andThen(safeQuoteParse);
   }
 
-  generateQuote(): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError> {
+  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError> {
     return fromPromise(
       this.openAiClient.chat.completions.create({
         model: "gpt-4-0314",
@@ -48,8 +48,7 @@ export class OpenAIQuoteService implements QuoteService {
           },
           {
             role: "user",
-            content:
-              "Provide a motivational message that's not only inspirational but also substantial, one that resonates deeply and encourages action.",
+            content: prompt,
           },
         ],
       }),

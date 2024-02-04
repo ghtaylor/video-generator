@@ -57,7 +57,7 @@ describe("GenerateQuote Handler - Unit Tests", () => {
         });
       });
 
-      describe("GIVEN the quote service returns a Quote AND the onComplete message sender succeeds", () => {
+      describe("GIVEN the integrations are successful", () => {
         const quote: Quote = {
           title: "Title example",
           text: "This is an example",
@@ -67,6 +67,11 @@ describe("GenerateQuote Handler - Unit Tests", () => {
         beforeEach(() => {
           quoteService.generateQuote.mockReturnValue(okAsync(quote));
           onComplete.send.mockReturnValue(okAsync(quote));
+        });
+
+        test("THEN the quote service should be called with the prompt from the SQSEvent", async () => {
+          await handler.handle(event);
+          expect(quoteService.generateQuote).toHaveBeenCalledWith("Example prompt");
         });
 
         test("THEN the handler should terminate successfully", async () => {

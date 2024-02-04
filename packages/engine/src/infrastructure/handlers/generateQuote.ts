@@ -35,8 +35,8 @@ export class GenerateQuoteHandler {
 
   async handle(event: SQSEvent) {
     for (const record of event.Records) {
-      const result = await parseJsonString(record.body, GenerateQuoteParams).asyncAndThen(
-        this.generateQuoteUseCase.execute.bind(this.generateQuoteUseCase),
+      const result = await parseJsonString(record.body, GenerateQuoteParams).asyncAndThen(({ prompt }) =>
+        this.generateQuoteUseCase.execute(prompt),
       );
 
       if (result.isErr() && result.error instanceof ValidationError) {

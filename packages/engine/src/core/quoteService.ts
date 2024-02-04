@@ -6,5 +6,5 @@ import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 
 export interface QuoteService {
-  generateQuote(): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError>;
+  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError>;
 }
