@@ -537,7 +537,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
 
       describe("EXCEPT sending the SpokenQuote message fails due to a NetworkError", () => {
         beforeEach(() => {
-          spokenQuoteMessageSender.send.mockResolvedValue(errAsync(new NetworkError("Failed to send spoken quote.")));
+          spokenQuoteMessageSender.send.mockReturnValue(errAsync(new NetworkError("Failed to send spoken quote.")));
         });
 
         test("THEN `execute` should return a NetworkError", async () => {

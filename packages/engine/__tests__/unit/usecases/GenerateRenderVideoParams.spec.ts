@@ -5,8 +5,8 @@ import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderV
 import { FileUrl } from "@video-generator/domain/File";
 import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
 import { RenderVideoParams } from "@video-generator/domain/Video";
-import { mock } from "vitest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";
+import { mock } from "vitest-mock-extended";
 
 describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const FPS = 30;
@@ -223,7 +223,7 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
 
       describe("EXCEPT sending the RenderVideoParams message fails due to a NetworkError", () => {
         beforeEach(() => {
-          renderVideoMessageSender.send.mockResolvedValue(
+          renderVideoMessageSender.send.mockReturnValue(
             errAsync(new NetworkError("Failed to send RenderVideoParams.")),
           );
         });
