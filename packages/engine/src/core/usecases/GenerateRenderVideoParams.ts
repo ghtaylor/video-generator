@@ -1,7 +1,7 @@
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
-import { FileUrl, FileLocation } from "@video-generator/domain/File";
+import { FileUrl, FilePath } from "@video-generator/domain/File";
 import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
 import { RenderVideoParams, RenderVideoSection } from "@video-generator/domain/Video";
 import shuffle from "lodash.shuffle";
@@ -53,19 +53,19 @@ export class GenerateRenderVideoParamsUseCase {
     });
   }
 
-  private getFileUrls(backgroundVideoLocations: FileLocation[]): ResultAsync<FileUrl[], NetworkError> {
-    return ResultAsync.combine(backgroundVideoLocations.map(this.fileStore.getUrl.bind(this.fileStore)));
+  private getFileUrls(backgroundVideoPaths: FilePath[]): ResultAsync<FileUrl[], NetworkError> {
+    return ResultAsync.combine(backgroundVideoPaths.map(this.fileStore.getUrl.bind(this.fileStore)));
   }
 
   execute(
     spokenQuote: SpokenQuote,
     fps: number,
-    backgroundVideosLocation: FileLocation,
-    musicAudiosLocation: FileLocation,
+    backgroundVideosPath: FilePath,
+    musicAudiosPath: FilePath,
   ): ResultAsync<RenderVideoParams, NetworkError> {
     return ResultAsync.combine([
-      this.fileStore.listFiles(backgroundVideosLocation).andThen(this.getFileUrls.bind(this)),
-      this.fileStore.listFiles(musicAudiosLocation).andThen(this.getFileUrls.bind(this)),
+      this.fileStore.listFiles(backgroundVideosPath).andThen(this.getFileUrls.bind(this)),
+      this.fileStore.listFiles(musicAudiosPath).andThen(this.getFileUrls.bind(this)),
     ])
       .andThen(([backgroundVideoUrls, musicAudioUrls]) =>
         this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, musicAudioUrls, fps),

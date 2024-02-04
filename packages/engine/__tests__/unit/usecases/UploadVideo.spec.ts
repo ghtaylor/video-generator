@@ -8,7 +8,7 @@ import { okAsync } from "neverthrow";
 describe("UploadVideo Use Case - Unit Tests", () => {
   describe("WHEN the `execute` method is called", () => {
     const VALID_UPLOAD_VIDEO_PARAMS: UploadVideoParams = {
-      videoLocation: "video_location",
+      videoPath: "video_location",
       metadata: {
         title: "video_title",
         description: "video_description",

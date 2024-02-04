@@ -20,7 +20,7 @@ export const RenderVideoParams = z.object({
 });
 
 export const UploadVideoParams = z.object({
-  videoLocation: z.string(),
+  videoPath: z.string(),
   metadata: VideoMetadata,
 });
 

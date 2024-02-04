@@ -3,7 +3,7 @@ import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
-import { FileUrl, FileLocation } from "@video-generator/domain/File";
+import { FileUrl, FilePath } from "@video-generator/domain/File";
 import { Quote } from "@video-generator/domain/Quote";
 import { Speech } from "@video-generator/domain/Speech";
 import { SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/SpokenQuote";
@@ -65,7 +65,7 @@ export class GenerateSpokenQuoteUseCase {
     });
   }
 
-  private getSpeechAudioFileLocation(): FileLocation {
+  private getSpeechAudioFilePath(): FilePath {
     return `speeches/${new Date().getTime()}.mp3`;
   }
 
@@ -74,9 +74,9 @@ export class GenerateSpokenQuoteUseCase {
       .generateSpeech(quote.text)
       .andThen((speech) =>
         this.fileStore
-          .store(this.getSpeechAudioFileLocation(), speech.audio)
+          .store(this.getSpeechAudioFilePath(), speech.audio)
           .andThen(this.fileStore.getUrl.bind(this.fileStore))
-          .andThen((audioLocation) => this.createSpokenQuote(quote, speech, audioLocation)),
+          .andThen((audioPath) => this.createSpokenQuote(quote, speech, audioPath)),
       )
       .andThen(this.onComplete.send.bind(this.onComplete));
   }

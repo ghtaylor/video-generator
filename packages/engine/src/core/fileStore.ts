@@ -1,10 +1,10 @@
 import { ResultAsync } from "neverthrow";
 import { NetworkError } from "@core/errors/NetworkError";
-import { FileLocation, FileUrl } from "@video-generator/domain/File";
+import { FilePath, FileUrl } from "@video-generator/domain/File";
 
 export interface FileStore {
-  store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError>;
-  listFiles(path: FileLocation): ResultAsync<FileLocation[], NetworkError>;
-  getUrl(path: FileLocation): ResultAsync<FileUrl, NetworkError>;
-  getBuffer(path: FileLocation): ResultAsync<Buffer, NetworkError>;
+  store(path: FilePath, buffer: Buffer): ResultAsync<FilePath, NetworkError>;
+  listFiles(path: FilePath): ResultAsync<FilePath[], NetworkError>;
+  getUrl(path: FilePath): ResultAsync<FileUrl, NetworkError>;
+  getBuffer(path: FilePath): ResultAsync<Buffer, NetworkError>;
 }

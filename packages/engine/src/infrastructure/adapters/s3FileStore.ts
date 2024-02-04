@@ -2,7 +2,7 @@ import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } fr
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
-import { FileLocation, FileUrl } from "@video-generator/domain/File";
+import { FilePath, FileUrl } from "@video-generator/domain/File";
 import { ResultAsync, errAsync, fromPromise } from "neverthrow";
 
 export class S3FileStore implements FileStore {
@@ -11,7 +11,7 @@ export class S3FileStore implements FileStore {
     private readonly bucketName: string,
   ) {}
 
-  store(path: FileLocation, buffer: Buffer): ResultAsync<FileLocation, NetworkError> {
+  store(path: FilePath, buffer: Buffer): ResultAsync<FilePath, NetworkError> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -24,7 +24,7 @@ export class S3FileStore implements FileStore {
     ).map(() => path);
   }
 
-  listFiles(path: FileLocation): ResultAsync<FileLocation[], NetworkError> {
+  listFiles(path: FilePath): ResultAsync<FilePath[], NetworkError> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucketName,
       Prefix: path,
