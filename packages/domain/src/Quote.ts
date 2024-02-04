@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+export const GenerateQuoteParams = z.object({
+  prompt: z.string().describe("The prompt to use for generating the quote"),
+});
+
 export const Quote = z.object({
   title: z.string().describe("A brief title for the quote"),
   text: z.string().describe("The quote"),
@@ -10,4 +14,5 @@ export const Quote = z.object({
     ),
 });
 
+export type GenerateQuoteParams = z.infer<typeof GenerateQuoteParams>;
 export type Quote = z.infer<typeof Quote>;

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "type:check": "tsc --noEmit",
-    "test": "vitest"
+    "test": "sst bind vitest"
   },
   "devDependencies": {
     "@remotion/compositor-linux-arm64-gnu": "4.0.53",
@@ -26,6 +26,7 @@
     "@aws-sdk/client-sqs": "^3.427.0",
     "@aws-sdk/s3-request-presigner": "^3.427.0",
     "@remotion/renderer": "4.0.56",
+    "@serverless/event-mocks": "^1.1.1",
     "@video-generator/domain": "workspace:*",
     "googleapis": "^128.0.0",
     "lodash.shuffle": "^4.2.0",
