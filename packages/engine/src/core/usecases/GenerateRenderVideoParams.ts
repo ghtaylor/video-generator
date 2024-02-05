@@ -2,7 +2,7 @@ import { NetworkError } from "@core/errors/NetworkError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
 import { FileUrl, FilePath } from "@video-generator/domain/File";
-import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote } from "@video-generator/domain/Quote";
 import { RenderVideoParams, RenderVideoSection } from "@video-generator/domain/Video";
 import shuffle from "lodash.shuffle";
 import { Result, ResultAsync, ok } from "neverthrow";

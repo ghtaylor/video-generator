@@ -3,7 +3,7 @@ import { SQSClient } from "@aws-sdk/client-sqs";
 import { parseJsonString } from "@common/parseJsonString";
 import { Logger } from "@core/logger";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
-import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote } from "@video-generator/domain/Quote";
 import { RenderVideoParams } from "@video-generator/domain/Video";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";

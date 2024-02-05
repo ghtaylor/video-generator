@@ -3,7 +3,7 @@ import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { FileUrl } from "@video-generator/domain/File";
-import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote } from "@video-generator/domain/Quote";
 import { RenderVideoParams } from "@video-generator/domain/Video";
 import { errAsync, okAsync } from "neverthrow";
 import { mock } from "vitest-mock-extended";

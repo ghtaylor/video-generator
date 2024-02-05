@@ -5,7 +5,7 @@ import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@video-generator/domain/Quote";
 import { Speech } from "@video-generator/domain/Speech";
-import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote } from "@video-generator/domain/Quote";
 import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { mock } from "vitest-mock-extended";
 import { errAsync, okAsync } from "neverthrow";

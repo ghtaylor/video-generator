@@ -5,7 +5,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { Logger } from "@core/logger";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { Quote } from "@video-generator/domain/Quote";
-import { SpokenQuote } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote } from "@video-generator/domain/Quote";
 import { ElevenLabsConfig } from "@infrastructure/adapters/elevenLabs/config";
 import { ElevenLabsClient } from "@infrastructure/adapters/elevenLabs/elevenLabsClient";
 import { ElevenLabsSpeechService } from "@infrastructure/adapters/elevenLabs/elevenLabsSpeechService";

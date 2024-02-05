@@ -6,7 +6,7 @@ import { SpeechService } from "@core/speechService";
 import { FileUrl, FilePath } from "@video-generator/domain/File";
 import { Quote } from "@video-generator/domain/Quote";
 import { Speech } from "@video-generator/domain/Speech";
-import { SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/SpokenQuote";
+import { SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
 import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { Result, ResultAsync, err, ok } from "neverthrow";
 
