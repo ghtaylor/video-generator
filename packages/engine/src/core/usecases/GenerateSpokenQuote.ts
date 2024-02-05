@@ -3,10 +3,9 @@ import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
-import { FileUrl, FilePath } from "@video-generator/domain/File";
-import { Quote } from "@video-generator/domain/Quote";
-import { Speech } from "@video-generator/domain/Speech";
-import { SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
+import { FilePath } from "@video-generator/domain/File";
+import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
+import { SpeechMark } from "@video-generator/domain/Speech";
 import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { Result, ResultAsync, err, ok } from "neverthrow";
 
@@ -19,11 +18,10 @@ export class GenerateSpokenQuoteUseCase {
 
   createSpokenQuote(
     quote: Quote,
-    speech: Speech,
-    audioUrl: FileUrl,
+    speechMarks: SpeechMark[],
+    audioFile: FilePath,
     endDelay: number = 2000,
   ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
-    const _speech = Object.assign({}, speech);
     const chunks: SpokenQuoteChunk[] = [];
 
     for (let chunkIndex = 0; chunkIndex < quote.chunks.length; chunkIndex++) {
@@ -36,17 +34,17 @@ export class GenerateSpokenQuoteUseCase {
       for (let wordIndex = 0; wordIndex < wordsOfChunk.length; wordIndex++) {
         const word = wordsOfChunk[wordIndex];
 
-        if (word.toLowerCase() !== _speech.marks[wordIndex]?.value.toLowerCase())
+        if (word.toLowerCase() !== speechMarks[wordIndex]?.value.toLowerCase())
           return err(new SpokenQuoteMarksInvalidError());
 
         if (wordIndex === 0 && chunkIndex === 0) start = 0;
-        else if (wordIndex === 0) start = _speech.marks[wordIndex].time;
+        else if (wordIndex === 0) start = speechMarks[wordIndex].time;
 
         if (wordIndex === wordsOfChunk.length - 1)
-          end = _speech.marks[wordIndex + 1]?.time ?? _speech.marks[wordIndex].time + endDelay;
+          end = speechMarks[wordIndex + 1]?.time ?? speechMarks[wordIndex].time + endDelay;
       }
 
-      _speech.marks = _speech.marks.slice(wordsOfChunk.length);
+      speechMarks = speechMarks.slice(wordsOfChunk.length);
 
       chunks.push({
         value: chunk,
@@ -55,13 +53,13 @@ export class GenerateSpokenQuoteUseCase {
       });
     }
 
-    if (_speech.marks.length > 0) return err(new SpokenQuoteMarksInvalidError());
+    if (speechMarks.length > 0) return err(new SpokenQuoteMarksInvalidError());
 
     return ok({
       title: quote.title,
       text: quote.text,
       chunks,
-      audioUrl,
+      audioFile,
     });
   }
 
@@ -75,8 +73,7 @@ export class GenerateSpokenQuoteUseCase {
       .andThen((speech) =>
         this.fileStore
           .store(this.getSpeechAudioFilePath(), speech.audio)
-          .andThen(this.fileStore.getUrl.bind(this.fileStore))
-          .andThen((audioPath) => this.createSpokenQuote(quote, speech, audioPath)),
+          .andThen((audioPath) => this.createSpokenQuote(quote, speech.marks, audioPath)),
       )
       .andThen(this.onComplete.send.bind(this.onComplete));
   }

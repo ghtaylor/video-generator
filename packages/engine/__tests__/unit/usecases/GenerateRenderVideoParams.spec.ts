@@ -10,8 +10,8 @@ import { mock } from "vitest-mock-extended";
 
 describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const FPS = 30;
-  const BACKGROUND_VIDEOS_LOCATION = "backgroundVideosLocation";
-  const MUSIC_AUDIOS_LOCATION = "musicAudiosLocation";
+  const BACKGROUND_VIDEOS_PATH = "background_videos/";
+  const MUSIC_AUDIOS_PATH = "music_audios/";
 
   const fileStore = mock<FileStore>();
   const renderVideoMessageSender = mock<MessageSender<RenderVideoParams>>();
@@ -19,12 +19,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore, renderVideoMessageSender);
 
   describe("`renderVideoParamsFrom`", () => {
-    describe.each<[SpokenQuote, FileUrl[], FileUrl[], RenderVideoParams]>([
+    describe.each<[SpokenQuote, FileUrl, FileUrl[], FileUrl[], RenderVideoParams]>([
       [
         {
           title: "A Title",
           text: "This is an example, where there are two chunks.",
-          audioUrl: "https://bucket.aws.com/audioLocation",
+          audioFile: "speeches/1.mp3",
           chunks: [
             {
               value: "This is an example,",
@@ -38,11 +38,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
             },
           ],
         },
+        "https://bucket.aws.com/speech.mp3",
         ["https://bucket.aws.com/1.mp4", "https://bucket.aws.com/2.mp4"],
         ["https://bucket.aws.com/1.mp3"],
         {
           fps: FPS,
-          speechAudioUrl: "https://bucket.aws.com/audioLocation",
+          speechAudioUrl: "https://bucket.aws.com/speech.mp3",
           musicAudioUrl: "https://bucket.aws.com/1.mp3",
           sections: [
             {
@@ -66,7 +67,7 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example. There are four chunks of varying durations, and three background videos. See!",
-          audioUrl: "https://bucket.aws.com/speechAudioLocation",
+          audioFile: "speeches/1.mp3",
           chunks: [
             {
               value: "This is an example.",
@@ -90,11 +91,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
             },
           ],
         },
+        "https://bucket.aws.com/speech.mp3",
         ["https://bucket.aws.com/1.mp4", "https://bucket.aws.com/2.mp4", "https://bucket.aws.com/3.mp4"],
         ["https://bucket.aws.com/1.mp3", "https://bucket.aws.com/2.mp3"],
         {
           fps: FPS,
-          speechAudioUrl: "https://bucket.aws.com/speechAudioLocation",
+          speechAudioUrl: "https://bucket.aws.com/speech.mp3",
           musicAudioUrl: expect.stringContaining(".mp3"),
           sections: [
             {
@@ -129,7 +131,7 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example, where the outputted frames are rounded.",
-          audioUrl: "https://bucket.aws.com/speechAudioLocation",
+          audioFile: "speeches/1.mp3",
           chunks: [
             {
               value: "This is an example,",
@@ -143,11 +145,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
             },
           ],
         },
+        "https://bucket.aws.com/speech.mp3",
         ["https://bucket.aws.com/1.mp4"],
         ["https://bucket.aws.com/1.mp3", "https://bucket.aws.com/2.mp3"],
         {
           fps: FPS,
-          speechAudioUrl: "https://bucket.aws.com/speechAudioLocation",
+          speechAudioUrl: "https://bucket.aws.com/speech.mp3",
           musicAudioUrl: expect.stringContaining(".mp3"),
           sections: [
             {
@@ -168,11 +171,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         },
       ],
     ])(
-      "GIVEN a SpokenQuote and background video locations",
-      (spokenQuote, backgroundVideoUrls, musicAudioUrls, expectedRenderVideoParams) => {
+      "GIVEN a SpokenQuote and background video paths",
+      (spokenQuote, speechAudioUrl, backgroundVideoUrls, musicAudioUrls, expectedRenderVideoParams) => {
         test("THEN `renderVideoParamsFrom` should return a result with the expected RenderVideoParams", () => {
           const result = generateRenderVideoParamsUseCase.renderVideoParamsFrom(
             spokenQuote,
+            speechAudioUrl,
             backgroundVideoUrls,
             musicAudioUrls,
             FPS,
@@ -188,7 +192,7 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
     const VALID_SPOKEN_QUOTE: SpokenQuote = {
       title: "A Title",
       text: "This is an example, where there are two chunks.",
-      audioUrl: "https://bucket.aws.com/audioLocation",
+      audioFile: "speeches/1.mp3",
       chunks: [
         {
           value: "This is an example,",
@@ -214,8 +218,8 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         const result = await generateRenderVideoParamsUseCase.execute(
           VALID_SPOKEN_QUOTE,
           FPS,
-          BACKGROUND_VIDEOS_LOCATION,
-          MUSIC_AUDIOS_LOCATION,
+          BACKGROUND_VIDEOS_PATH,
+          MUSIC_AUDIOS_PATH,
         );
 
         expect(result.isOk()).toBe(true);
@@ -232,8 +236,8 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
           const result = await generateRenderVideoParamsUseCase.execute(
             VALID_SPOKEN_QUOTE,
             FPS,
-            BACKGROUND_VIDEOS_LOCATION,
-            MUSIC_AUDIOS_LOCATION,
+            BACKGROUND_VIDEOS_PATH,
+            MUSIC_AUDIOS_PATH,
           );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
@@ -249,8 +253,8 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
           const result = await generateRenderVideoParamsUseCase.execute(
             VALID_SPOKEN_QUOTE,
             FPS,
-            BACKGROUND_VIDEOS_LOCATION,
-            MUSIC_AUDIOS_LOCATION,
+            BACKGROUND_VIDEOS_PATH,
+            MUSIC_AUDIOS_PATH,
           );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
@@ -266,8 +270,8 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
           const result = await generateRenderVideoParamsUseCase.execute(
             VALID_SPOKEN_QUOTE,
             FPS,
-            BACKGROUND_VIDEOS_LOCATION,
-            MUSIC_AUDIOS_LOCATION,
+            BACKGROUND_VIDEOS_PATH,
+            MUSIC_AUDIOS_PATH,
           );
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);

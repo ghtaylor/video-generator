@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FileUrl } from "./File";
+import { FilePath } from "./File";
 
 export const GenerateQuoteParams = z.object({
   prompt: z.string().describe("The prompt to use for generating the quote"),
@@ -21,7 +21,7 @@ export const SpokenQuoteChunk = z.object({
   end: z.number(),
 });
 
-export const SpokenQuote = Quote.extend({ audioUrl: FileUrl, chunks: z.array(SpokenQuoteChunk) });
+export const SpokenQuote = Quote.extend({ audioFile: FilePath, chunks: z.array(SpokenQuoteChunk) });
 
 export type GenerateQuoteParams = z.infer<typeof GenerateQuoteParams>;
 export type Quote = z.infer<typeof Quote>;

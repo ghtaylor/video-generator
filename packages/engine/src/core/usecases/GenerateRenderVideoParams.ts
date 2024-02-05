@@ -15,6 +15,7 @@ export class GenerateRenderVideoParamsUseCase {
 
   renderVideoParamsFrom(
     spokenQuote: SpokenQuote,
+    speechAudioUrl: FileUrl,
     backgroundVideoUrls: FileUrl[],
     musicAudioUrls: FileUrl[],
     fps: number,
@@ -43,7 +44,7 @@ export class GenerateRenderVideoParamsUseCase {
 
     return ok({
       fps,
-      speechAudioUrl: spokenQuote.audioUrl,
+      speechAudioUrl,
       musicAudioUrl: musicAudioUrls[Math.floor(Math.random() * musicAudioUrls.length)],
       sections: videoSections,
       metadata: {
@@ -64,11 +65,12 @@ export class GenerateRenderVideoParamsUseCase {
     musicAudiosPath: FilePath,
   ): ResultAsync<RenderVideoParams, NetworkError> {
     return ResultAsync.combine([
+      this.fileStore.getUrl(spokenQuote.audioFile),
       this.fileStore.listFiles(backgroundVideosPath).andThen(this.getFileUrls.bind(this)),
       this.fileStore.listFiles(musicAudiosPath).andThen(this.getFileUrls.bind(this)),
     ])
-      .andThen(([backgroundVideoUrls, musicAudioUrls]) =>
-        this.renderVideoParamsFrom(spokenQuote, backgroundVideoUrls, musicAudioUrls, fps),
+      .andThen(([speechAudioUrl, backgroundVideoUrls, musicAudioUrls]) =>
+        this.renderVideoParamsFrom(spokenQuote, speechAudioUrl, backgroundVideoUrls, musicAudioUrls, fps),
       )
       .andThen(this.onComplete.send.bind(this.onComplete));
   }
