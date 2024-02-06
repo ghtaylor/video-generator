@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { UnexpectedError } from "@core/errors/UnexpectedError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
@@ -24,7 +24,7 @@ export class GenerateRenderVideoParamsUseCase {
     backgroundVideoPaths,
     speechAudioPath,
     musicAudioPath,
-  }: VideoResourcePaths): ResultAsync<VideoResourceUrls, NetworkError | ValidationError> {
+  }: VideoResourcePaths): ResultAsync<VideoResourceUrls, ServiceError | ValidationError> {
     if (backgroundVideoPaths.length === 0)
       return errAsync(new ValidationError("At least one background video is required"));
 
@@ -83,14 +83,14 @@ export class GenerateRenderVideoParamsUseCase {
     )();
   }
 
-  private getFileUrls(backgroundVideoPaths: FilePath[]): ResultAsync<FileUrl[], NetworkError> {
+  private getFileUrls(backgroundVideoPaths: FilePath[]): ResultAsync<FileUrl[], ServiceError> {
     return ResultAsync.combine(backgroundVideoPaths.map(this.fileStore.getUrl.bind(this.fileStore)));
   }
 
   execute(
     spokenQuote: SpokenQuote,
     videoConfig: VideoConfig,
-  ): ResultAsync<RenderVideoParams, NetworkError | ValidationError | UnexpectedError> {
+  ): ResultAsync<RenderVideoParams, ServiceError | ValidationError | UnexpectedError> {
     return this.videoResourceUrlsFrom({
       backgroundVideoPaths: videoConfig.backgroundVideoPaths,
       speechAudioPath: spokenQuote.speechAudioPath,

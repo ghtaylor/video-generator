@@ -1,5 +1,5 @@
 import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
@@ -215,27 +215,27 @@ describe("PollySpeechService - Integration Tests", () => {
     describe("WHEN `getSpeechAudio` is called", () => {
       const text = "Hello world";
 
-      test("THEN it should return a NetworkError", async () => {
+      test("THEN it should return a ServiceError", async () => {
         const result = await pollySpeechService.getSpeechAudio(text);
-        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
       });
     });
 
     describe("WHEN `getSpeechMarks` is called", () => {
       const text = "Hello world";
 
-      test("THEN it should return a NetworkError", async () => {
+      test("THEN it should return a ServiceError", async () => {
         const result = await pollySpeechService.getSpeechAudio(text);
-        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
       });
     });
 
     describe("WHEN `generateSpeech` is called", () => {
       const text = "Hello world";
 
-      test("THEN it should return a NetworkError", async () => {
+      test("THEN it should return a ServiceError", async () => {
         const result = await pollySpeechService.getSpeechAudio(text);
-        expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
       });
     });
   });

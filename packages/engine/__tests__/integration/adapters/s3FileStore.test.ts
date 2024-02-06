@@ -6,7 +6,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { ok } from "neverthrow";
 import { GenericContainer, StartedTestContainer } from "testcontainers";
@@ -165,21 +165,21 @@ describe(
 
     describe(`GIVEN a bucket does not exist with the name "${bucketName}"`, () => {
       describe("WHEN storing a Buffer at 'example/test-path.txt'", () => {
-        test("THEN an NetworkError should be returned", async () => {
+        test("THEN an ServiceError should be returned", async () => {
           const result = await s3FileStore.store("example/test-path.txt", Buffer.from("test-buffer"));
 
           const error = result._unsafeUnwrapErr();
-          expect(error).toBeInstanceOf(NetworkError);
+          expect(error).toBeInstanceOf(ServiceError);
           expect(error.message).toEqual(expect.stringContaining("Failed to store file"));
         });
       });
 
       describe("WHEN listing files with the prefix 'example/'", () => {
-        test("THEN a NetworkError should be returned", async () => {
+        test("THEN a ServiceError should be returned", async () => {
           const result = await s3FileStore.listFiles("example/");
 
           const error = result._unsafeUnwrapErr();
-          expect(error).toBeInstanceOf(NetworkError);
+          expect(error).toBeInstanceOf(ServiceError);
           expect(error.message).toEqual(expect.stringContaining("Failed to list files"));
         });
       });

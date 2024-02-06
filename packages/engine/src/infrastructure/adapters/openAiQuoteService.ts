@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { ValidationError } from "@core/errors/ValidationError";
@@ -33,7 +33,7 @@ export class OpenAIQuoteService implements QuoteService {
     return safeJsonParse(quoteJsonString).andThen(safeQuoteParse);
   }
 
-  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | NetworkError | UnknownError> {
+  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | ServiceError | UnknownError> {
     return fromPromise(
       this.openAiClient.chat.completions.create({
         model: "gpt-4-0314",
@@ -53,7 +53,7 @@ export class OpenAIQuoteService implements QuoteService {
         ],
       }),
       (error) => {
-        if (error instanceof OpenAIError) return new NetworkError("OpenAI API error", error);
+        if (error instanceof OpenAIError) return new ServiceError("OpenAI API error", error);
         return new UnknownError();
       },
     )

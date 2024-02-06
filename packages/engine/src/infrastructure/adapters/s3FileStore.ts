@@ -1,6 +1,6 @@
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
 import { FilePath, FileUrl } from "@video-generator/domain/File";
 import { ResultAsync, errAsync, fromPromise } from "neverthrow";
@@ -11,7 +11,7 @@ export class S3FileStore implements FileStore {
     private readonly bucketName: string,
   ) {}
 
-  store(path: FilePath, buffer: Buffer): ResultAsync<FilePath, NetworkError> {
+  store(path: FilePath, buffer: Buffer): ResultAsync<FilePath, ServiceError> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -20,11 +20,11 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new NetworkError("Failed to store file", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to store file", error instanceof Error ? error : undefined),
     ).map(() => path);
   }
 
-  listFiles(path: FilePath): ResultAsync<FilePath[], NetworkError> {
+  listFiles(path: FilePath): ResultAsync<FilePath[], ServiceError> {
     const command = new ListObjectsV2Command({
       Bucket: this.bucketName,
       Prefix: path,
@@ -32,7 +32,7 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new NetworkError("Failed to list files", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to list files", error instanceof Error ? error : undefined),
     ).map((response) => {
       if (response.Contents === undefined) return [];
 
@@ -42,7 +42,7 @@ export class S3FileStore implements FileStore {
     });
   }
 
-  getUrl(path: string): ResultAsync<FileUrl, NetworkError> {
+  getUrl(path: string): ResultAsync<FileUrl, ServiceError> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -52,11 +52,11 @@ export class S3FileStore implements FileStore {
       getSignedUrl(this.s3Client, command, {
         expiresIn: 60 * 60,
       }),
-      (error) => new NetworkError("Failed to get file url", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to get file url", error instanceof Error ? error : undefined),
     );
   }
 
-  getBuffer(path: string): ResultAsync<Buffer, NetworkError> {
+  getBuffer(path: string): ResultAsync<Buffer, ServiceError> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: path,
@@ -64,14 +64,14 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new NetworkError("Failed to get file", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to get file", error instanceof Error ? error : undefined),
     )
       .andThen((response) => {
-        if (response.Body === undefined) return errAsync(new NetworkError("Failed to get file"));
+        if (response.Body === undefined) return errAsync(new ServiceError("Failed to get file"));
 
         return fromPromise(
           response.Body.transformToByteArray(),
-          (err) => new NetworkError("Failed to transform file to byte array", err instanceof Error ? err : undefined),
+          (err) => new ServiceError("Failed to transform file to byte array", err instanceof Error ? err : undefined),
         );
       })
       .map(Buffer.from);

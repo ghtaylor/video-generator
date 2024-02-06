@@ -1,5 +1,5 @@
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { MessageSender } from "@core/messageSender";
 import { ResultAsync, fromPromise } from "neverthrow";
 
@@ -9,7 +9,7 @@ export class SQSQueue<TMessage> implements MessageSender<TMessage> {
     private readonly queueUrl: string,
   ) {}
 
-  send(message: TMessage): ResultAsync<TMessage, NetworkError> {
+  send(message: TMessage): ResultAsync<TMessage, ServiceError> {
     const sendMessageCommand = new SendMessageCommand({
       QueueUrl: this.queueUrl,
       MessageBody: JSON.stringify(message),
@@ -17,7 +17,7 @@ export class SQSQueue<TMessage> implements MessageSender<TMessage> {
 
     return fromPromise(
       this.sqsClient.send(sendMessageCommand),
-      (error) => new NetworkError("Failed to send message", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to send message", error instanceof Error ? error : undefined),
     ).map(() => message);
   }
 }

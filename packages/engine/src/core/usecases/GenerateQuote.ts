@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { ValidationError } from "@core/errors/ValidationError";
@@ -13,7 +13,7 @@ export class GenerateQuoteUseCase {
     private readonly onComplete: MessageSender<Quote>,
   ) {}
 
-  execute(prompt: string): ResultAsync<Quote, ParseError | ValidationError | NetworkError | UnknownError> {
+  execute(prompt: string): ResultAsync<Quote, ParseError | ValidationError | ServiceError | UnknownError> {
     return this.quoteService.generateQuote(prompt).andThen(this.onComplete.send.bind(this.onComplete));
   }
 }

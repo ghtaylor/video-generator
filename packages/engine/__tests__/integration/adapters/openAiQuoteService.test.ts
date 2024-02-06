@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { Quote } from "@video-generator/domain/Quote";
@@ -86,9 +86,9 @@ describe("OpenAIQuoteService - Integration Tests", () => {
     });
 
     describe("WHEN `generateQuote` is called with a prompt", () => {
-      test("THEN it returns a NetworkError containing the OpenAIError", async () => {
+      test("THEN it returns a ServiceError containing the OpenAIError", async () => {
         await expect(openAIQuoteService.generateQuote(PROMPT)).resolves.toEqual(
-          err(new NetworkError("OpenAI API error", openAIError)),
+          err(new ServiceError("OpenAI API error", openAIError)),
         );
       });
     });

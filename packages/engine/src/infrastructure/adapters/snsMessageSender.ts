@@ -1,5 +1,5 @@
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { MessageSender } from "@core/messageSender";
 import { ResultAsync, fromPromise } from "neverthrow";
 
@@ -9,7 +9,7 @@ export class SNSMessageSender<TMessage> implements MessageSender<TMessage> {
     private readonly topicArn: string,
   ) {}
 
-  send(message: TMessage): ResultAsync<TMessage, NetworkError> {
+  send(message: TMessage): ResultAsync<TMessage, ServiceError> {
     const publishCommand = new PublishCommand({
       TopicArn: this.topicArn,
       Message: JSON.stringify(message),
@@ -17,7 +17,7 @@ export class SNSMessageSender<TMessage> implements MessageSender<TMessage> {
 
     return fromPromise(
       this.snsClient.send(publishCommand),
-      (error) => new NetworkError("Failed to send message", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to send message", error instanceof Error ? error : undefined),
     ).map(() => message);
   }
 }

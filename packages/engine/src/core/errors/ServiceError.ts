@@ -1,5 +1,5 @@
-export class NetworkError extends Error {
-  readonly name = "NetworkError";
+export class ServiceError extends Error {
+  readonly name = "ServiceError";
   originalError?: Error;
 
   constructor(message: string, originalError?: Error) {

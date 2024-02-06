@@ -1,5 +1,5 @@
 import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
@@ -20,10 +20,10 @@ export class PollySpeechService implements SpeechService {
     )();
   }
 
-  private sendPollyCommand(command: SynthesizeSpeechCommand): ResultAsync<SynthesizeSpeechCommandOutput, NetworkError> {
+  private sendPollyCommand(command: SynthesizeSpeechCommand): ResultAsync<SynthesizeSpeechCommandOutput, ServiceError> {
     return fromPromise(
       this.pollyClient.send(command),
-      (error) => new NetworkError("Polly API error", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Polly API error", error instanceof Error ? error : undefined),
     );
   }
 
@@ -38,7 +38,7 @@ export class PollySpeechService implements SpeechService {
     ).map((byteArray) => Buffer.from(byteArray));
   }
 
-  getSpeechMarks(text: string): ResultAsync<SpeechMark[], NetworkError | ParseError | ValidationError> {
+  getSpeechMarks(text: string): ResultAsync<SpeechMark[], ServiceError | ParseError | ValidationError> {
     const command = new SynthesizeSpeechCommand({
       OutputFormat: "json",
       SpeechMarkTypes: ["word"],
@@ -54,7 +54,7 @@ export class PollySpeechService implements SpeechService {
       .andThen(this.parseSpeechMarks);
   }
 
-  getSpeechAudio(text: string): ResultAsync<Buffer, NetworkError | ValidationError> {
+  getSpeechAudio(text: string): ResultAsync<Buffer, ServiceError | ValidationError> {
     const command = new SynthesizeSpeechCommand({
       OutputFormat: "mp3",
       Text: text,
@@ -67,7 +67,7 @@ export class PollySpeechService implements SpeechService {
       .andThen(this.getBufferFromAudioStream);
   }
 
-  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError | ParseError> {
+  generateSpeech(text: string): ResultAsync<Speech, ServiceError | ValidationError | ParseError> {
     return ResultAsync.combine([this.getSpeechAudio(text), this.getSpeechMarks(text)]).map(([audio, marks]) => ({
       audio,
       marks,

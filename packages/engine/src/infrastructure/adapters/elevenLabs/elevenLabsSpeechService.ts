@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { SpeechService } from "@core/speechService";
@@ -89,7 +89,7 @@ export class ElevenLabsSpeechService implements SpeechService {
     return ok(Buffer.concat(buffers));
   }
 
-  generateSpeech(text: string): ResultAsync<Speech, NetworkError | ValidationError | ParseError> {
+  generateSpeech(text: string): ResultAsync<Speech, ServiceError | ValidationError | ParseError> {
     return this.client
       .getWebSocketResponses(text)
       .andThen((responses) =>

@@ -1,6 +1,6 @@
 import { ResultAsync } from "neverthrow";
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 
 export interface MessageSender<TMessage> {
-  send(message: TMessage): ResultAsync<TMessage, NetworkError>;
+  send(message: TMessage): ResultAsync<TMessage, ServiceError>;
 }

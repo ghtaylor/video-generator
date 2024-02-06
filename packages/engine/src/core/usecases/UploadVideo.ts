@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
 import { VideoId, VideoUploader } from "@core/videoUploader";
@@ -12,14 +12,14 @@ export class UploadVideoUseCase {
     private readonly fileStore: FileStore,
   ) {}
 
-  private getVideoData(videoPath: FilePath): ResultAsync<VideoData, NetworkError> {
+  private getVideoData(videoPath: FilePath): ResultAsync<VideoData, ServiceError> {
     // if (this.videoUploader.platform === UploadVideoPlatform.YouTube)
     return this.fileStore.getBuffer(videoPath);
 
     // return this.fileStore.getUrl(videoPath);
   }
 
-  execute({ videoPath, metadata }: UploadVideoParams): ResultAsync<VideoId, NetworkError | ValidationError> {
+  execute({ videoPath, metadata }: UploadVideoParams): ResultAsync<VideoId, ServiceError | ValidationError> {
     return this.getVideoData(videoPath).andThen((videoData) => this.videoUploader.upload(videoData, metadata));
   }
 }

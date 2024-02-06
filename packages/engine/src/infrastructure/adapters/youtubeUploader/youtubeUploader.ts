@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { VideoUploader } from "@core/videoUploader";
 import { YoutubeCredentials } from "@infrastructure/adapters/youtubeUploader/credentials";
 import { UploadVideoPlatform, VideoMetadata } from "@video-generator/domain/Video";
@@ -11,7 +11,7 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
 
   constructor(private readonly credentials: YoutubeCredentials) {}
 
-  private getAccessToken(): ResultAsync<string, NetworkError> {
+  private getAccessToken(): ResultAsync<string, ServiceError> {
     const oAuthClient = new google.auth.OAuth2({
       clientId: this.credentials.clientId,
       clientSecret: this.credentials.clientSecret,
@@ -24,19 +24,19 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
 
     return fromPromise(
       oAuthClient.getAccessToken(),
-      (error) => new NetworkError("Error getting access token for YouTube", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Error getting access token for YouTube", error instanceof Error ? error : undefined),
     ).andThen(({ token }) => {
-      if (!token) return errAsync(new NetworkError("No token in response from Google"));
+      if (!token) return errAsync(new ServiceError("No token in response from Google"));
       return okAsync(token);
     });
   }
 
-  private insertYoutubeVideo(insert: youtube_v3.Params$Resource$Videos$Insert): ResultAsync<string, NetworkError> {
+  private insertYoutubeVideo(insert: youtube_v3.Params$Resource$Videos$Insert): ResultAsync<string, ServiceError> {
     return fromPromise(
       google.youtube("v3").videos.insert(insert),
-      (error) => new NetworkError("Error uploading video to YouTube", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Error uploading video to YouTube", error instanceof Error ? error : undefined),
     ).andThen((a) => {
-      if (a.status !== 200) return errAsync(new NetworkError("Error uploading video to YouTube"));
+      if (a.status !== 200) return errAsync(new ServiceError("Error uploading video to YouTube"));
       return okAsync(a.data.id!);
     });
   }
@@ -62,7 +62,7 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
     });
   }
 
-  upload(data: Buffer, metadata: VideoMetadata): ResultAsync<string, NetworkError> {
+  upload(data: Buffer, metadata: VideoMetadata): ResultAsync<string, ServiceError> {
     return this.getAccessToken()
       .andThen((accessToken) => this.youtubeInsertParamsFrom(metadata, accessToken, data))
       .andThen(this.insertYoutubeVideo);

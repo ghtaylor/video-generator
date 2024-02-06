@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
@@ -28,7 +28,7 @@ export class RenderVideoUseCase {
     });
   }
 
-  execute(renderVideoParams: RenderVideoParams): ResultAsync<UploadVideoParams, VideoRenderError | NetworkError> {
+  execute(renderVideoParams: RenderVideoParams): ResultAsync<UploadVideoParams, VideoRenderError | ServiceError> {
     return this.videoRenderer
       .renderVideo(renderVideoParams)
       .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))

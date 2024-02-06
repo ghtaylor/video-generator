@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
@@ -67,7 +67,7 @@ export class GenerateSpokenQuoteUseCase {
     return `speeches/${new Date().getTime()}.mp3`;
   }
 
-  execute(quote: Quote): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | NetworkError | UnknownError> {
+  execute(quote: Quote): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | ServiceError | UnknownError> {
     return this.speechService
       .generateSpeech(quote.text)
       .andThen((speech) =>

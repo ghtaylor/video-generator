@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
@@ -38,15 +38,15 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         });
       });
 
-      describe("GIVEN getting the file URLs fails due to a NetworkError", () => {
+      describe("GIVEN getting the file URLs fails due to a ServiceError", () => {
         beforeEach(() => {
-          fileStore.getUrl.mockReturnValue(errAsync(new NetworkError("Failed to get file URL.")));
+          fileStore.getUrl.mockReturnValue(errAsync(new ServiceError("Failed to get file URL.")));
         });
 
-        test("THEN `videoResourceUrlsFrom` should return a NetworkError", async () => {
+        test("THEN `videoResourceUrlsFrom` should return a ServiceError", async () => {
           const result = await generateRenderVideoParamsUseCase.videoResourceUrlsFrom(videoResourcePaths);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
     });
@@ -72,15 +72,15 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         });
       });
 
-      describe("GIVEN getting the file URLs fails due to a NetworkError", () => {
+      describe("GIVEN getting the file URLs fails due to a ServiceError", () => {
         beforeEach(() => {
-          fileStore.getUrl.mockReturnValue(errAsync(new NetworkError("Failed to get file URL.")));
+          fileStore.getUrl.mockReturnValue(errAsync(new ServiceError("Failed to get file URL.")));
         });
 
-        test("THEN `videoResourceUrlsFrom` should return a NetworkError", async () => {
+        test("THEN `videoResourceUrlsFrom` should return a ServiceError", async () => {
           const result = await generateRenderVideoParamsUseCase.videoResourceUrlsFrom(videoResourcePaths);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
     });
@@ -373,29 +373,29 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
         expect(renderVideoMessageSender.send).toHaveBeenCalledWith(result._unsafeUnwrap());
       });
 
-      describe("EXCEPT sending the RenderVideoParams message fails due to a NetworkError", () => {
+      describe("EXCEPT sending the RenderVideoParams message fails due to a ServiceError", () => {
         beforeEach(() => {
           renderVideoMessageSender.send.mockReturnValue(
-            errAsync(new NetworkError("Failed to send RenderVideoParams.")),
+            errAsync(new ServiceError("Failed to send RenderVideoParams.")),
           );
         });
 
-        test("THEN `execute` should return a NetworkError", async () => {
+        test("THEN `execute` should return a ServiceError", async () => {
           const result = await generateRenderVideoParamsUseCase.execute(VALID_SPOKEN_QUOTE, VALID_VIDEO_CONFIG);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
 
-      describe("EXCEPT getting the file URLs fails due to a NetworkError", () => {
+      describe("EXCEPT getting the file URLs fails due to a ServiceError", () => {
         beforeEach(() => {
-          fileStore.getUrl.mockReturnValue(errAsync(new NetworkError("Failed to get file URL.")));
+          fileStore.getUrl.mockReturnValue(errAsync(new ServiceError("Failed to get file URL.")));
         });
 
-        test("THEN `execute` should return a NetworkError", async () => {
+        test("THEN `execute` should return a ServiceError", async () => {
           const result = await generateRenderVideoParamsUseCase.execute(VALID_SPOKEN_QUOTE, VALID_VIDEO_CONFIG);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
     });

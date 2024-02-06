@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
 import { ResultAsync, fromPromise } from "neverthrow";
 import { WebSocket } from "ws";
@@ -9,10 +9,10 @@ import { ElevenLabsWSResponse } from "./schema";
 export class ElevenLabsClient {
   constructor(private readonly config: ElevenLabsConfig) {}
 
-  getWebSocketResponses(text: string): ResultAsync<ElevenLabsWSResponse[], NetworkError | ParseError> {
+  getWebSocketResponses(text: string): ResultAsync<ElevenLabsWSResponse[], ServiceError | ParseError> {
     return fromPromise(this.getWebSocketResponsesPromise(text), (error) => {
       if (error instanceof ZodError) return new ParseError("Failed to parse response", error);
-      return new NetworkError("ElevenLabs API error", error instanceof Error ? error : undefined);
+      return new ServiceError("ElevenLabs API error", error instanceof Error ? error : undefined);
     });
   }
 

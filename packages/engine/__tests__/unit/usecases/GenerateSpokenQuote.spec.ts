@@ -1,4 +1,4 @@
-import { NetworkError } from "@core/errors/NetworkError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
 import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
@@ -525,39 +525,39 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         expect(result.isOk()).toBe(true);
       });
 
-      describe("EXCEPT sending the SpokenQuote message fails due to a NetworkError", () => {
+      describe("EXCEPT sending the SpokenQuote message fails due to a ServiceError", () => {
         beforeEach(() => {
-          spokenQuoteMessageSender.send.mockReturnValue(errAsync(new NetworkError("Failed to send spoken quote.")));
+          spokenQuoteMessageSender.send.mockReturnValue(errAsync(new ServiceError("Failed to send spoken quote.")));
         });
 
-        test("THEN `execute` should return a NetworkError", async () => {
+        test("THEN `execute` should return a ServiceError", async () => {
           const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
 
-      describe("EXCEPT storing the Speech audio fails due to a NetworkError", () => {
+      describe("EXCEPT storing the Speech audio fails due to a ServiceError", () => {
         beforeEach(() => {
-          fileStore.store.mockReturnValue(errAsync(new NetworkError("Failed to store speech audio.")));
+          fileStore.store.mockReturnValue(errAsync(new ServiceError("Failed to store speech audio.")));
         });
 
-        test("THEN `execute` should return a NetworkError", async () => {
+        test("THEN `execute` should return a ServiceError", async () => {
           const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
 
-      describe("EXCEPT generating the Speech fails due to a NetworkError", () => {
+      describe("EXCEPT generating the Speech fails due to a ServiceError", () => {
         beforeEach(() => {
-          speechService.generateSpeech.mockReturnValue(errAsync(new NetworkError("Failed to generate speech.")));
+          speechService.generateSpeech.mockReturnValue(errAsync(new ServiceError("Failed to generate speech.")));
         });
 
-        test("THEN `execute` should return a NetworkError", async () => {
+        test("THEN `execute` should return a ServiceError", async () => {
           const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
 
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(NetworkError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
       });
     });
