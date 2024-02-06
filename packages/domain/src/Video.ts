@@ -1,3 +1,4 @@
+import { FilePath } from "./File";
 import { z } from "zod";
 
 export const VideoMetadata = z.object({
@@ -5,17 +6,35 @@ export const VideoMetadata = z.object({
   description: z.string(),
 });
 
-export const RenderVideoSection = z.object({
+export const VideoResourcePaths = z.object({
+  backgroundVideoPaths: z.array(FilePath),
+  musicAudioPath: FilePath.optional(),
+  speechAudioPath: FilePath,
+});
+
+export const VideoResourceUrls = z.object({
+  backgroundVideoUrls: z.array(z.string().url()),
+  musicAudioUrl: z.string().url().optional(),
+  speechAudioUrl: z.string().url(),
+});
+
+export const VideoConfig = z
+  .object({
+    fps: z.number(),
+  })
+  .merge(VideoResourcePaths.omit({ speechAudioPath: true }));
+
+export const VideoSection = z.object({
   text: z.string(),
   durationInFrames: z.number(),
-  backgroundVideoUrl: z.string(),
+  backgroundVideoUrl: z.string().url(),
 });
 
 export const RenderVideoParams = z.object({
   fps: z.number(),
-  speechAudioUrl: z.string(),
-  musicAudioUrl: z.string(),
-  sections: z.array(RenderVideoSection),
+  musicAudioUrl: z.string().url().optional(),
+  speechAudioUrl: z.string().url(),
+  sections: z.array(VideoSection),
   metadata: VideoMetadata,
 });
 
@@ -35,6 +54,9 @@ export type VideoDataByPlatform = {
 export type VideoData = VideoDataByPlatform[UploadVideoPlatform];
 
 export type VideoMetadata = z.infer<typeof VideoMetadata>;
-export type RenderVideoSection = z.infer<typeof RenderVideoSection>;
+export type VideoResourcePaths = z.infer<typeof VideoResourcePaths>;
+export type VideoResourceUrls = z.infer<typeof VideoResourceUrls>;
+export type VideoConfig = z.infer<typeof VideoConfig>;
+export type VideoSection = z.infer<typeof VideoSection>;
 export type RenderVideoParams = z.infer<typeof RenderVideoParams>;
 export type UploadVideoParams = z.infer<typeof UploadVideoParams>;

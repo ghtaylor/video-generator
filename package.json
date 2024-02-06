@@ -2,6 +2,9 @@
   "name": "video-generator",
   "version": "1.0.0",
   "packageManager": "pnpm@8.4.0",
+  "scripts": {
+    "deploy:dev": "sst deploy --stage dev"
+  },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.3",
     "@types/node": "^20.7.0",

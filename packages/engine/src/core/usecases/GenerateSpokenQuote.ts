@@ -19,7 +19,7 @@ export class GenerateSpokenQuoteUseCase {
   createSpokenQuote(
     quote: Quote,
     speechMarks: SpeechMark[],
-    audioFile: FilePath,
+    speechAudioPath: FilePath,
     endDelay: number = 2000,
   ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
     const chunks: SpokenQuoteChunk[] = [];
@@ -59,7 +59,7 @@ export class GenerateSpokenQuoteUseCase {
       title: quote.title,
       text: quote.text,
       chunks,
-      audioFile,
+      speechAudioPath,
     });
   }
 

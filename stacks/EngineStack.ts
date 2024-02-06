@@ -10,6 +10,7 @@ export function EngineStack({ stack }: StackContext) {
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
   const YOUTUBE_CREDENTIALS = new Config.Secret(stack, "YOUTUBE_CREDENTIALS");
   const ELEVEN_LABS_CONFIG = new Config.Secret(stack, "ELEVEN_LABS_CONFIG");
+  const VIDEO_CONFIG = new Config.Secret(stack, "VIDEO_CONFIG");
 
   const bucket = new Bucket(stack, "Bucket");
 
@@ -51,7 +52,7 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateRenderVideoParamsFunction = new Function(stack, "GenerateRenderVideoParams", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateRenderVideoParams.default`,
-    bind: [bucket, renderVideoQueue],
+    bind: [bucket, renderVideoQueue, VIDEO_CONFIG],
   });
 
   const renderVideoFunction = new Function(stack, "RenderVideo", {

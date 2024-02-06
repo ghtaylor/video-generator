@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "type:check": "tsc --noEmit",
-    "test": "sst bind vitest"
+    "test:unit": "sst bind vitest __tests__/unit/**/*",
+    "test": "pnpm run test:unit"
   },
   "devDependencies": {
     "@remotion/compositor-linux-arm64-gnu": "4.0.53",

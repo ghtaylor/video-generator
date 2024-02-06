@@ -61,7 +61,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example, a good one.",
-          audioFile: VALID_SPEECH_AUDIO_FILE_PATH,
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
           chunks: [
             {
               value: "This is an example,",
@@ -119,7 +119,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example, and there's an apostrophe.",
-          audioFile: VALID_SPEECH_AUDIO_FILE_PATH,
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
           chunks: [
             {
               value: "This is an example,",
@@ -181,7 +181,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example. Speech marks have capital letters.",
-          audioFile: VALID_SPEECH_AUDIO_FILE_PATH,
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
           chunks: [
             {
               value: "This is an example.",
@@ -247,7 +247,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example. Speech marks start later than zero.",
-          audioFile: VALID_SPEECH_AUDIO_FILE_PATH,
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
           chunks: [
             {
               value: "This is an example.",
@@ -313,7 +313,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         {
           title: "A Title",
           text: "This is an example. There are three chunks, yes, three!",
-          audioFile: VALID_SPEECH_AUDIO_FILE_PATH,
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
           chunks: [
             {
               value: "This is an example.",
@@ -497,7 +497,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
     const VALID_SPOKEN_QUOTE: SpokenQuote = {
       title: "A Title",
       text: "This is an example, a good one.",
-      audioFile: STORED_SPEECH_AUDIO_FILE_PATH,
+      speechAudioPath: STORED_SPEECH_AUDIO_FILE_PATH,
       chunks: [
         {
           value: "This is an example,",

@@ -21,7 +21,7 @@ export const SpokenQuoteChunk = z.object({
   end: z.number(),
 });
 
-export const SpokenQuote = Quote.extend({ audioFile: FilePath, chunks: z.array(SpokenQuoteChunk) });
+export const SpokenQuote = Quote.extend({ speechAudioPath: FilePath, chunks: z.array(SpokenQuoteChunk) });
 
 export type GenerateQuoteParams = z.infer<typeof GenerateQuoteParams>;
 export type Quote = z.infer<typeof Quote>;
