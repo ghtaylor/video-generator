@@ -22,7 +22,7 @@ export const VideoConfig = z
   .object({
     fps: z.number(),
   })
-  .merge(VideoResourcePaths.omit({ speechAudioPath: true }));
+  .merge(VideoResourcePaths.pick({ backgroundVideoPaths: true, musicAudioPath: true }));
 
 export const VideoSection = z.object({
   text: z.string(),
