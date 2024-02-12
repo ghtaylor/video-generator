@@ -1,7 +1,6 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
-import { MessageSender } from "@core/messageSender";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { SpokenQuote } from "@video-generator/domain/Quote";
 import { RenderVideoParams, VideoConfig, VideoResourcePaths, VideoResourceUrls } from "@video-generator/domain/Video";
@@ -10,9 +9,8 @@ import { mock } from "vitest-mock-extended";
 
 describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
   const fileStore = mock<FileStore>();
-  const renderVideoMessageSender = mock<MessageSender<RenderVideoParams>>();
 
-  const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore, renderVideoMessageSender);
+  const generateRenderVideoParamsUseCase = new GenerateRenderVideoParamsUseCase(fileStore);
 
   describe("`videoResourceUrlsFrom`", () => {
     describe("WHEN `videoResourceUrlsFrom` is called with valid VideoResourcePaths", () => {
@@ -358,33 +356,12 @@ describe("GenerateRenderVideoParams Use Case - Unit Tests", () => {
     describe("GIVEN all integrations are successful", () => {
       beforeEach(() => {
         fileStore.getUrl.mockImplementation((fileLocation) => okAsync(`https://${fileLocation}`));
-        renderVideoMessageSender.send.mockImplementation((renderVideoParams) => okAsync(renderVideoParams));
       });
 
       test("THEN `execute` should return a successful result", async () => {
         const result = await generateRenderVideoParamsUseCase.execute(VALID_SPOKEN_QUOTE, VALID_VIDEO_CONFIG);
 
         expect(result.isOk()).toBe(true);
-      });
-
-      test("THEN `execute` should send the RenderVideoParams message", async () => {
-        const result = await generateRenderVideoParamsUseCase.execute(VALID_SPOKEN_QUOTE, VALID_VIDEO_CONFIG);
-
-        expect(renderVideoMessageSender.send).toHaveBeenCalledWith(result._unsafeUnwrap());
-      });
-
-      describe("EXCEPT sending the RenderVideoParams message fails due to a ServiceError", () => {
-        beforeEach(() => {
-          renderVideoMessageSender.send.mockReturnValue(
-            errAsync(new ServiceError("Failed to send RenderVideoParams.")),
-          );
-        });
-
-        test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateRenderVideoParamsUseCase.execute(VALID_SPOKEN_QUOTE, VALID_VIDEO_CONFIG);
-
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
-        });
       });
 
       describe("EXCEPT getting the file URLs fails due to a ServiceError", () => {

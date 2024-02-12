@@ -1,6 +1,5 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
-import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
@@ -13,9 +12,8 @@ import { mock } from "vitest-mock-extended";
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
-  const spokenQuoteMessageSender = mock<MessageSender<SpokenQuote>>();
 
-  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteMessageSender);
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore);
 
   describe("`createSpokenQuote`", () => {
     const VALID_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
@@ -494,47 +492,16 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       ],
     };
 
-    const VALID_SPOKEN_QUOTE: SpokenQuote = {
-      title: "A Title",
-      text: "This is an example, a good one.",
-      speechAudioPath: STORED_SPEECH_AUDIO_FILE_PATH,
-      chunks: [
-        {
-          value: "This is an example,",
-          start: 0,
-          end: 490,
-        },
-        {
-          value: "a good one.",
-          start: 490,
-          end: 730,
-        },
-      ],
-    };
-
     describe("GIVEN all integrations are successful", () => {
       beforeEach(() => {
         speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
         fileStore.store.mockReturnValue(okAsync(STORED_SPEECH_AUDIO_FILE_PATH));
-        spokenQuoteMessageSender.send.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE));
       });
 
       test("THEN `execute` should return a successful result", async () => {
         const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
 
         expect(result.isOk()).toBe(true);
-      });
-
-      describe("EXCEPT sending the SpokenQuote message fails due to a ServiceError", () => {
-        beforeEach(() => {
-          spokenQuoteMessageSender.send.mockReturnValue(errAsync(new ServiceError("Failed to send spoken quote.")));
-        });
-
-        test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
-
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
-        });
       });
 
       describe("EXCEPT storing the Speech audio fails due to a ServiceError", () => {

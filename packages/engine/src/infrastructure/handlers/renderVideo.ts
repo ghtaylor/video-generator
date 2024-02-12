@@ -1,17 +1,14 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { SNSClient } from "@aws-sdk/client-sns";
 import { parseJsonString } from "@common/parseJsonString";
 import { Logger } from "@core/logger";
 import { RenderVideoUseCase } from "@core/usecases/RenderVideo";
-import { RenderVideoParams, UploadVideoParams } from "@video-generator/domain/Video";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { RemotionVideoRenderer } from "@infrastructure/adapters/remotionVideoRenderer";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
-import { SNSMessageSender } from "@infrastructure/adapters/snsMessageSender";
+import { RenderVideoParams } from "@video-generator/domain/Video";
 import { SQSEvent } from "aws-lambda";
 import { Bucket } from "sst/node/bucket";
 import { StaticSite } from "sst/node/site";
-import { Topic } from "sst/node/topic";
 
 class RenderVideoHandler {
   constructor(
@@ -24,17 +21,13 @@ class RenderVideoHandler {
     serveUrl: string,
     videoId: string,
     chromiumExecutablePath: string,
-    uploadVideoTopicArn: string,
   ): RenderVideoHandler {
     const videoRenderer = new RemotionVideoRenderer(serveUrl, videoId, chromiumExecutablePath);
 
     const s3Client = new S3Client({});
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
-    const snsClient = new SNSClient({});
-    const uploadVideoMessageSender = new SNSMessageSender<UploadVideoParams>(snsClient, uploadVideoTopicArn);
-
-    const renderVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore, uploadVideoMessageSender);
+    const renderVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore);
 
     const logger = PinoLogger.build();
 
@@ -57,7 +50,6 @@ const handlerInstance = RenderVideoHandler.build(
   StaticSite.VideoSite.url,
   "video",
   process.env.CHROMIUM_EXECUTABLE_PATH!,
-  Topic.UploadVideoTopic.topicArn,
 );
 
 export default handlerInstance.handle.bind(handlerInstance);

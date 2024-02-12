@@ -1,6 +1,5 @@
 import { ValidationError } from "@core/errors/ValidationError";
 import { Logger } from "@core/logger";
-import { MessageSender } from "@core/messageSender";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { GenerateQuoteHandler } from "@infrastructure/handlers/generateQuote";
@@ -12,8 +11,7 @@ import { mock } from "vitest-mock-extended";
 
 describe("GenerateQuote Handler - Unit Tests", () => {
   const quoteService = mock<QuoteService>();
-  const onComplete = mock<MessageSender<Quote>>();
-  const useCase = new GenerateQuoteUseCase(quoteService, onComplete);
+  const useCase = new GenerateQuoteUseCase(quoteService);
 
   const logger = mock<Logger>();
 
@@ -66,7 +64,6 @@ describe("GenerateQuote Handler - Unit Tests", () => {
 
         beforeEach(() => {
           quoteService.generateQuote.mockReturnValue(okAsync(quote));
-          onComplete.send.mockReturnValue(okAsync(quote));
         });
 
         test("THEN the quote service should be called with the prompt from the SQSEvent", async () => {

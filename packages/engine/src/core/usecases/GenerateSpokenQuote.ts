@@ -1,7 +1,6 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { UnknownError } from "@core/errors/UnknownError";
 import { FileStore } from "@core/fileStore";
-import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
@@ -13,7 +12,6 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly onComplete: MessageSender<SpokenQuote>,
   ) {}
 
   createSpokenQuote(
@@ -74,7 +72,6 @@ export class GenerateSpokenQuoteUseCase {
         this.fileStore
           .store(this.getSpeechAudioFilePath(), speech.audio)
           .andThen((audioPath) => this.createSpokenQuote(quote, speech.marks, audioPath)),
-      )
-      .andThen(this.onComplete.send.bind(this.onComplete));
+      );
   }
 }

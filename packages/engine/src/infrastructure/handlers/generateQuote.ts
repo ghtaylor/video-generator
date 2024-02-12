@@ -1,17 +1,14 @@
-import { SQSClient } from "@aws-sdk/client-sqs";
+import { parseJsonString } from "@common/parseJsonString";
 import { ValidationError } from "@core/errors/ValidationError";
 import { Logger } from "@core/logger";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
-import { GenerateQuoteParams, Quote } from "@video-generator/domain/Quote";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
-import { SQSQueue } from "@infrastructure/adapters/sqsQueue";
+import { GenerateQuoteParams } from "@video-generator/domain/Quote";
+import { SQSEvent } from "aws-lambda";
 import OpenAI from "openai";
 import { Config } from "sst/node/config";
-import { Queue } from "sst/node/queue";
-import { SQSEvent } from "aws-lambda";
-import { parseJsonString } from "@common/parseJsonString";
 
 export class GenerateQuoteHandler {
   constructor(
@@ -19,14 +16,11 @@ export class GenerateQuoteHandler {
     private readonly logger: Logger,
   ) {}
 
-  static build(openAiApiKey: string, generateQuoteWithSpeechQueueUrl: string) {
+  static build(openAiApiKey: string) {
     const openAIClient = new OpenAI({ apiKey: openAiApiKey });
     const quoteService: QuoteService = new OpenAIQuoteService(openAIClient);
 
-    const sqsClient = new SQSClient({});
-    const generateQuoteWithSpeechQueue = new SQSQueue<Quote>(sqsClient, generateQuoteWithSpeechQueueUrl);
-
-    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, generateQuoteWithSpeechQueue);
+    const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService);
 
     const logger = PinoLogger.build();
 
@@ -49,6 +43,6 @@ export class GenerateQuoteHandler {
   }
 }
 
-const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY, Queue.GenerateQuoteWithSpeechQueue.queueUrl);
+const handlerInstance = GenerateQuoteHandler.build(Config.OPENAI_API_KEY);
 
 export default handlerInstance.handle.bind(handlerInstance);
