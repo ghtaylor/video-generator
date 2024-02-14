@@ -33,8 +33,8 @@ class RenderVideoHandler {
     return new RenderVideoHandler(renderVideoUseCase, logger);
   }
 
-  async handle(event: unknown): Promise<RenderedVideo> {
-    return parseJson(event, RenderVideoParams)
+  async handle(payload: unknown): Promise<RenderedVideo> {
+    return parseJson(payload, RenderVideoParams)
       .asyncAndThen(this.renderVideoUseCase.execute.bind(this.renderVideoUseCase))
       .match(
         (renderedVideo) => {

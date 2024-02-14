@@ -33,8 +33,8 @@ export class GenerateRenderVideoParamsHandler {
     });
   }
 
-  async handle(event: unknown): Promise<RenderVideoParams> {
-    return parseJson(event, SpokenQuote)
+  async handle(payload: unknown): Promise<RenderVideoParams> {
+    return parseJson(payload, SpokenQuote)
       .asyncAndThen((spokenQuote) => this.useCase.execute(spokenQuote, this.videoConfig))
       .match(
         (renderVideoParams) => {
@@ -49,11 +49,11 @@ export class GenerateRenderVideoParamsHandler {
   }
 }
 
-export default async (event: unknown): Promise<RenderVideoParams> => {
+export default async (payload: unknown): Promise<RenderVideoParams> => {
   const logger = PinoLogger.build();
 
   return GenerateRenderVideoParamsHandler.build(Bucket.Bucket.bucketName, Config.VIDEO_CONFIG, logger).match(
-    async (handlerInstance) => handlerInstance.handle(event),
+    async (handlerInstance) => handlerInstance.handle(payload),
     async (error) => {
       logger.error("Failed to create handler", error);
       throw error;

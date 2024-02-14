@@ -38,8 +38,8 @@ export class GenerateSpokenQuoteHandler {
     });
   }
 
-  async handle(event: unknown): Promise<SpokenQuote> {
-    return parseJson(event, Quote)
+  async handle(payload: unknown): Promise<SpokenQuote> {
+    return parseJson(payload, Quote)
       .asyncAndThen(this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase))
       .match(
         (spokenQuote) => {
@@ -54,11 +54,11 @@ export class GenerateSpokenQuoteHandler {
   }
 }
 
-export default async (event: unknown): Promise<SpokenQuote> => {
+export default async (payload: unknown): Promise<SpokenQuote> => {
   const logger = PinoLogger.build();
 
   return GenerateSpokenQuoteHandler.build(Bucket.Bucket.bucketName, Config.ELEVEN_LABS_CONFIG, logger).match(
-    async (handlerInstance) => handlerInstance.handle(event),
+    async (handlerInstance) => handlerInstance.handle(payload),
     async (error) => {
       logger.error("Failed to create handler", error);
       throw error;

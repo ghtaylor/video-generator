@@ -25,8 +25,8 @@ export class GenerateQuoteHandler {
     return new GenerateQuoteHandler(generateQuoteUseCase, logger);
   }
 
-  async handle(event: unknown): Promise<Quote> {
-    return parseJson(event, GenerateQuoteParams)
+  async handle(payload: unknown): Promise<Quote> {
+    return parseJson(payload, GenerateQuoteParams)
       .asyncAndThen(({ prompt }) => this.generateQuoteUseCase.execute(prompt))
       .match(
         (quote) => {
