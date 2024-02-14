@@ -28,7 +28,7 @@ export const MyComposition: React.FC<RenderVideoParams> = ({ sections, speechAud
         ))}
       </Series>
       <Audio src={speechAudioUrl} />
-      <Audio src={musicAudioUrl} volume={0.4} />
+      {musicAudioUrl && <Audio src={musicAudioUrl} volume={0.4} />}
     </>
   );
 };
