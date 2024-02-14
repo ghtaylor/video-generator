@@ -1,13 +1,13 @@
 import { FileStore } from "@core/fileStore";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoUploader } from "@core/videoUploader";
-import { UploadVideoParams, UploadVideoPlatform, VideoData, VideoMetadata } from "@video-generator/domain/Video";
+import { RenderedVideo, UploadVideoPlatform, VideoData, VideoMetadata } from "@video-generator/domain/Video";
 import { mock } from "vitest-mock-extended";
 import { okAsync } from "neverthrow";
 
 describe("UploadVideo Use Case - Unit Tests", () => {
   describe("WHEN the `execute` method is called", () => {
-    const VALID_UPLOAD_VIDEO_PARAMS: UploadVideoParams = {
+    const VALID_RENDERED_VIDEO: RenderedVideo = {
       videoPath: "video_location",
       metadata: {
         title: "video_title",
@@ -30,17 +30,17 @@ describe("UploadVideo Use Case - Unit Tests", () => {
         });
 
         test("THEN `execute` should return a successful result", async () => {
-          const result = await uploadVideoUseCase.execute(VALID_UPLOAD_VIDEO_PARAMS);
+          const result = await uploadVideoUseCase.execute(VALID_RENDERED_VIDEO);
 
           expect(result.isOk()).toBe(true);
         });
 
         test("THEN the social media uploader should be called with video data as buffer", async () => {
-          await uploadVideoUseCase.execute(VALID_UPLOAD_VIDEO_PARAMS);
+          await uploadVideoUseCase.execute(VALID_RENDERED_VIDEO);
 
           expect(videoUploader.upload).toHaveBeenCalledWith<[VideoData, VideoMetadata]>(
             Buffer.from("video data"),
-            VALID_UPLOAD_VIDEO_PARAMS.metadata,
+            VALID_RENDERED_VIDEO.metadata,
           );
         });
       });

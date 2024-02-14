@@ -5,7 +5,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { Logger } from "@core/logger";
 import { UploadVideoUseCase } from "@core/usecases/UploadVideo";
 import { VideoUploader } from "@core/videoUploader";
-import { UploadVideoParams, UploadVideoPlatform } from "@video-generator/domain/Video";
+import { RenderedVideo, UploadVideoPlatform } from "@video-generator/domain/Video";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { YoutubeCredentials } from "@infrastructure/adapters/youtubeUploader/credentials";
@@ -61,7 +61,7 @@ class UploadVideoHandler {
       });
   }
 
-  private parseMessage(message: string): Result<UploadVideoParams, ParseError> {
+  private parseMessage(message: string): Result<RenderedVideo, ParseError> {
     return fromThrowable(
       () => {
         const container = z
@@ -70,7 +70,7 @@ class UploadVideoHandler {
           })
           .parse(JSON.parse(message));
 
-        return UploadVideoParams.parse(JSON.parse(container.Message));
+        return RenderedVideo.parse(JSON.parse(container.Message));
       },
       (error) => new ParseError("Failed to parse message", error instanceof Error ? error : undefined),
     )();
@@ -78,7 +78,7 @@ class UploadVideoHandler {
 
   async handle(record: SQSRecord): Promise<void> {
     const result = await parseJsonString(record.body, SNSMessage)
-      .andThen((snsMessage) => parseJsonString(snsMessage.Message, UploadVideoParams))
+      .andThen((snsMessage) => parseJsonString(snsMessage.Message, RenderedVideo))
       .asyncAndThen(this.uploadVideoUseCase.execute.bind(this.uploadVideoUseCase));
 
     this.logger.logResult(result);
