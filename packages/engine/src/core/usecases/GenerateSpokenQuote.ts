@@ -1,5 +1,6 @@
+import { ParseError } from "@core/errors/ParseError";
 import { ServiceError } from "@core/errors/ServiceError";
-import { UnknownError } from "@core/errors/UnknownError";
+import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
 import { SpeechService } from "@core/speechService";
 import { FilePath } from "@video-generator/domain/File";
@@ -33,7 +34,7 @@ export class GenerateSpokenQuoteUseCase {
         const word = wordsOfChunk[wordIndex];
 
         if (word.toLowerCase() !== speechMarks[wordIndex]?.value.toLowerCase())
-          return err(new SpokenQuoteMarksInvalidError());
+          return err(new SpokenQuoteMarksInvalidError(speechMarks, quote.text));
 
         if (wordIndex === 0 && chunkIndex === 0) start = 0;
         else if (wordIndex === 0) start = speechMarks[wordIndex].time;
@@ -51,7 +52,7 @@ export class GenerateSpokenQuoteUseCase {
       });
     }
 
-    if (speechMarks.length > 0) return err(new SpokenQuoteMarksInvalidError());
+    if (speechMarks.length > 0) return err(new SpokenQuoteMarksInvalidError(speechMarks, quote.text));
 
     return ok({
       title: quote.title,
@@ -65,7 +66,9 @@ export class GenerateSpokenQuoteUseCase {
     return `speeches/${new Date().getTime()}.mp3`;
   }
 
-  execute(quote: Quote): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | ServiceError | UnknownError> {
+  execute(
+    quote: Quote,
+  ): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | ServiceError | ValidationError | ParseError> {
     return this.speechService
       .generateSpeech(quote.text)
       .andThen((speech) =>
