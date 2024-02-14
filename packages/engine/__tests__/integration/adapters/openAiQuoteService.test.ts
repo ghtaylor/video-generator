@@ -88,7 +88,11 @@ describe("OpenAIQuoteService - Integration Tests", () => {
     describe("WHEN `generateQuote` is called with a prompt", () => {
       test("THEN it returns a ServiceError containing the OpenAIError", async () => {
         await expect(openAIQuoteService.generateQuote(PROMPT)).resolves.toEqual(
-          err(new ServiceError("OpenAI API error", openAIError)),
+          err(
+            new ServiceError("OpenAI API error", {
+              originalError: openAIError,
+            }),
+          ),
         );
       });
     });

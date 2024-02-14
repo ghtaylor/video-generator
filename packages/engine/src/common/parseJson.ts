@@ -8,7 +8,10 @@ export function parseJsonString<TSchema extends z.ZodSchema>(
 ): Result<z.infer<TSchema>, ParseError> {
   return fromThrowable(
     () => schema.parse(JSON.parse(jsonString)),
-    (error) => new ParseError("Failed to parse JSON string", error instanceof Error ? error : undefined),
+    (error) =>
+      new ParseError("Failed to parse JSON string", {
+        originalError: error,
+      }),
   )();
 }
 
@@ -18,6 +21,9 @@ export function parseJson<TSchema extends z.ZodSchema>(
 ): Result<z.infer<TSchema>, ParseError> {
   return fromThrowable(
     () => schema.parse(json),
-    (error) => new ParseError("Failed to parse JSON", error instanceof Error ? error : undefined),
+    (error) =>
+      new ParseError("Failed to parse JSON", {
+        originalError: error,
+      }),
   )();
 }

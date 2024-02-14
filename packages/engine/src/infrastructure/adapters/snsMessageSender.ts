@@ -17,7 +17,7 @@ export class SNSMessageSender<TMessage> implements MessageSender<TMessage> {
 
     return fromPromise(
       this.snsClient.send(publishCommand),
-      (error) => new ServiceError("Failed to send message", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to send message", { originalError: error }),
     ).map(() => message);
   }
 }

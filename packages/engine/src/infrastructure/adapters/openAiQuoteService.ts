@@ -1,6 +1,6 @@
-import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
-import { UnknownError } from "@core/errors/UnknownError";
+import { ServiceError } from "@core/errors/ServiceError";
+import { UnexpectedError } from "@core/errors/UnexpectedError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { QuoteService } from "@core/quoteService";
 import { Quote } from "@video-generator/domain/Quote";
@@ -20,12 +20,12 @@ export class OpenAIQuoteService implements QuoteService {
   parseChatResponse(response: ChatCompletion): Result<Quote, ParseError> {
     const safeJsonParse = fromThrowable(
       JSON.parse,
-      (error) => new ParseError("Invalid JSON provided by OpenAI", error instanceof Error ? error : undefined),
+      (error) => new ParseError("Invalid JSON provided by OpenAI", { originalError: error }),
     );
 
     const safeQuoteParse = fromThrowable(
       Quote.parse,
-      (error) => new ParseError("Invalid Quote provided by OpenAI", error instanceof Error ? error : undefined),
+      (error) => new ParseError("Invalid Quote provided by OpenAI", { originalError: error }),
     );
 
     const quoteJsonString = response.choices[0].message.content ?? "";
@@ -33,7 +33,7 @@ export class OpenAIQuoteService implements QuoteService {
     return safeJsonParse(quoteJsonString).andThen(safeQuoteParse);
   }
 
-  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | ServiceError | UnknownError> {
+  generateQuote(prompt: string): ResultAsync<Quote, ValidationError | ParseError | ServiceError | UnexpectedError> {
     return fromPromise(
       this.openAiClient.chat.completions.create({
         model: "gpt-4-0314",
@@ -53,8 +53,13 @@ export class OpenAIQuoteService implements QuoteService {
         ],
       }),
       (error) => {
-        if (error instanceof OpenAIError) return new ServiceError("OpenAI API error", error);
-        return new UnknownError();
+        if (error instanceof OpenAIError)
+          return new ServiceError("OpenAI API error", {
+            originalError: error,
+          });
+        return new UnexpectedError({
+          originalError: error,
+        });
       },
     )
       .andThen(this.parseChatResponse)

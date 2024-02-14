@@ -1,11 +1,9 @@
-export class ValidationError extends Error {
+import { BaseError, ErrorOptions } from "./BaseError";
+
+export class ValidationError extends BaseError {
   readonly name = "ValidationError";
 
-  constructor(message: string, originalError?: Error) {
-    super(originalError ? `${message} (${originalError.message})` : message);
-
-    if (originalError) {
-      this.stack = `${this.stack}\nCaused by: ${originalError.stack}`;
-    }
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
   }
 }

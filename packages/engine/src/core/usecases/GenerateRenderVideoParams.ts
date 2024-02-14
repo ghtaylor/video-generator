@@ -75,7 +75,7 @@ export class GenerateRenderVideoParamsUseCase {
           },
         };
       },
-      (error) => new UnexpectedError(error),
+      (error) => new UnexpectedError({ originalError: error }),
     )();
   }
 
