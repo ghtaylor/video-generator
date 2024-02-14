@@ -1,12 +1,10 @@
-import { parseJsonString } from "@common/parseJsonString";
-import { ValidationError } from "@core/errors/ValidationError";
+import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
-import { GenerateQuoteParams } from "@video-generator/domain/Quote";
-import { SQSEvent } from "aws-lambda";
+import { GenerateQuoteParams, Quote } from "@video-generator/domain/Quote";
 import OpenAI from "openai";
 import { Config } from "sst/node/config";
 
@@ -27,19 +25,19 @@ export class GenerateQuoteHandler {
     return new GenerateQuoteHandler(generateQuoteUseCase, logger);
   }
 
-  async handle(event: SQSEvent) {
-    for (const record of event.Records) {
-      const result = await parseJsonString(record.body, GenerateQuoteParams).asyncAndThen(({ prompt }) =>
-        this.generateQuoteUseCase.execute(prompt),
+  async handle(event: unknown): Promise<Quote> {
+    return parseJson(event, GenerateQuoteParams)
+      .asyncAndThen(({ prompt }) => this.generateQuoteUseCase.execute(prompt))
+      .match(
+        (quote) => {
+          this.logger.info("Quote generated", quote);
+          return quote;
+        },
+        (error) => {
+          this.logger.error("Error generating quote", error);
+          throw error;
+        },
       );
-
-      if (result.isErr() && result.error instanceof ValidationError) {
-        this.logger.error("Validation error occurred, throwing for retry", result.error);
-        throw result.error;
-      }
-
-      this.logger.logResult(result);
-    }
   }
 }
 

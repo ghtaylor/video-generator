@@ -1,5 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { parseJsonString } from "@common/parseJsonString";
+import { parseJson, parseJsonString } from "@common/parseJson";
 import { ParseError } from "@core/errors/ParseError";
 import { Logger } from "@core/logger";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
@@ -8,8 +8,7 @@ import { ElevenLabsClient } from "@infrastructure/adapters/elevenLabs/elevenLabs
 import { ElevenLabsSpeechService } from "@infrastructure/adapters/elevenLabs/elevenLabsSpeechService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
-import { Quote } from "@video-generator/domain/Quote";
-import { SQSEvent } from "aws-lambda";
+import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Result } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { Config } from "sst/node/config";
@@ -39,26 +38,30 @@ export class GenerateSpokenQuoteHandler {
     });
   }
 
-  async handle(event: SQSEvent) {
-    for (const record of event.Records) {
-      const result = await parseJsonString(record.body, Quote).asyncAndThen(
-        this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase),
+  async handle(event: unknown): Promise<SpokenQuote> {
+    return parseJson(event, Quote)
+      .asyncAndThen(this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase))
+      .match(
+        (spokenQuote) => {
+          this.logger.info("Spoken quote generated", spokenQuote);
+          return spokenQuote;
+        },
+        (error) => {
+          this.logger.error("Error generating spoken quote", error);
+          throw error;
+        },
       );
-
-      this.logger.logResult(result);
-    }
   }
 }
 
-export default async (event: SQSEvent): Promise<void> => {
+export default async (event: unknown): Promise<SpokenQuote> => {
   const logger = PinoLogger.build();
 
   return GenerateSpokenQuoteHandler.build(Bucket.Bucket.bucketName, Config.ELEVEN_LABS_CONFIG, logger).match(
-    async (handlerInstance) => {
-      return handlerInstance.handle(event);
-    },
+    async (handlerInstance) => handlerInstance.handle(event),
     async (error) => {
       logger.error("Failed to create handler", error);
+      throw error;
     },
   );
 };

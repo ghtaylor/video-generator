@@ -1,5 +1,6 @@
-import { Duration } from "aws-cdk-lib";
-import { Bucket, Config, Function, Queue, StackContext, Topic, use } from "sst/constructs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import { Bucket, Config, Function, StackContext, use } from "sst/constructs";
 import { VideoStack } from "./VideoStack";
 
 export function EngineStack({ stack }: StackContext) {
@@ -8,43 +9,20 @@ export function EngineStack({ stack }: StackContext) {
   const { videoSite } = use(VideoStack);
 
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
-  const YOUTUBE_CREDENTIALS = new Config.Secret(stack, "YOUTUBE_CREDENTIALS");
   const ELEVEN_LABS_CONFIG = new Config.Secret(stack, "ELEVEN_LABS_CONFIG");
   const VIDEO_CONFIG = new Config.Secret(stack, "VIDEO_CONFIG");
 
   const bucket = new Bucket(stack, "Bucket");
 
-  const generateQuoteQueue = new Queue(stack, "GenerateQuoteQueue");
-  const generateQuoteWithSpeechQueue = new Queue(stack, "GenerateQuoteWithSpeechQueue");
-  const generateRenderVideoParamsQueue = new Queue(stack, "GenerateRenderVideoParamsQueue");
-  const renderVideoQueue = new Queue(stack, "RenderVideoQueue", {
-    cdk: {
-      queue: {
-        visibilityTimeout: Duration.minutes(15),
-      },
-    },
-  });
-
-  const uploadVideoToYoutubeQueue = new Queue(stack, "UploadVideoToYoutubeQueue");
-
-  const uploadVideoTopic = new Topic(stack, "UploadVideoTopic", {
-    subscribers: {
-      youtubeQueueSubscriber: {
-        type: "queue",
-        queue: uploadVideoToYoutubeQueue,
-      },
-    },
-  });
-
   const generateQuoteFunction = new Function(stack, "GenerateQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateQuote.default`,
-    bind: [OPENAI_API_KEY, generateQuoteWithSpeechQueue],
+    bind: [OPENAI_API_KEY],
     timeout: "30 seconds",
   });
 
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateSpokenQuote.default`,
-    bind: [generateRenderVideoParamsQueue, bucket, ELEVEN_LABS_CONFIG],
+    bind: [bucket, ELEVEN_LABS_CONFIG],
     timeout: "30 seconds",
     // Required for Polly
     // permissions: ["polly:SynthesizeSpeech"],
@@ -52,12 +30,12 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateRenderVideoParamsFunction = new Function(stack, "GenerateRenderVideoParams", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateRenderVideoParams.default`,
-    bind: [bucket, renderVideoQueue, VIDEO_CONFIG],
+    bind: [bucket, VIDEO_CONFIG],
   });
 
   const renderVideoFunction = new Function(stack, "RenderVideo", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/renderVideo.default`,
-    bind: [bucket, videoSite, uploadVideoTopic],
+    bind: [bucket, videoSite],
     retryAttempts: 0,
     architecture: "arm_64",
     runtime: "nodejs18.x",
@@ -77,14 +55,28 @@ export function EngineStack({ stack }: StackContext) {
     },
   });
 
-  const uploadVideoFunction = new Function(stack, "UploadVideo", {
-    handler: `${ENGINE_DIR}/src/infrastructure/handlers/uploadVideo.default`,
-    bind: [YOUTUBE_CREDENTIALS, uploadVideoToYoutubeQueue, bucket],
+  const sGenerateQuote = new tasks.LambdaInvoke(stack, generateQuoteFunction.functionName, {
+    lambdaFunction: generateQuoteFunction,
   });
 
-  generateQuoteQueue.addConsumer(stack, generateQuoteFunction);
-  generateQuoteWithSpeechQueue.addConsumer(stack, generateSpokenQuoteFunction);
-  generateRenderVideoParamsQueue.addConsumer(stack, generateRenderVideoParamsFunction);
-  renderVideoQueue.addConsumer(stack, renderVideoFunction);
-  uploadVideoToYoutubeQueue.addConsumer(stack, uploadVideoFunction);
+  const sGenerateSpokenQuote = new tasks.LambdaInvoke(stack, generateSpokenQuoteFunction.functionName, {
+    lambdaFunction: generateSpokenQuoteFunction,
+    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+  });
+
+  const sGenerateRenderVideoParams = new tasks.LambdaInvoke(stack, generateRenderVideoParamsFunction.functionName, {
+    lambdaFunction: generateRenderVideoParamsFunction,
+    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+  });
+
+  const sRenderVideo = new tasks.LambdaInvoke(stack, renderVideoFunction.functionName, {
+    lambdaFunction: renderVideoFunction,
+    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+  });
+
+  new sfn.StateMachine(stack, "GenerateQuoteVideoMachine", {
+    definitionBody: sfn.DefinitionBody.fromChainable(
+      sGenerateQuote.next(sGenerateSpokenQuote).next(sGenerateRenderVideoParams).next(sRenderVideo),
+    ),
+  });
 }

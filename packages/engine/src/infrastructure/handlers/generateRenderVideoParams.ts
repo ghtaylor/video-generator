@@ -1,13 +1,12 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { parseJsonString } from "@common/parseJsonString";
+import { parseJson, parseJsonString } from "@common/parseJson";
 import { ParseError } from "@core/errors/ParseError";
 import { Logger } from "@core/logger";
 import { GenerateRenderVideoParamsUseCase } from "@core/usecases/GenerateRenderVideoParams";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { SpokenQuote } from "@video-generator/domain/Quote";
-import { VideoConfig } from "@video-generator/domain/Video";
-import { SQSEvent } from "aws-lambda";
+import { RenderVideoParams, VideoConfig } from "@video-generator/domain/Video";
 import { Result } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { Config } from "sst/node/config";
@@ -34,26 +33,30 @@ export class GenerateRenderVideoParamsHandler {
     });
   }
 
-  async handle(event: SQSEvent) {
-    for (const record of event.Records) {
-      const result = await parseJsonString(record.body, SpokenQuote).asyncAndThen((spokenQuote) =>
-        this.useCase.execute(spokenQuote, this.videoConfig),
+  async handle(event: unknown): Promise<RenderVideoParams> {
+    return parseJson(event, SpokenQuote)
+      .asyncAndThen((spokenQuote) => this.useCase.execute(spokenQuote, this.videoConfig))
+      .match(
+        (renderVideoParams) => {
+          this.logger.info("Render video params generated", renderVideoParams);
+          return renderVideoParams;
+        },
+        (error) => {
+          this.logger.error("Error generating render video params", error);
+          throw error;
+        },
       );
-
-      this.logger.logResult(result);
-    }
   }
 }
 
-export default async (event: SQSEvent): Promise<void> => {
+export default async (event: unknown): Promise<RenderVideoParams> => {
   const logger = PinoLogger.build();
 
   return GenerateRenderVideoParamsHandler.build(Bucket.Bucket.bucketName, Config.VIDEO_CONFIG, logger).match(
-    async (handlerInstance) => {
-      return handlerInstance.handle(event);
-    },
+    async (handlerInstance) => handlerInstance.handle(event),
     async (error) => {
       logger.error("Failed to create handler", error);
+      throw error;
     },
   );
 };
