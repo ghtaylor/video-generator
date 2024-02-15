@@ -331,6 +331,85 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
           ],
         },
       ],
+      [
+        {
+          title: "A Title",
+          text: "This is an example. There are three chunks. With a hyphenated-word",
+          chunks: ["This is an example.", "There are three chunks.", "With a hyphenated-word"],
+        },
+        [
+          {
+            value: "this",
+            time: 0,
+          },
+          {
+            value: "is",
+            time: 120,
+          },
+          {
+            value: "an",
+            time: 240,
+          },
+          {
+            value: "example",
+            time: 360,
+          },
+          {
+            value: "There",
+            time: 490,
+          },
+          {
+            value: "are",
+            time: 610,
+          },
+          {
+            value: "three",
+            time: 730,
+          },
+          {
+            value: "chunks",
+            time: 850,
+          },
+          {
+            value: "with",
+            time: 1020,
+          },
+          {
+            value: "a",
+            time: 1100,
+          },
+          {
+            value: "hyphenated",
+            time: 1150,
+          },
+          {
+            value: "word",
+            time: 1250,
+          },
+        ],
+        {
+          title: "A Title",
+          text: "This is an example. There are three chunks. With a hyphenated-word",
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
+          chunks: [
+            {
+              value: "This is an example.",
+              start: 0,
+              end: 490,
+            },
+            {
+              value: "There are three chunks.",
+              start: 490,
+              end: 1020,
+            },
+            {
+              value: "With a hyphenated-word",
+              start: 1020,
+              end: 1250 + END_DELAY,
+            },
+          ],
+        },
+      ],
     ])("GIVEN a Quote and SpeechMarks that are valid", (quote, speechMarks, expectedSpokenQuote) => {
       test("THEN `createSpokenQuote` should return a result with the SpokenQuote", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(

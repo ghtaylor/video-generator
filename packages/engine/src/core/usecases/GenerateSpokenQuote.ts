@@ -25,7 +25,10 @@ export class GenerateSpokenQuoteUseCase {
 
     for (let chunkIndex = 0; chunkIndex < quote.chunks.length; chunkIndex++) {
       const chunk = quote.chunks[chunkIndex];
-      const wordsOfChunk = chunk.replace(/[^a-zA-Z0-9\s']/g, "").split(" ");
+      const wordsOfChunk = chunk
+        .replace(/[^a-zA-Z0-9\s'-]/g, "")
+        .replace("-", " ")
+        .split(" ");
 
       let start = 0;
       let end = 0;
@@ -34,7 +37,13 @@ export class GenerateSpokenQuoteUseCase {
         const word = wordsOfChunk[wordIndex];
 
         if (word.toLowerCase() !== speechMarks[wordIndex]?.value.toLowerCase())
-          return err(new SpokenQuoteMarksInvalidError(speechMarks, quote.text));
+          return err(
+            new SpokenQuoteMarksInvalidError(
+              `Chunk word '${word.toLowerCase()} != Speech marks word '${speechMarks[wordIndex]?.value.toLowerCase()}'`,
+              speechMarks,
+              quote,
+            ),
+          );
 
         if (wordIndex === 0 && chunkIndex === 0) start = 0;
         else if (wordIndex === 0) start = speechMarks[wordIndex].time;
@@ -52,7 +61,8 @@ export class GenerateSpokenQuoteUseCase {
       });
     }
 
-    if (speechMarks.length > 0) return err(new SpokenQuoteMarksInvalidError(speechMarks, quote.text));
+    if (speechMarks.length > 0)
+      return err(new SpokenQuoteMarksInvalidError(`Leftover speech marks: ${speechMarks.length}`, speechMarks, quote));
 
     return ok({
       title: quote.title,
