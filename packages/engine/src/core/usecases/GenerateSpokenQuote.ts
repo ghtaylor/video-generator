@@ -2,6 +2,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
+import { ProgressReporter } from "@core/progressReporter";
 import { SpeechService } from "@core/speechService";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
@@ -13,6 +14,7 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
+    private readonly progressReporter: ProgressReporter,
   ) {}
 
   createSpokenQuote(
@@ -81,12 +83,16 @@ export class GenerateSpokenQuoteUseCase {
   execute(
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
-    return this.speechService
-      .generateSpeech(quote.text)
-      .andThen((speech) =>
-        this.fileStore
-          .store(this.getSpeechAudioFilePath(), speech.audio)
-          .andThen((audioPath) => this.createSpokenQuote(quote, speech.marks, audioPath)),
+    return this.progressReporter
+      .reportProgress("GENERATING_SPEECH")
+      .andThen(() =>
+        this.speechService
+          .generateSpeech(quote.text)
+          .andThen((speech) =>
+            this.fileStore
+              .store(this.getSpeechAudioFilePath(), speech.audio)
+              .andThen((audioPath) => this.createSpokenQuote(quote, speech.marks, audioPath)),
+          ),
       );
   }
 }

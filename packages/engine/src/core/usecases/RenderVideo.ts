@@ -1,6 +1,7 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileStore } from "@core/fileStore";
+import { ProgressReporter } from "@core/progressReporter";
 import { VideoRenderer } from "@core/videoRenderer";
 import { FilePath } from "@video-generator/domain/File";
 import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video";
@@ -10,6 +11,7 @@ export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
+    private readonly progressReporter: ProgressReporter,
   ) {}
 
   private getFilePath(): string {
@@ -27,9 +29,11 @@ export class RenderVideoUseCase {
   }
 
   execute(renderVideoParams: RenderVideoParams): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
-    return this.videoRenderer
-      .renderVideo(renderVideoParams)
-      .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))
-      .andThen((filePath) => this.renderedVideoFrom(renderVideoParams, filePath));
+    return this.progressReporter.reportProgress("RENDERING_VIDEO").andThen(() =>
+      this.videoRenderer
+        .renderVideo(renderVideoParams)
+        .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))
+        .andThen((filePath) => this.renderedVideoFrom(renderVideoParams, filePath)),
+    );
   }
 }
