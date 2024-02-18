@@ -43,16 +43,6 @@ export const RenderedVideo = z.object({
   metadata: VideoMetadata,
 });
 
-export enum UploadVideoPlatform {
-  YouTube = "youtube",
-}
-
-export type VideoDataByPlatform = {
-  [UploadVideoPlatform.YouTube]: Buffer;
-};
-
-export type VideoData = VideoDataByPlatform[UploadVideoPlatform];
-
 export type VideoMetadata = z.infer<typeof VideoMetadata>;
 export type VideoResourcePaths = z.infer<typeof VideoResourcePaths>;
 export type VideoResourceUrls = z.infer<typeof VideoResourceUrls>;
