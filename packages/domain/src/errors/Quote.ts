@@ -1,4 +1,4 @@
-import { Quote } from "Quote";
+import { Quote } from "../Quote";
 
 export class QuoteChunksInvalidError extends Error {
   readonly name: string = "QuoteChunksInvalidError";
