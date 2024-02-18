@@ -38,7 +38,7 @@ export const RenderVideoParams = z.object({
   metadata: VideoMetadata,
 });
 
-export const UploadVideoParams = z.object({
+export const RenderedVideo = z.object({
   videoPath: z.string(),
   metadata: VideoMetadata,
 });
@@ -59,4 +59,4 @@ export type VideoResourceUrls = z.infer<typeof VideoResourceUrls>;
 export type VideoConfig = z.infer<typeof VideoConfig>;
 export type VideoSection = z.infer<typeof VideoSection>;
 export type RenderVideoParams = z.infer<typeof RenderVideoParams>;
-export type UploadVideoParams = z.infer<typeof UploadVideoParams>;
+export type RenderedVideo = z.infer<typeof RenderedVideo>;

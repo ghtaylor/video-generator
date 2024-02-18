@@ -1,12 +1,9 @@
-export class UnexpectedError extends Error {
+import { BaseError, ErrorOptions } from "./BaseError";
+
+export class UnexpectedError extends BaseError {
   readonly name = "UnexpectedError";
 
-  constructor(originalError?: unknown) {
-    const message = "An unexpected error occurred";
-    super(originalError && originalError instanceof Error ? `${message} (${originalError.message})` : message);
-
-    if (originalError && originalError instanceof Error) {
-      this.stack = `${this.stack}\nCaused by: ${originalError.stack}`;
-    }
+  constructor(options?: ErrorOptions) {
+    super("An unexpected error occurred", options);
   }
 }

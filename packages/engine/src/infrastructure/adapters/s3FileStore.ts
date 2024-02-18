@@ -20,7 +20,7 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new ServiceError("Failed to store file", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to store file", { originalError: error }),
     ).map(() => path);
   }
 
@@ -32,7 +32,7 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new ServiceError("Failed to list files", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to list files", { originalError: error }),
     ).map((response) => {
       if (response.Contents === undefined) return [];
 
@@ -52,7 +52,7 @@ export class S3FileStore implements FileStore {
       getSignedUrl(this.s3Client, command, {
         expiresIn: 60 * 60,
       }),
-      (error) => new ServiceError("Failed to get file url", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to get file url", { originalError: error }),
     );
   }
 
@@ -64,14 +64,14 @@ export class S3FileStore implements FileStore {
 
     return fromPromise(
       this.s3Client.send(command),
-      (error) => new ServiceError("Failed to get file", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Failed to get file", { originalError: error }),
     )
       .andThen((response) => {
         if (response.Body === undefined) return errAsync(new ServiceError("Failed to get file"));
 
         return fromPromise(
           response.Body.transformToByteArray(),
-          (err) => new ServiceError("Failed to transform file to byte array", err instanceof Error ? err : undefined),
+          (error) => new ServiceError("Failed to transform file to byte array", { originalError: error }),
         );
       })
       .map(Buffer.from);

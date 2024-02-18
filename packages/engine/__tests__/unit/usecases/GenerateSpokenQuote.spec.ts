@@ -1,21 +1,19 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
-import { MessageSender } from "@core/messageSender";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Speech, SpeechMark } from "@video-generator/domain/Speech";
-import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
+import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { errAsync, okAsync } from "neverthrow";
 import { mock } from "vitest-mock-extended";
 
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
-  const spokenQuoteMessageSender = mock<MessageSender<SpokenQuote>>();
 
-  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, spokenQuoteMessageSender);
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore);
 
   describe("`createSpokenQuote`", () => {
     const VALID_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
@@ -333,6 +331,85 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
           ],
         },
       ],
+      [
+        {
+          title: "A Title",
+          text: "This is an example. There are three chunks. With a hyphenated-word",
+          chunks: ["This is an example.", "There are three chunks.", "With a hyphenated-word"],
+        },
+        [
+          {
+            value: "this",
+            time: 0,
+          },
+          {
+            value: "is",
+            time: 120,
+          },
+          {
+            value: "an",
+            time: 240,
+          },
+          {
+            value: "example",
+            time: 360,
+          },
+          {
+            value: "There",
+            time: 490,
+          },
+          {
+            value: "are",
+            time: 610,
+          },
+          {
+            value: "three",
+            time: 730,
+          },
+          {
+            value: "chunks",
+            time: 850,
+          },
+          {
+            value: "with",
+            time: 1020,
+          },
+          {
+            value: "a",
+            time: 1100,
+          },
+          {
+            value: "hyphenated",
+            time: 1150,
+          },
+          {
+            value: "word",
+            time: 1250,
+          },
+        ],
+        {
+          title: "A Title",
+          text: "This is an example. There are three chunks. With a hyphenated-word",
+          speechAudioPath: VALID_SPEECH_AUDIO_FILE_PATH,
+          chunks: [
+            {
+              value: "This is an example.",
+              start: 0,
+              end: 490,
+            },
+            {
+              value: "There are three chunks.",
+              start: 490,
+              end: 1020,
+            },
+            {
+              value: "With a hyphenated-word",
+              start: 1020,
+              end: 1250 + END_DELAY,
+            },
+          ],
+        },
+      ],
     ])("GIVEN a Quote and SpeechMarks that are valid", (quote, speechMarks, expectedSpokenQuote) => {
       test("THEN `createSpokenQuote` should return a result with the SpokenQuote", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(
@@ -438,7 +515,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         ],
       ],
     ])("GIVEN a Quote, but the Speech has marks that do not match the Quote", (quote, speechMarks) => {
-      test("THEN `createSpokenQuote` should return a result with a SpokenQuoteMarksInvalidError", () => {
+      test("THEN `createSpokenQuote` should return a result with a SpokenQuoteSpeechMarksInvalidError", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(
           quote,
           speechMarks,
@@ -446,7 +523,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
           END_DELAY,
         );
 
-        expect(result._unsafeUnwrapErr()).toBeInstanceOf(SpokenQuoteMarksInvalidError);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(SpokenQuoteSpeechMarksInvalidError);
       });
     });
   });
@@ -494,47 +571,16 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       ],
     };
 
-    const VALID_SPOKEN_QUOTE: SpokenQuote = {
-      title: "A Title",
-      text: "This is an example, a good one.",
-      speechAudioPath: STORED_SPEECH_AUDIO_FILE_PATH,
-      chunks: [
-        {
-          value: "This is an example,",
-          start: 0,
-          end: 490,
-        },
-        {
-          value: "a good one.",
-          start: 490,
-          end: 730,
-        },
-      ],
-    };
-
     describe("GIVEN all integrations are successful", () => {
       beforeEach(() => {
         speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
         fileStore.store.mockReturnValue(okAsync(STORED_SPEECH_AUDIO_FILE_PATH));
-        spokenQuoteMessageSender.send.mockReturnValue(okAsync(VALID_SPOKEN_QUOTE));
       });
 
       test("THEN `execute` should return a successful result", async () => {
         const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
 
         expect(result.isOk()).toBe(true);
-      });
-
-      describe("EXCEPT sending the SpokenQuote message fails due to a ServiceError", () => {
-        beforeEach(() => {
-          spokenQuoteMessageSender.send.mockReturnValue(errAsync(new ServiceError("Failed to send spoken quote.")));
-        });
-
-        test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
-
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
-        });
       });
 
       describe("EXCEPT storing the Speech audio fails due to a ServiceError", () => {

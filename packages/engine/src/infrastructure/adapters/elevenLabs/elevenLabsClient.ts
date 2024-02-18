@@ -11,8 +11,8 @@ export class ElevenLabsClient {
 
   getWebSocketResponses(text: string): ResultAsync<ElevenLabsWSResponse[], ServiceError | ParseError> {
     return fromPromise(this.getWebSocketResponsesPromise(text), (error) => {
-      if (error instanceof ZodError) return new ParseError("Failed to parse response", error);
-      return new ServiceError("ElevenLabs API error", error instanceof Error ? error : undefined);
+      if (error instanceof ZodError) return new ParseError("Failed to parse response", { originalError: error });
+      return new ServiceError("ElevenLabs API error", { originalError: error });
     });
   }
 

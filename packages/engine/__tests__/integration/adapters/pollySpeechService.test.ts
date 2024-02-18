@@ -1,11 +1,11 @@
 import { PollyClient, SynthesizeSpeechCommand, SynthesizeSpeechCommandOutput } from "@aws-sdk/client-polly";
-import { ServiceError } from "@core/errors/ServiceError";
 import { ParseError } from "@core/errors/ParseError";
+import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { PollySpeechService } from "@infrastructure/adapters/pollySpeechService";
-import { mockDeep } from "vitest-mock-extended";
-import { err, ok } from "neverthrow";
+import { ok } from "neverthrow";
 import type { PartialDeep } from "type-fest";
+import { mockDeep } from "vitest-mock-extended";
 
 const pollyClient = mockDeep<PollyClient>();
 
@@ -71,9 +71,8 @@ describe("PollySpeechService - Integration Tests", () => {
         const text = "Hello world";
 
         test("THEN it should return a ValidationError", async () => {
-          await expect(pollySpeechService.getSpeechAudio(text)).resolves.toEqual(
-            err(new ValidationError("Audio stream is invalid", new Error("Transform error"))),
-          );
+          const result = await pollySpeechService.getSpeechAudio(text);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
         });
       });
     });

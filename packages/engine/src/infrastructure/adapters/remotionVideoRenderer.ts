@@ -20,7 +20,7 @@ export class RemotionVideoRenderer implements VideoRenderer {
         id: this.videoId,
         inputProps: params,
       }),
-      (error) => new VideoRenderError("Failed to select composition", error instanceof Error ? error : undefined),
+      (error) => new VideoRenderError("Failed to select composition", { originalError: error }),
     );
   }
 
@@ -38,7 +38,7 @@ export class RemotionVideoRenderer implements VideoRenderer {
           console.log("Progress:", progress);
         },
       }),
-      (error) => new VideoRenderError("Failed to render media", error instanceof Error ? error : undefined),
+      (error) => new VideoRenderError("Failed to render media", { originalError: error }),
     ).andThen(({ buffer }) => {
       if (buffer === null) return errAsync(new VideoRenderError("Failed to render media due to null buffer"));
       return okAsync(buffer);

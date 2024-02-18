@@ -1,14 +1,9 @@
-export class ServiceError extends Error {
+import { BaseError, ErrorOptions } from "./BaseError";
+
+export class ServiceError extends BaseError {
   readonly name = "ServiceError";
-  originalError?: Error;
 
-  constructor(message: string, originalError?: Error) {
-    super(originalError ? `${message} (${originalError.message})` : message);
-
-    this.originalError = originalError;
-
-    if (originalError) {
-      this.stack = `${this.stack}\nCaused by: ${originalError.stack}`;
-    }
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
   }
 }

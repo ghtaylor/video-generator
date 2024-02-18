@@ -1,11 +1,11 @@
 import { ParseError } from "@core/errors/ParseError";
-import { ValidationError } from "@core/errors/ValidationError";
-import { Quote } from "@video-generator/domain/Quote";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
-import { mock } from "vitest-mock-extended";
+import { Quote } from "@video-generator/domain/Quote";
+import { QuoteChunksInvalidError } from "@video-generator/domain/errors/Quote";
 import { ok } from "neverthrow";
 import OpenAI from "openai";
 import { ChatCompletion } from "openai/resources/chat/completions";
+import { mock } from "vitest-mock-extended";
 import { buildChatCompletion } from "../../helpers/openAi";
 
 const openAiClient = mock<OpenAI>();
@@ -51,9 +51,9 @@ describe("OpenAiQuoteService - Unit Tests", () => {
       },
     ])("GIVEN a Quote that is invalid (chunks do not match text)", (invalidQuote) => {
       describe("WHEN `validateQuote` is called", () => {
-        test("THEN it returns a ValidationError", () => {
+        test("THEN it returns a QuoteChunksInvalidError", () => {
           const result = openAiQuoteService.validateQuote(invalidQuote);
-          expect(result._unsafeUnwrapErr()).toBeInstanceOf(ValidationError);
+          expect(result._unsafeUnwrapErr()).toBeInstanceOf(QuoteChunksInvalidError);
         });
       });
     });

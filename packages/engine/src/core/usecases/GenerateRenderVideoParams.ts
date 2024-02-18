@@ -2,7 +2,6 @@ import { ServiceError } from "@core/errors/ServiceError";
 import { UnexpectedError } from "@core/errors/UnexpectedError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
-import { MessageSender } from "@core/messageSender";
 import { FilePath, FileUrl } from "@video-generator/domain/File";
 import { SpokenQuote } from "@video-generator/domain/Quote";
 import {
@@ -15,10 +14,7 @@ import {
 import { Result, ResultAsync, errAsync, fromThrowable, ok, okAsync } from "neverthrow";
 
 export class GenerateRenderVideoParamsUseCase {
-  constructor(
-    private readonly fileStore: FileStore,
-    private readonly onComplete: MessageSender<RenderVideoParams>,
-  ) {}
+  constructor(private readonly fileStore: FileStore) {}
 
   videoResourceUrlsFrom({
     backgroundVideoPaths,
@@ -79,7 +75,7 @@ export class GenerateRenderVideoParamsUseCase {
           },
         };
       },
-      (error) => new UnexpectedError(error),
+      (error) => new UnexpectedError({ originalError: error }),
     )();
   }
 
@@ -95,8 +91,6 @@ export class GenerateRenderVideoParamsUseCase {
       backgroundVideoPaths: videoConfig.backgroundVideoPaths,
       speechAudioPath: spokenQuote.speechAudioPath,
       musicAudioPath: videoConfig.musicAudioPath,
-    })
-      .andThen((videoResources) => this.renderVideoParamsFrom(spokenQuote, videoResources, videoConfig.fps))
-      .andThen(this.onComplete.send.bind(this.onComplete));
+    }).andThen((videoResources) => this.renderVideoParamsFrom(spokenQuote, videoResources, videoConfig.fps));
   }
 }

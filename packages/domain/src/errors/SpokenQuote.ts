@@ -1,7 +1,14 @@
-export class SpokenQuoteMarksInvalidError extends Error {
-  readonly name: string = "SpokenQuoteMarksInvalidError";
+import { Quote } from "Quote";
+import { SpeechMark } from "../Speech";
 
-  constructor() {
-    super("Speech marks do not match quote text");
+export class SpokenQuoteSpeechMarksInvalidError extends Error {
+  readonly name: string = "SpokenQuoteSpeechMarksInvalidError";
+
+  constructor(
+    message: string,
+    readonly speechMarks: SpeechMark[],
+    readonly quote: Quote,
+  ) {
+    super(`Speech marks do not match quote text (${message})`);
   }
 }

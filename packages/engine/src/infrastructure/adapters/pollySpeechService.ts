@@ -16,14 +16,14 @@ export class PollySpeechService implements SpeechService {
           .trim()
           .split("\n")
           .map((rawSpeechMark) => SpeechMark.parse(JSON.parse(rawSpeechMark))),
-      (error) => new ParseError("Invalid SpeechMarks provided by Polly", error instanceof Error ? error : undefined),
+      (error) => new ParseError("Invalid SpeechMarks provided by Polly", { originalError: error }),
     )();
   }
 
   private sendPollyCommand(command: SynthesizeSpeechCommand): ResultAsync<SynthesizeSpeechCommandOutput, ServiceError> {
     return fromPromise(
       this.pollyClient.send(command),
-      (error) => new ServiceError("Polly API error", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Polly API error", { originalError: error }),
     );
   }
 
@@ -34,7 +34,7 @@ export class PollySpeechService implements SpeechService {
 
     return fromPromise(
       audioStream.transformToByteArray(),
-      (error) => new ValidationError("Audio stream is invalid", error instanceof Error ? error : undefined),
+      (error) => new ValidationError("Audio stream is invalid", { originalError: error }),
     ).map((byteArray) => Buffer.from(byteArray));
   }
 

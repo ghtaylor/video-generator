@@ -1,11 +1,9 @@
-export class VideoRenderError extends Error {
+import { BaseError, ErrorOptions } from "./BaseError";
+
+export class VideoRenderError extends BaseError {
   readonly name = "VideoRenderError";
 
-  constructor(message: string, originalError?: Error) {
-    super(originalError ? `${message} (${originalError.message})` : message);
-
-    if (originalError) {
-      this.stack = `${this.stack}\nCaused by: ${originalError.stack}`;
-    }
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
   }
 }

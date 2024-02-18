@@ -24,7 +24,7 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
 
     return fromPromise(
       oAuthClient.getAccessToken(),
-      (error) => new ServiceError("Error getting access token for YouTube", error instanceof Error ? error : undefined),
+      (error) => new ServiceError("Error getting access token for YouTube", { originalError: error }),
     ).andThen(({ token }) => {
       if (!token) return errAsync(new ServiceError("No token in response from Google"));
       return okAsync(token);
@@ -34,7 +34,10 @@ export class YoutubeUploader implements VideoUploader<UploadVideoPlatform.YouTub
   private insertYoutubeVideo(insert: youtube_v3.Params$Resource$Videos$Insert): ResultAsync<string, ServiceError> {
     return fromPromise(
       google.youtube("v3").videos.insert(insert),
-      (error) => new ServiceError("Error uploading video to YouTube", error instanceof Error ? error : undefined),
+      (error) =>
+        new ServiceError("Error uploading video to YouTube", {
+          originalError: error,
+        }),
     ).andThen((a) => {
       if (a.status !== 200) return errAsync(new ServiceError("Error uploading video to YouTube"));
       return okAsync(a.data.id!);

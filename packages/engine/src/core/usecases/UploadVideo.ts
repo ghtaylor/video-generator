@@ -3,7 +3,7 @@ import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
 import { VideoId, VideoUploader } from "@core/videoUploader";
 import { FilePath } from "@video-generator/domain/File";
-import { UploadVideoParams, UploadVideoPlatform, VideoData } from "@video-generator/domain/Video";
+import { RenderedVideo, UploadVideoPlatform, VideoData } from "@video-generator/domain/Video";
 import { ResultAsync } from "neverthrow";
 
 export class UploadVideoUseCase {
@@ -19,7 +19,7 @@ export class UploadVideoUseCase {
     // return this.fileStore.getUrl(videoPath);
   }
 
-  execute({ videoPath, metadata }: UploadVideoParams): ResultAsync<VideoId, ServiceError | ValidationError> {
+  execute({ videoPath, metadata }: RenderedVideo): ResultAsync<VideoId, ServiceError | ValidationError> {
     return this.getVideoData(videoPath).andThen((videoData) => this.videoUploader.upload(videoData, metadata));
   }
 }
