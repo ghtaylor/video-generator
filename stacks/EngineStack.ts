@@ -55,28 +55,38 @@ export function EngineStack({ stack }: StackContext) {
     },
   });
 
-  const sGenerateQuote = new tasks.LambdaInvoke(stack, generateQuoteFunction.functionName, {
-    lambdaFunction: generateQuoteFunction,
+  const onErrorFunction = new Function(stack, "OnError", {
+    handler: `${ENGINE_DIR}/src/infrastructure/handlers/onError.default`,
   });
 
-  const sGenerateSpokenQuote = new tasks.LambdaInvoke(stack, generateSpokenQuoteFunction.functionName, {
+  const sGenerateQuote = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
+    lambdaFunction: generateQuoteFunction,
+  }).addRetry({ errors: ["QuoteChunksInvalidError"], maxAttempts: 2 });
+
+  const sGenerateSpokenQuote = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
     lambdaFunction: generateSpokenQuoteFunction,
     payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
   });
 
-  const sGenerateRenderVideoParams = new tasks.LambdaInvoke(stack, generateRenderVideoParamsFunction.functionName, {
+  const sGenerateRenderVideoParams = new tasks.LambdaInvoke(stack, "GenerateRenderVideoParamsTask", {
     lambdaFunction: generateRenderVideoParamsFunction,
     payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
   });
 
-  const sRenderVideo = new tasks.LambdaInvoke(stack, renderVideoFunction.functionName, {
+  const sRenderVideo = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
     lambdaFunction: renderVideoFunction,
     payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
   });
 
+  const sOnError = new tasks.LambdaInvoke(stack, "OnErrorTask", {
+    lambdaFunction: onErrorFunction,
+  });
+
+  const generateQuoteVideoBlock = new sfn.Parallel(stack, "GenerateQuoteVideoBlock")
+    .branch(sGenerateQuote.next(sGenerateSpokenQuote).next(sGenerateRenderVideoParams).next(sRenderVideo))
+    .addCatch(sOnError);
+
   new sfn.StateMachine(stack, "GenerateQuoteVideoMachine", {
-    definitionBody: sfn.DefinitionBody.fromChainable(
-      sGenerateQuote.next(sGenerateSpokenQuote).next(sGenerateRenderVideoParams).next(sRenderVideo),
-    ),
+    definitionBody: sfn.DefinitionBody.fromChainable(generateQuoteVideoBlock),
   });
 }
