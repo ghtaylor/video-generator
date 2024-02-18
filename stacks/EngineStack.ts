@@ -61,21 +61,41 @@ export function EngineStack({ stack }: StackContext) {
 
   const sGenerateQuote = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
     lambdaFunction: generateQuoteFunction,
+    inputPath: "$.quoteParams",
+    resultSelector: {
+      data: sfn.JsonPath.objectAt("$.Payload"),
+    },
+    resultPath: "$.quote",
   }).addRetry({ errors: ["QuoteChunksInvalidError"], maxAttempts: 2 });
 
   const sGenerateSpokenQuote = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
     lambdaFunction: generateSpokenQuoteFunction,
-    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+    inputPath: "$.quote.data",
+    resultSelector: {
+      data: sfn.JsonPath.objectAt("$.Payload"),
+    },
+    resultPath: "$.spokenQuote",
   });
 
   const sGenerateRenderVideoParams = new tasks.LambdaInvoke(stack, "GenerateRenderVideoParamsTask", {
     lambdaFunction: generateRenderVideoParamsFunction,
-    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+    payload: sfn.TaskInput.fromObject({
+      spokenQuote: sfn.JsonPath.objectAt("$.spokenQuote.data"),
+      videoConfig: sfn.JsonPath.objectAt("$.videoConfig"),
+    }),
+    resultSelector: {
+      data: sfn.JsonPath.objectAt("$.Payload"),
+    },
+    resultPath: "$.renderVideoParams",
   });
 
   const sRenderVideo = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
     lambdaFunction: renderVideoFunction,
-    payload: sfn.TaskInput.fromJsonPathAt("$.Payload"),
+    inputPath: "$.renderVideoParams.data",
+    resultSelector: {
+      data: sfn.JsonPath.objectAt("$.Payload"),
+    },
+    resultPath: "$.renderedVideo",
   });
 
   const sOnError = new tasks.LambdaInvoke(stack, "OnErrorTask", {
