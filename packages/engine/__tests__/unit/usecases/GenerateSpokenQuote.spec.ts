@@ -5,7 +5,7 @@ import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Speech, SpeechMark } from "@video-generator/domain/Speech";
-import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
+import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { errAsync, okAsync } from "neverthrow";
 import { mock } from "vitest-mock-extended";
 
@@ -515,7 +515,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         ],
       ],
     ])("GIVEN a Quote, but the Speech has marks that do not match the Quote", (quote, speechMarks) => {
-      test("THEN `createSpokenQuote` should return a result with a SpokenQuoteMarksInvalidError", () => {
+      test("THEN `createSpokenQuote` should return a result with a SpokenQuoteSpeechMarksInvalidError", () => {
         const result = generateSpokenQuoteUseCase.createSpokenQuote(
           quote,
           speechMarks,
@@ -523,7 +523,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
           END_DELAY,
         );
 
-        expect(result._unsafeUnwrapErr()).toBeInstanceOf(SpokenQuoteMarksInvalidError);
+        expect(result._unsafeUnwrapErr()).toBeInstanceOf(SpokenQuoteSpeechMarksInvalidError);
       });
     });
   });

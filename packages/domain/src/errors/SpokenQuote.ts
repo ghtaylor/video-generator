@@ -1,8 +1,8 @@
 import { Quote } from "Quote";
 import { SpeechMark } from "../Speech";
 
-export class SpokenQuoteMarksInvalidError extends Error {
-  readonly name: string = "SpokenQuoteMarksInvalidError";
+export class SpokenQuoteSpeechMarksInvalidError extends Error {
+  readonly name: string = "SpokenQuoteSpeechMarksInvalidError";
 
   constructor(
     message: string,

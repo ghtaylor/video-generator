@@ -6,7 +6,7 @@ import { SpeechService } from "@core/speechService";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
 import { SpeechMark } from "@video-generator/domain/Speech";
-import { SpokenQuoteMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
+import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { Result, ResultAsync, err, ok } from "neverthrow";
 
 export class GenerateSpokenQuoteUseCase {
@@ -20,7 +20,7 @@ export class GenerateSpokenQuoteUseCase {
     speechMarks: SpeechMark[],
     speechAudioPath: FilePath,
     endDelay: number = 2000,
-  ): Result<SpokenQuote, SpokenQuoteMarksInvalidError> {
+  ): Result<SpokenQuote, SpokenQuoteSpeechMarksInvalidError> {
     const chunks: SpokenQuoteChunk[] = [];
 
     for (let chunkIndex = 0; chunkIndex < quote.chunks.length; chunkIndex++) {
@@ -38,7 +38,7 @@ export class GenerateSpokenQuoteUseCase {
 
         if (word.toLowerCase() !== speechMarks[wordIndex]?.value.toLowerCase())
           return err(
-            new SpokenQuoteMarksInvalidError(
+            new SpokenQuoteSpeechMarksInvalidError(
               `Chunk word '${word.toLowerCase()} != Speech marks word '${speechMarks[wordIndex]?.value.toLowerCase()}'`,
               speechMarks,
               quote,
@@ -62,7 +62,9 @@ export class GenerateSpokenQuoteUseCase {
     }
 
     if (speechMarks.length > 0)
-      return err(new SpokenQuoteMarksInvalidError(`Leftover speech marks: ${speechMarks.length}`, speechMarks, quote));
+      return err(
+        new SpokenQuoteSpeechMarksInvalidError(`Leftover speech marks: ${speechMarks.length}`, speechMarks, quote),
+      );
 
     return ok({
       title: quote.title,
@@ -78,7 +80,7 @@ export class GenerateSpokenQuoteUseCase {
 
   execute(
     quote: Quote,
-  ): ResultAsync<SpokenQuote, SpokenQuoteMarksInvalidError | ServiceError | ValidationError | ParseError> {
+  ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
     return this.speechService
       .generateSpeech(quote.text)
       .andThen((speech) =>
