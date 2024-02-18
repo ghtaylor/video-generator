@@ -59,7 +59,7 @@ export function EngineStack({ stack }: StackContext) {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/onError.default`,
   });
 
-  const sGenerateQuote = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
+  const generateQuoteTask = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
     lambdaFunction: generateQuoteFunction,
     inputPath: "$.quoteParams",
     resultSelector: {
@@ -68,7 +68,7 @@ export function EngineStack({ stack }: StackContext) {
     resultPath: "$.quote",
   }).addRetry({ errors: ["QuoteChunksInvalidError"], maxAttempts: 2 });
 
-  const sGenerateSpokenQuote = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
+  const generateSpokenQuoteTask = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
     lambdaFunction: generateSpokenQuoteFunction,
     inputPath: "$.quote.data",
     resultSelector: {
@@ -77,7 +77,7 @@ export function EngineStack({ stack }: StackContext) {
     resultPath: "$.spokenQuote",
   });
 
-  const sGenerateRenderVideoParams = new tasks.LambdaInvoke(stack, "GenerateRenderVideoParamsTask", {
+  const generateRenderVideoParamsTask = new tasks.LambdaInvoke(stack, "GenerateRenderVideoParamsTask", {
     lambdaFunction: generateRenderVideoParamsFunction,
     payload: sfn.TaskInput.fromObject({
       spokenQuote: sfn.JsonPath.objectAt("$.spokenQuote.data"),
@@ -89,7 +89,7 @@ export function EngineStack({ stack }: StackContext) {
     resultPath: "$.renderVideoParams",
   });
 
-  const sRenderVideo = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
+  const renderVideoTask = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
     lambdaFunction: renderVideoFunction,
     inputPath: "$.renderVideoParams.data",
     resultSelector: {
@@ -98,15 +98,15 @@ export function EngineStack({ stack }: StackContext) {
     resultPath: "$.renderedVideo",
   });
 
-  const sOnError = new tasks.LambdaInvoke(stack, "OnErrorTask", {
+  const onErrorTask = new tasks.LambdaInvoke(stack, "OnErrorTask", {
     lambdaFunction: onErrorFunction,
   });
 
-  const generateQuoteVideoBlock = new sfn.Parallel(stack, "GenerateQuoteVideoBlock")
-    .branch(sGenerateQuote.next(sGenerateSpokenQuote).next(sGenerateRenderVideoParams).next(sRenderVideo))
-    .addCatch(sOnError);
+  const engineBlock = new sfn.Parallel(stack, "EngineBlock")
+    .branch(generateQuoteTask.next(generateSpokenQuoteTask).next(generateRenderVideoParamsTask).next(renderVideoTask))
+    .addCatch(onErrorTask);
 
-  new sfn.StateMachine(stack, "GenerateQuoteVideoMachine", {
-    definitionBody: sfn.DefinitionBody.fromChainable(generateQuoteVideoBlock),
+  new sfn.StateMachine(stack, "Engine", {
+    definitionBody: sfn.DefinitionBody.fromChainable(engineBlock),
   });
 }
