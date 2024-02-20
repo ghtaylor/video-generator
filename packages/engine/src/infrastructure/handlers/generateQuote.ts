@@ -24,7 +24,7 @@ export class GenerateQuoteHandler {
     const quoteService: QuoteService = new OpenAIQuoteService(openAIClient);
 
     const eventBridgeClient = new EventBridgeClient({});
-    const progressReporter = new EventBridgeProgressReporter(eventBridgeClient, eventBusName, logger);
+    const progressReporter = new EventBridgeProgressReporter(eventBridgeClient, eventBusName);
 
     const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, progressReporter);
 

@@ -1,6 +1,5 @@
 import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput } from "@aws-sdk/client-eventbridge";
 import { ServiceError } from "@core/errors/ServiceError";
-import { Logger } from "@core/logger";
 import { ProgressReporter } from "@core/progressReporter";
 import { Progress, State } from "@video-generator/domain/Progress";
 import { ResultAsync, errAsync, fromPromise, okAsync } from "neverthrow";
@@ -9,7 +8,6 @@ export class EventBridgeProgressReporter implements ProgressReporter {
   constructor(
     private readonly eventBridge: EventBridgeClient,
     private readonly eventBusName: string,
-    private readonly logger?: Logger,
   ) {}
 
   private progressFrom(state: State): Progress {
