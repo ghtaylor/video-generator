@@ -15,7 +15,7 @@ export class GenerateQuoteUseCase {
 
   execute(prompt: string): ResultAsync<Quote, ParseError | QuoteChunksInvalidError | ServiceError | UnexpectedError> {
     return this.progressReporter
-      .reportProgress("GENERATING_QUOTE")
+      .reportProgress({ state: "GENERATING_QUOTE", progress: 0.25 })
       .andThen(() => this.quoteService.generateQuote(prompt));
   }
 }

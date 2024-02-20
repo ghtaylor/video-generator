@@ -29,7 +29,7 @@ export class RenderVideoUseCase {
   }
 
   execute(renderVideoParams: RenderVideoParams): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
-    return this.progressReporter.reportProgress("RENDERING_VIDEO").andThen(() =>
+    return this.progressReporter.reportProgress({ state: "RENDERING_VIDEO", progress: 0.75 }).andThen(() =>
       this.videoRenderer
         .renderVideo(renderVideoParams)
         .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))

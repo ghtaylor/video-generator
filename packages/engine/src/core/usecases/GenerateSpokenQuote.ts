@@ -84,7 +84,7 @@ export class GenerateSpokenQuoteUseCase {
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
     return this.progressReporter
-      .reportProgress("GENERATING_SPEECH")
+      .reportProgress({ state: "GENERATING_SPEECH", progress: 0.5 })
       .andThen(() =>
         this.speechService
           .generateSpeech(quote.text)
