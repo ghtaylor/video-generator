@@ -1,7 +1,7 @@
 import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput } from "@aws-sdk/client-eventbridge";
 import { ServiceError } from "@core/errors/ServiceError";
 import { ProgressReporter } from "@core/progressReporter";
-import { Progress } from "@video-generator/domain/Progress";
+import { EngineProgress } from "@video-generator/domain/Engine";
 import { ResultAsync, errAsync, fromPromise, okAsync } from "neverthrow";
 
 export class EventBridgeProgressReporter implements ProgressReporter {
@@ -17,7 +17,7 @@ export class EventBridgeProgressReporter implements ProgressReporter {
     );
   }
 
-  reportProgress(progress: Progress): ResultAsync<Progress, ServiceError> {
+  reportProgress(progress: EngineProgress): ResultAsync<EngineProgress, ServiceError> {
     const command = new PutEventsCommand({
       Entries: [
         {

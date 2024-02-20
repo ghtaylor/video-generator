@@ -1,7 +1,7 @@
-import { Progress } from "@video-generator/domain/Progress";
+import { EngineProgress } from "@video-generator/domain/Engine";
 import { ResultAsync } from "neverthrow";
 import { ServiceError } from "./errors/ServiceError";
 
 export interface ProgressReporter {
-  reportProgress(progress: Progress): ResultAsync<Progress, ServiceError>;
+  reportProgress(progress: EngineProgress): ResultAsync<EngineProgress, ServiceError>;
 }

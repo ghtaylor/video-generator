@@ -4,7 +4,7 @@ import { ProgressReporter } from "@core/progressReporter";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
-import { Progress } from "@video-generator/domain/Progress";
+import { EngineProgress } from "@video-generator/domain/Engine";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Speech, SpeechMark } from "@video-generator/domain/Speech";
 import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
@@ -574,7 +574,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       ],
     };
 
-    const VALID_PROGRESS: Progress = {
+    const VALID_PROGRESS: EngineProgress = {
       state: "GENERATING_SPEECH",
       progress: 0.5,
     };
