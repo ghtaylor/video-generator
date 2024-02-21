@@ -22,7 +22,7 @@ export class EventBridgeProgressReporter implements ProgressReporter {
       Entries: [
         {
           Source: "video-generator",
-          DetailType: "progressReported",
+          DetailType: "engineProgressReported",
           Detail: JSON.stringify(progress),
           EventBusName: this.eventBusName,
         },
