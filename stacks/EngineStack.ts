@@ -57,8 +57,14 @@ export function EngineStack({ stack }: StackContext) {
     },
   });
 
+  const onDoneFunction = new Function(stack, "OnDone", {
+    handler: `${ENGINE_DIR}/src/infrastructure/handlers/onDone.default`,
+    bind: [eventBus],
+  });
+
   const onErrorFunction = new Function(stack, "OnError", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/onError.default`,
+    bind: [eventBus],
   });
 
   const generateQuoteTask = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
@@ -104,9 +110,14 @@ export function EngineStack({ stack }: StackContext) {
     lambdaFunction: onErrorFunction,
   });
 
+  const onDoneTask = new tasks.LambdaInvoke(stack, "OnDoneTask", {
+    lambdaFunction: onDoneFunction,
+  });
+
   const engineBlock = new sfn.Parallel(stack, "EngineBlock")
     .branch(generateQuoteTask.next(generateSpokenQuoteTask).next(generateRenderVideoParamsTask).next(renderVideoTask))
-    .addCatch(onErrorTask);
+    .addCatch(onErrorTask)
+    .next(onDoneTask);
 
   new sfn.StateMachine(stack, "Engine", {
     definitionBody: sfn.DefinitionBody.fromChainable(engineBlock),

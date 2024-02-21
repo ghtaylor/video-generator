@@ -21,8 +21,8 @@ export class EventBridgeProgressReporter implements ProgressReporter {
     const command = new PutEventsCommand({
       Entries: [
         {
-          Source: "video-generator",
-          DetailType: "engineProgressReported",
+          Source: "vidgen.engine",
+          DetailType: "progressReported",
           Detail: JSON.stringify(progress),
           EventBusName: this.eventBusName,
         },
