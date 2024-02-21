@@ -14,7 +14,7 @@ export class RenderVideoUseCase {
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
     private readonly progressReporter: ProgressReporter,
-    readonly START_ENGINE_PROGRESS = 0.75,
+    readonly START_ENGINE_PROGRESS = 0.5,
     readonly END_ENGINE_PROGRESS = 0.95,
   ) {}
 
