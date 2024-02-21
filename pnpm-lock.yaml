@@ -83,6 +83,9 @@ importers:
       googleapis:
         specifier: ^128.0.0
         version: 128.0.0
+      lodash.round:
+        specifier: ^4.0.4
+        version: 4.0.4
       lodash.shuffle:
         specifier: ^4.2.0
         version: 4.2.0
@@ -117,6 +120,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.124
         version: 8.10.132
+      '@types/lodash.round':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/lodash.shuffle':
         specifier: ^4.2.8
         version: 4.2.9
@@ -4536,6 +4542,12 @@ packages:
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
+  /@types/lodash.round@4.0.9:
+    resolution: {integrity: sha512-rP29rMt+DQs4AwWLUUclI17+nrTZ63o9+rwZOzqVV+U3dRDzdnXZwz2LLweBnhYhhHH4eJOdvCYHKxAgdcbjyA==}
+    dependencies:
+      '@types/lodash': 4.14.202
+    dev: true
+
   /@types/lodash.shuffle@4.2.9:
     resolution: {integrity: sha512-4siLZ4/vQH4T7Bm4254sG4n6hh9k7vd/bqfDVoeIwSha4Itu3MuoTxPX2I2Tue2JN94y7Y2I27QzwHZLdMlrBg==}
     dependencies:
@@ -7533,6 +7545,10 @@ packages:
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
+
+  /lodash.round@4.0.4:
+    resolution: {integrity: sha512-dzDLNwFMXbjN1pEC0LgLPKVOI5o2DOpBx+oGxWthVE+a9mlV3rEdvoz2i3se/ico4Y3G62Yg3/e1fcp/GMu2lQ==}
+    dev: false
 
   /lodash.shuffle@4.2.0:
     resolution: {integrity: sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==}

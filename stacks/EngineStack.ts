@@ -24,7 +24,7 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateSpokenQuote.default`,
-    bind: [bucket, ELEVEN_LABS_CONFIG],
+    bind: [bucket, eventBus, ELEVEN_LABS_CONFIG],
     timeout: "30 seconds",
     // Required for Polly
     // permissions: ["polly:SynthesizeSpeech"],
@@ -37,7 +37,7 @@ export function EngineStack({ stack }: StackContext) {
 
   const renderVideoFunction = new Function(stack, "RenderVideo", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/renderVideo.default`,
-    bind: [bucket, videoSite],
+    bind: [bucket, eventBus, videoSite],
     retryAttempts: 0,
     architecture: "arm_64",
     runtime: "nodejs18.x",
