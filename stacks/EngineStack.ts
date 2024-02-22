@@ -67,11 +67,6 @@ export function EngineStack({ stack }: StackContext) {
     bind: [eventBus],
   });
 
-  const testFunction = new Function(stack, "Test", {
-    handler: `${ENGINE_DIR}/src/infrastructure/handlers/test.default`,
-    bind: [eventBus],
-  });
-
   const generateQuoteTask = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
     lambdaFunction: generateQuoteFunction,
     payload: sfn.TaskInput.fromObject({
@@ -149,9 +144,5 @@ export function EngineStack({ stack }: StackContext) {
         detailType: ["progressReported"],
       },
     },
-  });
-
-  eventBus.addTargets(stack, "progressReportedRule", {
-    target1: testFunction,
   });
 }
