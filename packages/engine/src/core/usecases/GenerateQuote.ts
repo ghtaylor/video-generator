@@ -3,7 +3,7 @@ import { ServiceError } from "@core/errors/ServiceError";
 import { UnexpectedError } from "@core/errors/UnexpectedError";
 import { ProgressReporter } from "@core/progressReporter";
 import { QuoteService } from "@core/quoteService";
-import { Quote } from "@video-generator/domain/Quote";
+import { GenerateQuoteParams, Quote } from "@video-generator/domain/Quote";
 import { QuoteChunksInvalidError } from "@video-generator/domain/errors/Quote";
 import { ResultAsync } from "neverthrow";
 
@@ -15,7 +15,7 @@ export class GenerateQuoteUseCase {
 
   execute(
     executionId: string,
-    prompt: string,
+    { prompt }: GenerateQuoteParams,
   ): ResultAsync<Quote, ParseError | QuoteChunksInvalidError | ServiceError | UnexpectedError> {
     return this.progressReporter
       .reportProgress({ executionId, state: "GENERATING_QUOTE", progress: 0.1 })
