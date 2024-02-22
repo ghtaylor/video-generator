@@ -81,10 +81,11 @@ export class GenerateSpokenQuoteUseCase {
   }
 
   execute(
+    executionId: string,
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
     return this.progressReporter
-      .reportProgress({ state: "GENERATING_SPEECH", progress: 0.3 })
+      .reportProgress({ executionId, state: "GENERATING_SPEECH", progress: 0.3 })
       .andThen(() =>
         this.speechService
           .generateSpeech(quote.text)

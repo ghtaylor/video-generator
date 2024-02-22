@@ -67,9 +67,17 @@ export function EngineStack({ stack }: StackContext) {
     bind: [eventBus],
   });
 
+  const testFunction = new Function(stack, "Test", {
+    handler: `${ENGINE_DIR}/src/infrastructure/handlers/test.default`,
+    bind: [eventBus],
+  });
+
   const generateQuoteTask = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
     lambdaFunction: generateQuoteFunction,
-    inputPath: "$.quoteParams",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      quoteParams: sfn.JsonPath.objectAt("$.quoteParams"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -78,7 +86,10 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateSpokenQuoteTask = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
     lambdaFunction: generateSpokenQuoteFunction,
-    inputPath: "$.quote.data",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      quote: sfn.JsonPath.objectAt("$.quote.data"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -99,7 +110,10 @@ export function EngineStack({ stack }: StackContext) {
 
   const renderVideoTask = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
     lambdaFunction: renderVideoFunction,
-    inputPath: "$.renderVideoParams.data",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      renderVideoParams: sfn.JsonPath.objectAt("$.renderVideoParams.data"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -108,10 +122,16 @@ export function EngineStack({ stack }: StackContext) {
 
   const onErrorTask = new tasks.LambdaInvoke(stack, "OnErrorTask", {
     lambdaFunction: onErrorFunction,
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+    }),
   });
 
   const onDoneTask = new tasks.LambdaInvoke(stack, "OnDoneTask", {
     lambdaFunction: onDoneFunction,
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+    }),
   });
 
   const engineBlock = new sfn.Parallel(stack, "EngineBlock")
@@ -132,6 +152,6 @@ export function EngineStack({ stack }: StackContext) {
   });
 
   eventBus.addTargets(stack, "progressReportedRule", {
-    target1: onErrorFunction,
+    target1: testFunction,
   });
 }

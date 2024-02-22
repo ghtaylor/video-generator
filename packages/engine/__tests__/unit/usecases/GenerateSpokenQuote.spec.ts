@@ -532,6 +532,8 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   });
 
   describe("WHEN the `execute` method is called", () => {
+    const VALID_EXECUTION_ID = "executionId";
+
     const STORED_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
 
     const VALID_QUOTE: Quote = {
@@ -575,6 +577,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
     };
 
     const VALID_PROGRESS: EngineProgress = {
+      executionId: VALID_EXECUTION_ID,
       state: "GENERATING_SPEECH",
       progress: 0.5,
     };
@@ -587,7 +590,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       });
 
       test("THEN `execute` should return a successful result", async () => {
-        const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+        const result = await generateSpokenQuoteUseCase.execute(VALID_EXECUTION_ID, VALID_QUOTE);
 
         expect(result.isOk()).toBe(true);
       });
@@ -598,7 +601,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         });
 
         test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+          const result = await generateSpokenQuoteUseCase.execute(VALID_EXECUTION_ID, VALID_QUOTE);
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
@@ -610,7 +613,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         });
 
         test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+          const result = await generateSpokenQuoteUseCase.execute(VALID_EXECUTION_ID, VALID_QUOTE);
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });
@@ -622,7 +625,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         });
 
         test("THEN `execute` should return a ServiceError", async () => {
-          const result = await generateSpokenQuoteUseCase.execute(VALID_QUOTE);
+          const result = await generateSpokenQuoteUseCase.execute(VALID_EXECUTION_ID, VALID_QUOTE);
 
           expect(result._unsafeUnwrapErr()).toBeInstanceOf(ServiceError);
         });

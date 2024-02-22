@@ -6,10 +6,13 @@ import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
 import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
+import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
 import { GenerateQuoteParams, Quote } from "@video-generator/domain/Quote";
 import OpenAI from "openai";
 import { Config } from "sst/node/config";
 import { EventBus } from "sst/node/event-bus";
+
+const Payload = BaseSFNPayload.extend({ quoteParams: GenerateQuoteParams });
 
 export class GenerateQuoteHandler {
   constructor(
@@ -32,8 +35,10 @@ export class GenerateQuoteHandler {
   }
 
   async handle(payload: unknown): Promise<Quote> {
-    return parseJson(payload, GenerateQuoteParams)
-      .asyncAndThen(({ prompt }) => this.generateQuoteUseCase.execute(prompt))
+    return parseJson(payload, Payload)
+      .asyncAndThen(({ quoteParams, executionId }) =>
+        this.generateQuoteUseCase.execute(executionId, quoteParams.prompt),
+      )
       .match(
         (quote) => {
           this.logger.info("Quote generated", quote);

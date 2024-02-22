@@ -10,11 +10,14 @@ import { ElevenLabsSpeechService } from "@infrastructure/adapters/elevenLabs/ele
 import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
+import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Result } from "neverthrow";
 import { Bucket } from "sst/node/bucket";
 import { Config } from "sst/node/config";
 import { EventBus } from "sst/node/event-bus";
+
+const Payload = BaseSFNPayload.extend({ quote: Quote });
 
 export class GenerateSpokenQuoteHandler {
   constructor(
@@ -46,8 +49,8 @@ export class GenerateSpokenQuoteHandler {
   }
 
   async handle(payload: unknown): Promise<SpokenQuote> {
-    return parseJson(payload, Quote)
-      .asyncAndThen(this.generateSpokenQuoteUseCase.execute.bind(this.generateSpokenQuoteUseCase))
+    return parseJson(payload, Payload)
+      .asyncAndThen(({ quote, executionId }) => this.generateSpokenQuoteUseCase.execute(executionId, quote))
       .match(
         (spokenQuote) => {
           this.logger.info("Spoken quote generated", spokenQuote);

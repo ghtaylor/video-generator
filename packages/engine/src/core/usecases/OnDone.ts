@@ -5,7 +5,7 @@ import { ResultAsync } from "neverthrow";
 export class OnDoneUseCase {
   constructor(private readonly progressReporter: ProgressReporter) {}
 
-  execute(): ResultAsync<null, ServiceError> {
-    return this.progressReporter.reportProgress({ state: "DONE", progress: 1 }).map(() => null);
+  execute(executionId: string): ResultAsync<null, ServiceError> {
+    return this.progressReporter.reportProgress({ executionId, state: "DONE", progress: 1 }).map(() => null);
   }
 }

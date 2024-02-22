@@ -9,6 +9,13 @@ import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video"
 import round from "lodash.round";
 import { Result, ResultAsync, ok } from "neverthrow";
 
+export type ReportRenderProgressParams = {
+  executionId: string;
+  renderProgress: number;
+  startEngineProgress: number;
+  endEngineProgress: number;
+};
+
 export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
@@ -32,12 +39,14 @@ export class RenderVideoUseCase {
     });
   }
 
-  engineProgressFrom(
-    renderProgress: number,
-    startEngineProgress: number,
-    endEngineProgress: number,
-  ): Result<EngineProgress, never> {
+  engineProgressFrom({
+    executionId,
+    renderProgress,
+    startEngineProgress,
+    endEngineProgress,
+  }: ReportRenderProgressParams): Result<EngineProgress, never> {
     return ok({
+      executionId,
       state: "RENDERING_VIDEO",
       progress: round(startEngineProgress + (endEngineProgress - startEngineProgress) * renderProgress, 2),
     });
@@ -45,22 +54,35 @@ export class RenderVideoUseCase {
 
   reportedRenderProgress = new Set<number>();
 
-  onRenderProgress(renderProgress: number, startEngineProgress: number, endEngineProgress: number): void {
+  reportRenderProgress({
+    executionId,
+    renderProgress,
+    startEngineProgress,
+    endEngineProgress,
+  }: ReportRenderProgressParams): void {
     const shouldReportProgress = (renderProgress * 10) % 1 === 0 && !this.reportedRenderProgress.has(renderProgress);
 
     if (shouldReportProgress) {
-      this.engineProgressFrom(renderProgress, startEngineProgress, endEngineProgress).asyncAndThen((engineProgress) =>
-        this.progressReporter.reportProgress(engineProgress),
+      this.engineProgressFrom({ executionId, renderProgress, startEngineProgress, endEngineProgress }).asyncAndThen(
+        (engineProgress) => this.progressReporter.reportProgress(engineProgress),
       );
 
       this.reportedRenderProgress.add(renderProgress);
     }
   }
 
-  execute(renderVideoParams: RenderVideoParams): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
+  execute(
+    executionId: string,
+    renderVideoParams: RenderVideoParams,
+  ): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
     return this.videoRenderer
-      .renderVideo(renderVideoParams, (progress) =>
-        this.onRenderProgress(progress, this.START_ENGINE_PROGRESS, this.END_ENGINE_PROGRESS),
+      .renderVideo(renderVideoParams, (renderProgress) =>
+        this.reportRenderProgress({
+          executionId,
+          renderProgress,
+          startEngineProgress: this.START_ENGINE_PROGRESS,
+          endEngineProgress: this.END_ENGINE_PROGRESS,
+        }),
       )
       .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))
       .andThen((filePath) => this.renderedVideoFrom(renderVideoParams, filePath));

@@ -1,9 +1,13 @@
 import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
+import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
 import { OnDoneUseCase } from "@core/usecases/OnDone";
 import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
+import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
 import { EventBus } from "sst/node/event-bus";
+
+const Payload = BaseSFNPayload;
 
 export class OnDoneHandler {
   constructor(
@@ -22,15 +26,18 @@ export class OnDoneHandler {
     return new OnDoneHandler(useCase, logger);
   }
 
-  async handle(): Promise<void> {
-    return this.useCase.execute().match(
-      () => {
-        this.logger.info("OnDone use case executed");
-      },
-      (error) => {
-        this.logger.error("Error executing OnDone use case", error);
-      },
-    );
+  async handle(event: unknown): Promise<void> {
+    return parseJson(event, Payload)
+      .map(({ executionId }) => executionId)
+      .asyncAndThen(this.useCase.execute.bind(this.useCase))
+      .match(
+        () => {
+          this.logger.info("OnDone use case executed");
+        },
+        (error) => {
+          this.logger.error("Error executing OnDone use case", error);
+        },
+      );
   }
 }
 

@@ -7,10 +7,13 @@ import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridg
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { RemotionVideoRenderer } from "@infrastructure/adapters/remotionVideoRenderer";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
+import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
 import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video";
 import { Bucket } from "sst/node/bucket";
 import { EventBus } from "sst/node/event-bus";
 import { StaticSite } from "sst/node/site";
+
+const Payload = BaseSFNPayload.extend({ renderVideoParams: RenderVideoParams });
 
 class RenderVideoHandler {
   constructor(
@@ -41,8 +44,10 @@ class RenderVideoHandler {
   }
 
   async handle(payload: unknown): Promise<RenderedVideo> {
-    return parseJson(payload, RenderVideoParams)
-      .asyncAndThen(this.renderVideoUseCase.execute.bind(this.renderVideoUseCase))
+    return parseJson(payload, Payload)
+      .asyncAndThen(({ renderVideoParams, executionId }) =>
+        this.renderVideoUseCase.execute(executionId, renderVideoParams),
+      )
       .match(
         (renderedVideo) => {
           this.logger.info("Video rendered", renderedVideo);
