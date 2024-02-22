@@ -1,12 +1,14 @@
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { Bucket, Config, Function, StackContext, use } from "sst/constructs";
+import { CommonStack } from "./CommonStack";
 import { VideoStack } from "./VideoStack";
 
 export function EngineStack({ stack }: StackContext) {
   const ENGINE_DIR = "packages/engine";
 
   const { videoSite } = use(VideoStack);
+  const { eventBus } = use(CommonStack);
 
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
   const ELEVEN_LABS_CONFIG = new Config.Secret(stack, "ELEVEN_LABS_CONFIG");
@@ -16,13 +18,13 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateQuoteFunction = new Function(stack, "GenerateQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateQuote.default`,
-    bind: [OPENAI_API_KEY],
+    bind: [OPENAI_API_KEY, eventBus],
     timeout: "30 seconds",
   });
 
   const generateSpokenQuoteFunction = new Function(stack, "GenerateSpokenQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateSpokenQuote.default`,
-    bind: [bucket, ELEVEN_LABS_CONFIG],
+    bind: [bucket, eventBus, ELEVEN_LABS_CONFIG],
     timeout: "30 seconds",
     // Required for Polly
     // permissions: ["polly:SynthesizeSpeech"],
@@ -35,7 +37,7 @@ export function EngineStack({ stack }: StackContext) {
 
   const renderVideoFunction = new Function(stack, "RenderVideo", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/renderVideo.default`,
-    bind: [bucket, videoSite],
+    bind: [bucket, eventBus, videoSite],
     retryAttempts: 0,
     architecture: "arm_64",
     runtime: "nodejs18.x",
@@ -55,13 +57,22 @@ export function EngineStack({ stack }: StackContext) {
     },
   });
 
+  const onDoneFunction = new Function(stack, "OnDone", {
+    handler: `${ENGINE_DIR}/src/infrastructure/handlers/onDone.default`,
+    bind: [eventBus],
+  });
+
   const onErrorFunction = new Function(stack, "OnError", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/onError.default`,
+    bind: [eventBus],
   });
 
   const generateQuoteTask = new tasks.LambdaInvoke(stack, "GenerateQuoteTask", {
     lambdaFunction: generateQuoteFunction,
-    inputPath: "$.quoteParams",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      quoteParams: sfn.JsonPath.objectAt("$.quoteParams"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -70,7 +81,10 @@ export function EngineStack({ stack }: StackContext) {
 
   const generateSpokenQuoteTask = new tasks.LambdaInvoke(stack, "GenerateSpokenQuoteTask", {
     lambdaFunction: generateSpokenQuoteFunction,
-    inputPath: "$.quote.data",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      quote: sfn.JsonPath.objectAt("$.quote.data"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -91,7 +105,10 @@ export function EngineStack({ stack }: StackContext) {
 
   const renderVideoTask = new tasks.LambdaInvoke(stack, "RenderVideoTask", {
     lambdaFunction: renderVideoFunction,
-    inputPath: "$.renderVideoParams.data",
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      renderVideoParams: sfn.JsonPath.objectAt("$.renderVideoParams.data"),
+    }),
     resultSelector: {
       data: sfn.JsonPath.objectAt("$.Payload"),
     },
@@ -100,13 +117,32 @@ export function EngineStack({ stack }: StackContext) {
 
   const onErrorTask = new tasks.LambdaInvoke(stack, "OnErrorTask", {
     lambdaFunction: onErrorFunction,
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+    }),
+  });
+
+  const onDoneTask = new tasks.LambdaInvoke(stack, "OnDoneTask", {
+    lambdaFunction: onDoneFunction,
+    payload: sfn.TaskInput.fromObject({
+      executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+    }),
   });
 
   const engineBlock = new sfn.Parallel(stack, "EngineBlock")
     .branch(generateQuoteTask.next(generateSpokenQuoteTask).next(generateRenderVideoParamsTask).next(renderVideoTask))
-    .addCatch(onErrorTask);
+    .addCatch(onErrorTask)
+    .next(onDoneTask);
 
   new sfn.StateMachine(stack, "Engine", {
     definitionBody: sfn.DefinitionBody.fromChainable(engineBlock),
+  });
+
+  eventBus.addRules(stack, {
+    progressReportedRule: {
+      pattern: {
+        detailType: ["progressReported"],
+      },
+    },
   });
 }

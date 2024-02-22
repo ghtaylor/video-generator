@@ -1,7 +1,7 @@
 import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
 import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
-import { OnErrorUseCase } from "@core/usecases/OnError";
+import { OnDoneUseCase } from "@core/usecases/OnDone";
 import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
@@ -9,38 +9,38 @@ import { EventBus } from "sst/node/event-bus";
 
 const Payload = BaseSFNPayload;
 
-export class OnErrorHandler {
+export class OnDoneHandler {
   constructor(
-    private readonly useCase: OnErrorUseCase,
+    private readonly useCase: OnDoneUseCase,
     private readonly logger: Logger,
   ) {}
 
-  static build(eventBusName: string): OnErrorHandler {
+  static build(eventBusName: string) {
     const logger = PinoLogger.build();
 
     const eventBridgeClient = new EventBridgeClient({});
     const eventBridgeProgressReporter = new EventBridgeProgressReporter(eventBridgeClient, eventBusName);
 
-    const useCase = new OnErrorUseCase(eventBridgeProgressReporter);
+    const useCase = new OnDoneUseCase(eventBridgeProgressReporter);
 
-    return new OnErrorHandler(useCase, logger);
+    return new OnDoneHandler(useCase, logger);
   }
 
-  async handle(payload: unknown): Promise<void> {
-    return parseJson(payload, Payload)
+  async handle(event: unknown): Promise<void> {
+    return parseJson(event, Payload)
       .map(({ executionId }) => executionId)
       .asyncAndThen(this.useCase.execute.bind(this.useCase))
       .match(
         () => {
-          this.logger.info("OnError use case executed");
+          this.logger.info("OnDone use case executed");
         },
         (error) => {
-          this.logger.error("Error executing OnError use case", error);
+          this.logger.error("Error executing OnDone use case", error);
         },
       );
   }
 }
 
-const handlerInstance = OnErrorHandler.build(EventBus.EventBus.eventBusName);
+const handlerInstance = OnDoneHandler.build(EventBus.EventBus.eventBusName);
 
 export default handlerInstance.handle.bind(handlerInstance);

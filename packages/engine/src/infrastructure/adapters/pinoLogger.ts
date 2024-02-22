@@ -4,6 +4,7 @@ import pino, { Logger as Pino } from "pino";
 
 export class PinoLogger implements Logger {
   constructor(private logger: Pino) {}
+
   logResult<T, E extends Error>(result: Result<T, E>, message?: string): void {
     if (result.isOk()) {
       this.info(message ?? "OK result received", { result: result.value });

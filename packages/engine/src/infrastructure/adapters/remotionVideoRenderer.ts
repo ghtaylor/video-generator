@@ -24,7 +24,11 @@ export class RemotionVideoRenderer implements VideoRenderer {
     );
   }
 
-  private renderMedia(composition: VideoConfig, params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError> {
+  private renderMedia(
+    composition: VideoConfig,
+    params: RenderVideoParams,
+    onProgress?: (progress: number) => void,
+  ): ResultAsync<Buffer, VideoRenderError> {
     return fromPromise(
       renderMedia({
         composition,
@@ -34,9 +38,7 @@ export class RemotionVideoRenderer implements VideoRenderer {
         inputProps: params,
         timeoutInMilliseconds: 60_000,
         outputLocation: null,
-        onProgress: ({ progress }) => {
-          console.log("Progress:", progress);
-        },
+        onProgress: ({ progress }) => onProgress?.(progress),
       }),
       (error) => new VideoRenderError("Failed to render media", { originalError: error }),
     ).andThen(({ buffer }) => {
@@ -45,7 +47,10 @@ export class RemotionVideoRenderer implements VideoRenderer {
     });
   }
 
-  renderVideo(params: RenderVideoParams): ResultAsync<Buffer, VideoRenderError> {
-    return this.selectComposition(params).andThen((composition) => this.renderMedia(composition, params));
+  renderVideo(
+    params: RenderVideoParams,
+    onProgress?: (progress: number) => void,
+  ): ResultAsync<Buffer, VideoRenderError> {
+    return this.selectComposition(params).andThen((composition) => this.renderMedia(composition, params, onProgress));
   }
 }

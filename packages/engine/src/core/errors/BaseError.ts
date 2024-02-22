@@ -1,6 +1,6 @@
 export type ErrorOptions = {
   originalError?: unknown;
-  data?: Record<string, unknown>;
+  data?: unknown;
 };
 
 export abstract class BaseError extends Error {

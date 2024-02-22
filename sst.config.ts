@@ -1,6 +1,7 @@
 import { SSTConfig } from "sst";
-import { VideoStack } from "./stacks/VideoStack";
+import { CommonStack } from "./stacks/CommonStack";
 import { EngineStack } from "./stacks/EngineStack";
+import { VideoStack } from "./stacks/VideoStack";
 
 export default {
   config() {
@@ -10,6 +11,7 @@ export default {
     };
   },
   stacks(app) {
+    app.stack(CommonStack);
     app.stack(VideoStack);
     app.stack(EngineStack);
   },
