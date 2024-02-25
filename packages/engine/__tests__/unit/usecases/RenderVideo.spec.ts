@@ -1,6 +1,6 @@
 import { FileStore } from "@core/fileStore";
 import { ExecutionManager } from "@core/executionManager";
-import { ReportRenderProgressParams, RenderVideoUseCase } from "@core/usecases/RenderVideo";
+import { ReportExecutionStateChangedParams, RenderVideoUseCase } from "@core/usecases/RenderVideo";
 import { VideoRenderer } from "@core/videoRenderer";
 import { RenderVideoParams } from "@video-generator/domain/Video";
 import { okAsync } from "neverthrow";
@@ -29,7 +29,7 @@ describe("RenderVideo Use Case - Unit Tests", () => {
   };
 
   describe("WHEN `executionStateFrom` is called", () => {
-    describe.each<[ReportRenderProgressParams, ExpectedExecutionState]>([
+    describe.each<[ReportExecutionStateChangedParams, ExpectedExecutionState]>([
       [
         {
           executionId: VALID_EXECUTION_ID,

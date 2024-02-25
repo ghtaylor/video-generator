@@ -9,7 +9,7 @@ import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video"
 import round from "lodash.round";
 import { Result, ResultAsync, ok } from "neverthrow";
 
-export type ReportRenderProgressParams = {
+export type ReportExecutionStateChangedParams = {
   executionId: string;
   renderProgress: number;
   startExecutionState: number;
@@ -44,7 +44,7 @@ export class RenderVideoUseCase {
     renderProgress,
     startExecutionState,
     endExecutionState,
-  }: ReportRenderProgressParams): Result<ExecutionState, never> {
+  }: ReportExecutionStateChangedParams): Result<ExecutionState, never> {
     return ok({
       executionId,
       state: "RENDERING_VIDEO",
@@ -54,21 +54,22 @@ export class RenderVideoUseCase {
 
   reportedRenderProgress = new Set<number>();
 
-  reportRenderProgress({
+  reportExecutionStateChanged({
     executionId,
     renderProgress,
     startExecutionState,
     endExecutionState,
-  }: ReportRenderProgressParams): void {
-    const shouldReportProgress = (renderProgress * 10) % 1 === 0 && !this.reportedRenderProgress.has(renderProgress);
+  }: ReportExecutionStateChangedParams): void {
+    const shouldReportStateChanged =
+      (renderProgress * 10) % 1 === 0 && !this.reportedRenderProgress.has(renderProgress);
 
-    if (shouldReportProgress) {
+    if (shouldReportStateChanged) {
       this.executionStateFrom({
         executionId,
         renderProgress,
         startExecutionState,
         endExecutionState,
-      }).asyncAndThen((executionState) => this.executionManager.reportState(executionState));
+      }).asyncAndThen(this.executionManager.reportState.bind(this.executionManager));
 
       this.reportedRenderProgress.add(renderProgress);
     }
@@ -80,7 +81,7 @@ export class RenderVideoUseCase {
   ): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
     return this.videoRenderer
       .renderVideo(renderVideoParams, (renderProgress) =>
-        this.reportRenderProgress({
+        this.reportExecutionStateChanged({
           executionId,
           renderProgress,
           startExecutionState: this.START_ENGINE_PROGRESS,
