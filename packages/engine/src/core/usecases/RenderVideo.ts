@@ -1,9 +1,9 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
 import { FileStore } from "@core/fileStore";
-import { ProgressReporter } from "@core/progressReporter";
+import { ExecutionManager } from "@core/executionManager";
 import { VideoRenderer } from "@core/videoRenderer";
-import { EngineProgress } from "@video-generator/domain/Engine";
+import { ExecutionState } from "@video-generator/domain/Execution";
 import { FilePath } from "@video-generator/domain/File";
 import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video";
 import round from "lodash.round";
@@ -12,15 +12,15 @@ import { Result, ResultAsync, ok } from "neverthrow";
 export type ReportRenderProgressParams = {
   executionId: string;
   renderProgress: number;
-  startEngineProgress: number;
-  endEngineProgress: number;
+  startExecutionState: number;
+  endExecutionState: number;
 };
 
 export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
-    private readonly progressReporter: ProgressReporter,
+    private readonly executionManager: ExecutionManager,
     readonly START_ENGINE_PROGRESS = 0.5,
     readonly END_ENGINE_PROGRESS = 0.95,
   ) {}
@@ -39,16 +39,16 @@ export class RenderVideoUseCase {
     });
   }
 
-  engineProgressFrom({
+  executionStateFrom({
     executionId,
     renderProgress,
-    startEngineProgress,
-    endEngineProgress,
-  }: ReportRenderProgressParams): Result<EngineProgress, never> {
+    startExecutionState,
+    endExecutionState,
+  }: ReportRenderProgressParams): Result<ExecutionState, never> {
     return ok({
       executionId,
       state: "RENDERING_VIDEO",
-      progress: round(startEngineProgress + (endEngineProgress - startEngineProgress) * renderProgress, 2),
+      progress: round(startExecutionState + (endExecutionState - startExecutionState) * renderProgress, 2),
     });
   }
 
@@ -57,15 +57,18 @@ export class RenderVideoUseCase {
   reportRenderProgress({
     executionId,
     renderProgress,
-    startEngineProgress,
-    endEngineProgress,
+    startExecutionState,
+    endExecutionState,
   }: ReportRenderProgressParams): void {
     const shouldReportProgress = (renderProgress * 10) % 1 === 0 && !this.reportedRenderProgress.has(renderProgress);
 
     if (shouldReportProgress) {
-      this.engineProgressFrom({ executionId, renderProgress, startEngineProgress, endEngineProgress }).asyncAndThen(
-        (engineProgress) => this.progressReporter.reportProgress(engineProgress),
-      );
+      this.executionStateFrom({
+        executionId,
+        renderProgress,
+        startExecutionState,
+        endExecutionState,
+      }).asyncAndThen((executionState) => this.executionManager.reportState(executionState));
 
       this.reportedRenderProgress.add(renderProgress);
     }
@@ -80,8 +83,8 @@ export class RenderVideoUseCase {
         this.reportRenderProgress({
           executionId,
           renderProgress,
-          startEngineProgress: this.START_ENGINE_PROGRESS,
-          endEngineProgress: this.END_ENGINE_PROGRESS,
+          startExecutionState: this.START_ENGINE_PROGRESS,
+          endExecutionState: this.END_ENGINE_PROGRESS,
         }),
       )
       .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))

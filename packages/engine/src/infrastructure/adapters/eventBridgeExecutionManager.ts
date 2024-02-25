@@ -1,10 +1,10 @@
 import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput } from "@aws-sdk/client-eventbridge";
 import { ServiceError } from "@core/errors/ServiceError";
-import { ProgressReporter } from "@core/progressReporter";
-import { EngineProgress } from "@video-generator/domain/Engine";
+import { ExecutionManager } from "@core/executionManager";
+import { ExecutionState } from "@video-generator/domain/Execution";
 import { ResultAsync, errAsync, fromPromise, okAsync } from "neverthrow";
 
-export class EventBridgeProgressReporter implements ProgressReporter {
+export class EventBridgeExecutionManager implements ExecutionManager {
   constructor(
     private readonly eventBridge: EventBridgeClient,
     private readonly eventBusName: string,
@@ -13,17 +13,17 @@ export class EventBridgeProgressReporter implements ProgressReporter {
   private sendPutEventsCommand(command: PutEventsCommand): ResultAsync<PutEventsCommandOutput, ServiceError> {
     return fromPromise(
       this.eventBridge.send(command),
-      (error) => new ServiceError("Failed to report progress", { originalError: error }),
+      (error) => new ServiceError("Failed to report execution state", { originalError: error }),
     );
   }
 
-  reportProgress(progress: EngineProgress): ResultAsync<EngineProgress, ServiceError> {
+  reportState(state: ExecutionState): ResultAsync<ExecutionState, ServiceError> {
     const command = new PutEventsCommand({
       Entries: [
         {
           Source: "vidgen.engine",
-          DetailType: "progressReported",
-          Detail: JSON.stringify(progress),
+          DetailType: "executionStateChanged",
+          Detail: JSON.stringify(state),
           EventBusName: this.eventBusName,
         },
       ],
@@ -31,9 +31,9 @@ export class EventBridgeProgressReporter implements ProgressReporter {
 
     return this.sendPutEventsCommand(command).andThen((output) => {
       if (output.FailedEntryCount !== 0)
-        return errAsync(new ServiceError("Failed to report progress", { data: output }));
+        return errAsync(new ServiceError("Failed to report execution state", { data: output }));
 
-      return okAsync(progress);
+      return okAsync(state);
     });
   }
 }

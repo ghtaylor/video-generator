@@ -139,9 +139,9 @@ export function EngineStack({ stack }: StackContext) {
   });
 
   eventBus.addRules(stack, {
-    progressReportedRule: {
+    executionStateChanged: {
       pattern: {
-        detailType: ["progressReported"],
+        detailType: ["executionStateChanged"],
       },
     },
   });
