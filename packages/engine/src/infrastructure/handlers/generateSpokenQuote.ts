@@ -7,7 +7,7 @@ import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { ElevenLabsConfig } from "@infrastructure/adapters/elevenLabs/config";
 import { ElevenLabsClient } from "@infrastructure/adapters/elevenLabs/elevenLabsClient";
 import { ElevenLabsSpeechService } from "@infrastructure/adapters/elevenLabs/elevenLabsSpeechService";
-import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
+import { EventBridgeExecutionManager } from "@infrastructure/adapters/eventBridgeExecutionManager";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
@@ -40,9 +40,9 @@ export class GenerateSpokenQuoteHandler {
       const s3FileStore = new S3FileStore(s3Client, bucketName);
 
       const eventBridgeClient = new EventBridgeClient({});
-      const progressReporter = new EventBridgeProgressReporter(eventBridgeClient, eventBusName);
+      const executionManager = new EventBridgeExecutionManager(eventBridgeClient, eventBusName);
 
-      const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, s3FileStore, progressReporter);
+      const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, s3FileStore, executionManager);
 
       return new GenerateSpokenQuoteHandler(generateSpokenQuoteUseCase, logger);
     });

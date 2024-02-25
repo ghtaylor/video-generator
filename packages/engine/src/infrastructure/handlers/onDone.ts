@@ -2,7 +2,7 @@ import { EventBridgeClient } from "@aws-sdk/client-eventbridge";
 import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
 import { OnDoneUseCase } from "@core/usecases/OnDone";
-import { EventBridgeProgressReporter } from "@infrastructure/adapters/eventBridgeProgressReporter";
+import { EventBridgeExecutionManager } from "@infrastructure/adapters/eventBridgeExecutionManager";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
 import { EventBus } from "sst/node/event-bus";
@@ -19,9 +19,9 @@ export class OnDoneHandler {
     const logger = PinoLogger.build();
 
     const eventBridgeClient = new EventBridgeClient({});
-    const eventBridgeProgressReporter = new EventBridgeProgressReporter(eventBridgeClient, eventBusName);
+    const eventBridgeExecutionManager = new EventBridgeExecutionManager(eventBridgeClient, eventBusName);
 
-    const useCase = new OnDoneUseCase(eventBridgeProgressReporter);
+    const useCase = new OnDoneUseCase(eventBridgeExecutionManager);
 
     return new OnDoneHandler(useCase, logger);
   }

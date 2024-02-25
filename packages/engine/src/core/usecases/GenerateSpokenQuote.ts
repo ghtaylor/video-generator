@@ -2,7 +2,7 @@ import { ParseError } from "@core/errors/ParseError";
 import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
 import { FileStore } from "@core/fileStore";
-import { ProgressReporter } from "@core/progressReporter";
+import { ExecutionManager } from "@core/executionManager";
 import { SpeechService } from "@core/speechService";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
@@ -14,7 +14,7 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly progressReporter: ProgressReporter,
+    private readonly executionManager: ExecutionManager,
   ) {}
 
   createSpokenQuote(
@@ -84,8 +84,8 @@ export class GenerateSpokenQuoteUseCase {
     executionId: string,
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
-    return this.progressReporter
-      .reportProgress({ executionId, state: "GENERATING_SPEECH", progress: 0.3 })
+    return this.executionManager
+      .reportState({ executionId, state: "GENERATING_SPEECH", progress: 0.3 })
       .andThen(() =>
         this.speechService
           .generateSpeech(quote.text)

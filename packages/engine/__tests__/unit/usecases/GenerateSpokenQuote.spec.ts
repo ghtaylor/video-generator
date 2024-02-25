@@ -1,10 +1,10 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
-import { ProgressReporter } from "@core/progressReporter";
+import { ExecutionManager } from "@core/executionManager";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
-import { EngineProgress } from "@video-generator/domain/Engine";
+import { ExecutionState } from "@video-generator/domain/Execution";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Speech, SpeechMark } from "@video-generator/domain/Speech";
 import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
@@ -14,9 +14,9 @@ import { mock } from "vitest-mock-extended";
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
-  const progressReporter = mock<ProgressReporter>();
+  const executionManager = mock<ExecutionManager>();
 
-  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, progressReporter);
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, executionManager);
 
   describe("`createSpokenQuote`", () => {
     const VALID_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
@@ -576,7 +576,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       ],
     };
 
-    const VALID_PROGRESS: EngineProgress = {
+    const VALID_EXECUTION_STATE: ExecutionState = {
       executionId: VALID_EXECUTION_ID,
       state: "GENERATING_SPEECH",
       progress: 0.5,
@@ -586,7 +586,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       beforeEach(() => {
         speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
         fileStore.store.mockReturnValue(okAsync(STORED_SPEECH_AUDIO_FILE_PATH));
-        progressReporter.reportProgress.mockReturnValue(okAsync(VALID_PROGRESS));
+        executionManager.reportState.mockReturnValue(okAsync(VALID_EXECUTION_STATE));
       });
 
       test("THEN `execute` should return a successful result", async () => {
@@ -619,9 +619,9 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
         });
       });
 
-      describe("EXCEPT reporting the progress fails due to a ServiceError", () => {
+      describe("EXCEPT reporting the execution state fails due to a ServiceError", () => {
         beforeEach(() => {
-          progressReporter.reportProgress.mockReturnValue(errAsync(new ServiceError("Failed to report progress.")));
+          executionManager.reportState.mockReturnValue(errAsync(new ServiceError("Failed to report execution state.")));
         });
 
         test("THEN `execute` should return a ServiceError", async () => {

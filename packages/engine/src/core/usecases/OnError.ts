@@ -1,11 +1,11 @@
 import { ServiceError } from "@core/errors/ServiceError";
-import { ProgressReporter } from "@core/progressReporter";
+import { ExecutionManager } from "@core/executionManager";
 import { ResultAsync } from "neverthrow";
 
 export class OnErrorUseCase {
-  constructor(private readonly progressReporter: ProgressReporter) {}
+  constructor(private readonly executionManager: ExecutionManager) {}
 
   execute(executionId: string): ResultAsync<null, ServiceError> {
-    return this.progressReporter.reportProgress({ executionId, state: "ERROR", progress: 1 }).map(() => null);
+    return this.executionManager.reportState({ executionId, state: "ERROR", progress: 1 }).map(() => null);
   }
 }
