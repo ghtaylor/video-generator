@@ -1,7 +1,7 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { VideoRenderError } from "@core/errors/VideoRenderError";
+import { EventSender } from "@core/eventSender";
 import { FileStore } from "@core/fileStore";
-import { ExecutionManager } from "@core/executionManager";
 import { VideoRenderer } from "@core/videoRenderer";
 import { ExecutionState } from "@video-generator/domain/Execution";
 import { FilePath } from "@video-generator/domain/File";
@@ -9,20 +9,20 @@ import { RenderVideoParams, RenderedVideo } from "@video-generator/domain/Video"
 import round from "lodash.round";
 import { Result, ResultAsync, ok } from "neverthrow";
 
-export type ReportExecutionStateChangedParams = {
+export type SendExecutionStateChangedParams = {
   executionId: string;
   renderProgress: number;
-  startExecutionState: number;
-  endExecutionState: number;
+  startExecutionStateProgress: number;
+  endExecutionStateProgress: number;
 };
 
 export class RenderVideoUseCase {
   constructor(
     private readonly videoRenderer: VideoRenderer,
     private readonly fileStore: FileStore,
-    private readonly executionManager: ExecutionManager,
-    readonly START_ENGINE_PROGRESS = 0.5,
-    readonly END_ENGINE_PROGRESS = 0.95,
+    private readonly eventSender: EventSender,
+    readonly START_EXECUTION_STATE_PROGRESS = 0.5,
+    readonly END_EXECUTION_STATE_PROGRESS = 0.95,
   ) {}
 
   private getFilePath(): string {
@@ -42,24 +42,27 @@ export class RenderVideoUseCase {
   executionStateFrom({
     executionId,
     renderProgress,
-    startExecutionState,
-    endExecutionState,
-  }: ReportExecutionStateChangedParams): Result<ExecutionState, never> {
+    startExecutionStateProgress,
+    endExecutionStateProgress,
+  }: SendExecutionStateChangedParams): Result<ExecutionState, never> {
     return ok({
       executionId,
       state: "RENDERING_VIDEO",
-      progress: round(startExecutionState + (endExecutionState - startExecutionState) * renderProgress, 2),
+      progress: round(
+        startExecutionStateProgress + (endExecutionStateProgress - startExecutionStateProgress) * renderProgress,
+        2,
+      ),
     });
   }
 
   reportedRenderProgress = new Set<number>();
 
-  reportExecutionStateChanged({
+  sendExecutionStateChanged({
     executionId,
     renderProgress,
-    startExecutionState,
-    endExecutionState,
-  }: ReportExecutionStateChangedParams): void {
+    startExecutionStateProgress,
+    endExecutionStateProgress,
+  }: SendExecutionStateChangedParams): void {
     const shouldReportStateChanged =
       (renderProgress * 10) % 1 === 0 && !this.reportedRenderProgress.has(renderProgress);
 
@@ -67,9 +70,9 @@ export class RenderVideoUseCase {
       this.executionStateFrom({
         executionId,
         renderProgress,
-        startExecutionState,
-        endExecutionState,
-      }).asyncAndThen(this.executionManager.reportState.bind(this.executionManager));
+        startExecutionStateProgress,
+        endExecutionStateProgress,
+      }).asyncAndThen((executionState) => this.eventSender.sendEvent("executionStateChanged", executionState));
 
       this.reportedRenderProgress.add(renderProgress);
     }
@@ -81,11 +84,11 @@ export class RenderVideoUseCase {
   ): ResultAsync<RenderedVideo, VideoRenderError | ServiceError> {
     return this.videoRenderer
       .renderVideo(renderVideoParams, (renderProgress) =>
-        this.reportExecutionStateChanged({
+        this.sendExecutionStateChanged({
           executionId,
           renderProgress,
-          startExecutionState: this.START_ENGINE_PROGRESS,
-          endExecutionState: this.END_ENGINE_PROGRESS,
+          startExecutionStateProgress: this.START_EXECUTION_STATE_PROGRESS,
+          endExecutionStateProgress: this.END_EXECUTION_STATE_PROGRESS,
         }),
       )
       .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))

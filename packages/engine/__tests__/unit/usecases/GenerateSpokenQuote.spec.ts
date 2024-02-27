@@ -1,6 +1,5 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
-import { ExecutionManager } from "@core/executionManager";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
@@ -10,13 +9,14 @@ import { Speech, SpeechMark } from "@video-generator/domain/Speech";
 import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
 import { errAsync, okAsync } from "neverthrow";
 import { mock } from "vitest-mock-extended";
+import { EventSender } from "@core/eventSender";
 
 describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   const speechService = mock<SpeechService>();
   const fileStore = mock<FileStore>();
-  const executionManager = mock<ExecutionManager>();
+  const eventSender = mock<EventSender>();
 
-  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, executionManager);
+  const generateSpokenQuoteUseCase = new GenerateSpokenQuoteUseCase(speechService, fileStore, eventSender);
 
   describe("`createSpokenQuote`", () => {
     const VALID_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
@@ -586,7 +586,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       beforeEach(() => {
         speechService.generateSpeech.mockReturnValue(okAsync(VALID_SPEECH));
         fileStore.store.mockReturnValue(okAsync(STORED_SPEECH_AUDIO_FILE_PATH));
-        executionManager.reportState.mockReturnValue(okAsync(VALID_EXECUTION_STATE));
+        eventSender.sendEvent.mockReturnValue(okAsync(VALID_EXECUTION_STATE));
       });
 
       test("THEN `execute` should return a successful result", async () => {
@@ -621,7 +621,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
 
       describe("EXCEPT reporting the execution state fails due to a ServiceError", () => {
         beforeEach(() => {
-          executionManager.reportState.mockReturnValue(errAsync(new ServiceError("Failed to report execution state.")));
+          eventSender.sendEvent.mockReturnValue(errAsync(new ServiceError("Failed to report execution state.")));
         });
 
         test("THEN `execute` should return a ServiceError", async () => {

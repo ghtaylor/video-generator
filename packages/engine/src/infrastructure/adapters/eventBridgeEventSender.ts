@@ -1,10 +1,10 @@
 import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput } from "@aws-sdk/client-eventbridge";
 import { ServiceError } from "@core/errors/ServiceError";
-import { ExecutionManager } from "@core/executionManager";
-import { ExecutionState } from "@video-generator/domain/Execution";
+import { EventSender } from "@core/eventSender";
+import { EventName } from "@video-generator/domain/Event";
 import { ResultAsync, errAsync, fromPromise, okAsync } from "neverthrow";
 
-export class EventBridgeExecutionManager implements ExecutionManager {
+export class EventBridgeEventSender implements EventSender {
   constructor(
     private readonly eventBridge: EventBridgeClient,
     private readonly eventBusName: string,
@@ -13,27 +13,26 @@ export class EventBridgeExecutionManager implements ExecutionManager {
   private sendPutEventsCommand(command: PutEventsCommand): ResultAsync<PutEventsCommandOutput, ServiceError> {
     return fromPromise(
       this.eventBridge.send(command),
-      (error) => new ServiceError("Failed to report execution state", { originalError: error }),
+      (error) => new ServiceError("Failed to send event", { originalError: error }),
     );
   }
 
-  reportState(state: ExecutionState): ResultAsync<ExecutionState, ServiceError> {
+  sendEvent<TEvent>(name: EventName, event: TEvent): ResultAsync<TEvent, ServiceError> {
     const command = new PutEventsCommand({
       Entries: [
         {
           Source: "vidgen.engine",
-          DetailType: "executionStateChanged",
-          Detail: JSON.stringify(state),
+          DetailType: name,
+          Detail: JSON.stringify(event),
           EventBusName: this.eventBusName,
         },
       ],
     });
 
     return this.sendPutEventsCommand(command).andThen((output) => {
-      if (output.FailedEntryCount !== 0)
-        return errAsync(new ServiceError("Failed to report execution state", { data: output }));
+      if (output.FailedEntryCount !== 0) return errAsync(new ServiceError("Failed to send event", { data: output }));
 
-      return okAsync(state);
+      return okAsync(event);
     });
   }
 }
