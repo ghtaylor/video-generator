@@ -3,7 +3,7 @@ import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
 import { QuoteService } from "@core/quoteService";
 import { GenerateQuoteUseCase } from "@core/usecases/GenerateQuote";
-import { EventBridgeExecutionManager } from "@infrastructure/adapters/eventBridgeExecutionManager";
+import { EventBridgeEventSender } from "@infrastructure/adapters/eventBridgeEventSender";
 import { OpenAIQuoteService } from "@infrastructure/adapters/openAiQuoteService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
@@ -27,7 +27,7 @@ export class GenerateQuoteHandler {
     const quoteService: QuoteService = new OpenAIQuoteService(openAIClient);
 
     const eventBridgeClient = new EventBridgeClient({});
-    const executionManager = new EventBridgeExecutionManager(eventBridgeClient, eventBusName);
+    const executionManager = new EventBridgeEventSender(eventBridgeClient, eventBusName);
 
     const generateQuoteUseCase = new GenerateQuoteUseCase(quoteService, executionManager);
 

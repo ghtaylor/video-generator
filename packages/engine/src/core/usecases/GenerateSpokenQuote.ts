@@ -1,9 +1,10 @@
 import { ParseError } from "@core/errors/ParseError";
 import { ServiceError } from "@core/errors/ServiceError";
 import { ValidationError } from "@core/errors/ValidationError";
+import { EventSender } from "@core/eventSender";
 import { FileStore } from "@core/fileStore";
-import { ExecutionManager } from "@core/executionManager";
 import { SpeechService } from "@core/speechService";
+import { ExecutionState } from "@video-generator/domain/Execution";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
 import { SpeechMark } from "@video-generator/domain/Speech";
@@ -14,7 +15,7 @@ export class GenerateSpokenQuoteUseCase {
   constructor(
     private readonly speechService: SpeechService,
     private readonly fileStore: FileStore,
-    private readonly executionManager: ExecutionManager,
+    private readonly eventSender: EventSender,
   ) {}
 
   createSpokenQuote(
@@ -84,8 +85,8 @@ export class GenerateSpokenQuoteUseCase {
     executionId: string,
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
-    return this.executionManager
-      .reportState({ executionId, state: "GENERATING_SPEECH", progress: 0.3 })
+    return this.eventSender
+      .sendEvent<ExecutionState>("executionStateChanged", { executionId, state: "GENERATING_SPEECH", progress: 0.3 })
       .andThen(() =>
         this.speechService
           .generateSpeech(quote.text)

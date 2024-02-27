@@ -3,7 +3,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { parseJson } from "@common/parseJson";
 import { Logger } from "@core/logger";
 import { RenderVideoUseCase } from "@core/usecases/RenderVideo";
-import { EventBridgeExecutionManager } from "@infrastructure/adapters/eventBridgeExecutionManager";
+import { EventBridgeEventSender } from "@infrastructure/adapters/eventBridgeEventSender";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
 import { RemotionVideoRenderer } from "@infrastructure/adapters/remotionVideoRenderer";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
@@ -34,7 +34,7 @@ class RenderVideoHandler {
     const s3FileStore = new S3FileStore(s3Client, bucketName);
 
     const eventBridgeClient = new EventBridgeClient({});
-    const executionManager = new EventBridgeExecutionManager(eventBridgeClient, eventBusName);
+    const executionManager = new EventBridgeEventSender(eventBridgeClient, eventBusName);
 
     const renderVideoUseCase = new RenderVideoUseCase(videoRenderer, s3FileStore, executionManager);
 
