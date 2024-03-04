@@ -14,6 +14,7 @@ export const ExecutionStatus = z.enum([
   "RENDERING_VIDEO",
   "DONE",
   "ERROR",
+  "UNKNOWN",
 ]);
 
 export const Execution = z.object({
