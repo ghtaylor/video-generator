@@ -19,7 +19,7 @@ export class GenerateQuoteUseCase {
     { prompt }: GenerateQuoteParams,
   ): ResultAsync<Quote, ParseError | QuoteChunksInvalidError | ServiceError | UnexpectedError> {
     return this.eventSender
-      .sendEvent<Execution>("executionStateChanged", { id: executionId, status: "GENERATING_QUOTE", progress: 0.1 })
+      .sendEvent<Execution>("executionUpdated", { id: executionId, status: "GENERATING_QUOTE", progress: 0.1 })
       .andThen(() => this.quoteService.generateQuote(prompt));
   }
 }

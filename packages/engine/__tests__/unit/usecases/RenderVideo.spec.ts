@@ -217,7 +217,7 @@ describe("RenderVideo Use Case - Unit Tests", () => {
 
             await useCase.execute(VALID_EXECUTION_ID, VALID_RENDER_VIDEO_PARAMS);
 
-            expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecution);
+            expect(eventSender.sendEvent).toHaveBeenCalledWith("executionUpdated", expectedExecution);
           });
         },
       );
@@ -272,7 +272,7 @@ describe("RenderVideo Use Case - Unit Tests", () => {
           await useCase.execute(VALID_EXECUTION_ID, VALID_RENDER_VIDEO_PARAMS);
 
           expect(eventSender.sendEvent).toHaveBeenCalledTimes(1);
-          expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecution);
+          expect(eventSender.sendEvent).toHaveBeenCalledWith("executionUpdated", expectedExecution);
         });
       });
     });

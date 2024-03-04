@@ -69,7 +69,7 @@ export class RenderVideoUseCase {
         renderProgress,
         startExecutionProgress,
         endExecutionProgress,
-      }).asyncAndThen((executionState) => this.eventSender.sendEvent("executionStateChanged", executionState));
+      }).asyncAndThen((executionState) => this.eventSender.sendEvent("executionUpdated", executionState));
 
       this.reportedRenderProgress.add(renderProgress);
     }

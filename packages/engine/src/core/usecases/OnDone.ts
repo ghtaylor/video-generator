@@ -8,7 +8,7 @@ export class OnDoneUseCase {
 
   execute(executionId: string): ResultAsync<null, ServiceError> {
     return this.eventSender
-      .sendEvent<Execution>("executionStateChanged", { id: executionId, status: "DONE", progress: 1 })
+      .sendEvent<Execution>("executionUpdated", { id: executionId, status: "DONE", progress: 1 })
       .map(() => null);
   }
 }
