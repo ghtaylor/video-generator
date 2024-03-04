@@ -89,6 +89,11 @@ export class RenderVideoUseCase {
         }),
       )
       .andThen((videoBuffer) => this.fileStore.store(this.getFilePath(), videoBuffer))
-      .andThen((filePath) => this.renderedVideoFrom(renderVideoParams, filePath));
+      .andThen((filePath) => this.renderedVideoFrom(renderVideoParams, filePath))
+      .andThen((renderedVideo) => {
+        this.reportedRenderProgress.clear();
+
+        return ok(renderedVideo);
+      });
   }
 }
