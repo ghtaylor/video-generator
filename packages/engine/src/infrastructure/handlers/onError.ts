@@ -28,7 +28,7 @@ export class OnErrorHandler {
 
   async handle(payload: unknown): Promise<void> {
     return parseJson(payload, Payload)
-      .map(({ executionId }) => executionId)
+      .map(({ id }) => id)
       .asyncAndThen(this.useCase.execute.bind(this.useCase))
       .match(
         () => {

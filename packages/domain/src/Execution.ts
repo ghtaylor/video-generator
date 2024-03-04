@@ -7,11 +7,21 @@ export const ExecutionParams = z.object({
   videoConfig: VideoConfig,
 });
 
-export const ExecutionState = z.object({
-  executionId: z.string().describe("The ID of the engine execution"),
-  state: z.enum(["STARTED", "GENERATING_QUOTE", "GENERATING_SPEECH", "RENDERING_VIDEO", "DONE", "ERROR"]),
-  progress: z.number().min(0).max(1).describe("Progress of the overall process (from 0 to 1)"),
+export const ExecutionStatus = z.enum([
+  "STARTED",
+  "GENERATING_QUOTE",
+  "GENERATING_SPEECH",
+  "RENDERING_VIDEO",
+  "DONE",
+  "ERROR",
+]);
+
+export const Execution = z.object({
+  id: z.string(),
+  status: ExecutionStatus,
+  progress: z.number().min(0).max(1).optional().describe("Progress of the overall process (from 0 to 1)"),
 });
 
 export type ExecutionParams = z.infer<typeof ExecutionParams>;
-export type ExecutionState = z.infer<typeof ExecutionState>;
+export type ExecutionStatus = z.infer<typeof ExecutionStatus>;
+export type Execution = z.infer<typeof Execution>;

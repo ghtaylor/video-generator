@@ -1,12 +1,12 @@
 import { EventSender } from "@core/eventSender";
 import { FileStore } from "@core/fileStore";
-import { RenderVideoUseCase, SendExecutionStateChangedParams } from "@core/usecases/RenderVideo";
+import { RenderVideoUseCase, SendExecutionChangedParams } from "@core/usecases/RenderVideo";
 import { VideoRenderer } from "@core/videoRenderer";
 import { RenderVideoParams } from "@video-generator/domain/Video";
 import { okAsync } from "neverthrow";
 import { mock } from "vitest-mock-extended";
 
-type ExpectedExecutionState = number;
+type ExpectedExecution = number;
 type RenderProgress = number;
 
 describe("RenderVideo Use Case - Unit Tests", () => {
@@ -16,7 +16,7 @@ describe("RenderVideo Use Case - Unit Tests", () => {
 
   const useCase = new RenderVideoUseCase(videoRenderer, fileStore, eventSender);
 
-  const VALID_EXECUTION_ID = "executionId";
+  const VALID_EXECUTION_ID = "id";
 
   const VALID_RENDER_VIDEO_PARAMS: RenderVideoParams = {
     fps: 30,
@@ -29,13 +29,13 @@ describe("RenderVideo Use Case - Unit Tests", () => {
   };
 
   describe("WHEN `executionStateFrom` is called", () => {
-    describe.each<[SendExecutionStateChangedParams, ExpectedExecutionState]>([
+    describe.each<[SendExecutionChangedParams, ExpectedExecution]>([
       [
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 0.95,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 0.95,
         },
         0.75,
       ],
@@ -43,8 +43,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.25,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 0.95,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 0.95,
         },
         0.8,
       ],
@@ -53,8 +53,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.5,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 0.95,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 0.95,
         },
         0.85,
       ],
@@ -62,8 +62,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.75,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 0.95,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 0.95,
         },
         0.9,
       ],
@@ -71,8 +71,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 1,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 0.95,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 0.95,
         },
         0.95,
       ],
@@ -81,8 +81,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0,
-          startExecutionStateProgress: 0,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0,
+          endExecutionProgress: 1,
         },
         0,
       ],
@@ -90,8 +90,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.25,
-          startExecutionStateProgress: 0,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0,
+          endExecutionProgress: 1,
         },
         0.25,
       ],
@@ -99,8 +99,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.5,
-          startExecutionStateProgress: 0,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0,
+          endExecutionProgress: 1,
         },
         0.5,
       ],
@@ -108,8 +108,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.75,
-          startExecutionStateProgress: 0,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0,
+          endExecutionProgress: 1,
         },
         0.75,
       ],
@@ -117,8 +117,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 1,
-          startExecutionStateProgress: 0,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0,
+          endExecutionProgress: 1,
         },
         1,
       ],
@@ -127,8 +127,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 1,
         },
         0.75,
       ],
@@ -136,8 +136,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.25,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 1,
         },
         0.81,
       ],
@@ -145,8 +145,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.5,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 1,
         },
         0.88,
       ],
@@ -154,8 +154,8 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 0.75,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 1,
         },
         0.94,
       ],
@@ -163,17 +163,17 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         {
           executionId: VALID_EXECUTION_ID,
           renderProgress: 1,
-          startExecutionStateProgress: 0.75,
-          endExecutionStateProgress: 1,
+          startExecutionProgress: 0.75,
+          endExecutionProgress: 1,
         },
         1,
       ],
     ])(
       "GIVEN render progress is %s, start total progress is %s and end engine progress is %s",
-      (sendExecutionStateChangedParams, expectedExecutionState) => {
-        it(`THEN the expected total engine progress should be ${expectedExecutionState}`, () => {
-          const result = useCase.executionStateFrom(sendExecutionStateChangedParams);
-          expect(result._unsafeUnwrap().progress).toEqual(expectedExecutionState);
+      (sendExecutionChangedParams, expectedExecution) => {
+        it(`THEN the expected total engine progress should be ${expectedExecution}`, () => {
+          const result = useCase.executionStateFrom(sendExecutionChangedParams);
+          expect(result._unsafeUnwrap().progress).toEqual(expectedExecution);
         });
       },
     );
@@ -206,18 +206,18 @@ describe("RenderVideo Use Case - Unit Tests", () => {
           });
 
           test("THEN the Progress Reporter should be called with the expected Progress", async () => {
-            const expectedExecutionState = useCase
+            const expectedExecution = useCase
               .executionStateFrom({
                 executionId: VALID_EXECUTION_ID,
                 renderProgress,
-                startExecutionStateProgress: useCase.START_EXECUTION_STATE_PROGRESS,
-                endExecutionStateProgress: useCase.END_EXECUTION_STATE_PROGRESS,
+                startExecutionProgress: useCase.START_EXECUTION_STATE_PROGRESS,
+                endExecutionProgress: useCase.END_EXECUTION_STATE_PROGRESS,
               })
               ._unsafeUnwrap();
 
             await useCase.execute(VALID_EXECUTION_ID, VALID_RENDER_VIDEO_PARAMS);
 
-            expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecutionState);
+            expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecution);
           });
         },
       );
@@ -260,19 +260,19 @@ describe("RenderVideo Use Case - Unit Tests", () => {
         });
 
         test("THEN the Progress Reporter should be called only once", async () => {
-          const expectedExecutionState = useCase
+          const expectedExecution = useCase
             .executionStateFrom({
               executionId: VALID_EXECUTION_ID,
               renderProgress: 0.1,
-              startExecutionStateProgress: useCase.START_EXECUTION_STATE_PROGRESS,
-              endExecutionStateProgress: useCase.END_EXECUTION_STATE_PROGRESS,
+              startExecutionProgress: useCase.START_EXECUTION_STATE_PROGRESS,
+              endExecutionProgress: useCase.END_EXECUTION_STATE_PROGRESS,
             })
             ._unsafeUnwrap();
 
           await useCase.execute(VALID_EXECUTION_ID, VALID_RENDER_VIDEO_PARAMS);
 
           expect(eventSender.sendEvent).toHaveBeenCalledTimes(1);
-          expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecutionState);
+          expect(eventSender.sendEvent).toHaveBeenCalledWith("executionStateChanged", expectedExecution);
         });
       });
     });

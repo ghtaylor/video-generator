@@ -4,7 +4,7 @@ import { ValidationError } from "@core/errors/ValidationError";
 import { EventSender } from "@core/eventSender";
 import { FileStore } from "@core/fileStore";
 import { SpeechService } from "@core/speechService";
-import { ExecutionState } from "@video-generator/domain/Execution";
+import { Execution } from "@video-generator/domain/Execution";
 import { FilePath } from "@video-generator/domain/File";
 import { Quote, SpokenQuote, SpokenQuoteChunk } from "@video-generator/domain/Quote";
 import { SpeechMark } from "@video-generator/domain/Speech";
@@ -86,7 +86,7 @@ export class GenerateSpokenQuoteUseCase {
     quote: Quote,
   ): ResultAsync<SpokenQuote, SpokenQuoteSpeechMarksInvalidError | ServiceError | ValidationError | ParseError> {
     return this.eventSender
-      .sendEvent<ExecutionState>("executionStateChanged", { executionId, state: "GENERATING_SPEECH", progress: 0.3 })
+      .sendEvent<Execution>("executionStateChanged", { id: executionId, status: "GENERATING_SPEECH", progress: 0.3 })
       .andThen(() =>
         this.speechService
           .generateSpeech(quote.text)

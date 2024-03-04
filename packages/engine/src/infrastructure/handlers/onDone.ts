@@ -28,7 +28,7 @@ export class OnDoneHandler {
 
   async handle(event: unknown): Promise<void> {
     return parseJson(event, Payload)
-      .map(({ executionId }) => executionId)
+      .map(({ id }) => id)
       .asyncAndThen(this.useCase.execute.bind(this.useCase))
       .match(
         () => {

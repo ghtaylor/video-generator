@@ -36,7 +36,7 @@ export class GenerateQuoteHandler {
 
   async handle(payload: unknown): Promise<Quote> {
     return parseJson(payload, Payload)
-      .asyncAndThen(({ quoteParams, executionId }) => this.generateQuoteUseCase.execute(executionId, quoteParams))
+      .asyncAndThen(({ quoteParams, id }) => this.generateQuoteUseCase.execute(id, quoteParams))
       .match(
         (quote) => {
           this.logger.info("Quote generated", quote);

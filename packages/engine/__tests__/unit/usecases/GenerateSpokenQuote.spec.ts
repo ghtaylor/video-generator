@@ -3,7 +3,7 @@ import { FileStore } from "@core/fileStore";
 import { SpeechService } from "@core/speechService";
 import { GenerateSpokenQuoteUseCase } from "@core/usecases/GenerateSpokenQuote";
 import { FilePath } from "@video-generator/domain/File";
-import { ExecutionState } from "@video-generator/domain/Execution";
+import { Execution } from "@video-generator/domain/Execution";
 import { Quote, SpokenQuote } from "@video-generator/domain/Quote";
 import { Speech, SpeechMark } from "@video-generator/domain/Speech";
 import { SpokenQuoteSpeechMarksInvalidError } from "@video-generator/domain/errors/SpokenQuote";
@@ -532,7 +532,7 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
   });
 
   describe("WHEN the `execute` method is called", () => {
-    const VALID_EXECUTION_ID = "executionId";
+    const VALID_EXECUTION_ID = "id";
 
     const STORED_SPEECH_AUDIO_FILE_PATH: FilePath = "speeches/1234567890.mp3";
 
@@ -576,9 +576,9 @@ describe("GenerateSpokenQuote Use Case - Unit Tests", () => {
       ],
     };
 
-    const VALID_EXECUTION_STATE: ExecutionState = {
-      executionId: VALID_EXECUTION_ID,
-      state: "GENERATING_SPEECH",
+    const VALID_EXECUTION_STATE: Execution = {
+      id: VALID_EXECUTION_ID,
+      status: "GENERATING_SPEECH",
       progress: 0.5,
     };
 

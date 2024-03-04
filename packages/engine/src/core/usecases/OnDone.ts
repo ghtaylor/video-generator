@@ -1,6 +1,6 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { EventSender } from "@core/eventSender";
-import { ExecutionState } from "@video-generator/domain/Execution";
+import { Execution } from "@video-generator/domain/Execution";
 import { ResultAsync } from "neverthrow";
 
 export class OnDoneUseCase {
@@ -8,7 +8,7 @@ export class OnDoneUseCase {
 
   execute(executionId: string): ResultAsync<null, ServiceError> {
     return this.eventSender
-      .sendEvent<ExecutionState>("executionStateChanged", { executionId, state: "DONE", progress: 1 })
+      .sendEvent<Execution>("executionStateChanged", { id: executionId, status: "DONE", progress: 1 })
       .map(() => null);
   }
 }
