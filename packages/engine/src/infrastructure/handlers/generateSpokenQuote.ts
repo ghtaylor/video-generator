@@ -50,7 +50,7 @@ export class GenerateSpokenQuoteHandler {
 
   async handle(payload: unknown): Promise<SpokenQuote> {
     return parseJson(payload, Payload)
-      .asyncAndThen(({ quote, id }) => this.generateSpokenQuoteUseCase.execute(id, quote))
+      .asyncAndThen(({ quote, executionId }) => this.generateSpokenQuoteUseCase.execute(executionId, quote))
       .match(
         (spokenQuote) => {
           this.logger.info("Spoken quote generated", spokenQuote);
