@@ -4,10 +4,10 @@ import { Logger } from "@core/logger";
 import { OnErrorUseCase } from "@core/usecases/OnError";
 import { EventBridgeEventSender } from "@infrastructure/adapters/eventBridgeEventSender";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
-import { BaseSFNPayload } from "@infrastructure/events/sfnPayload";
+import { ErrorSFNPayload } from "@infrastructure/events/sfnPayload";
 import { EventBus } from "sst/node/event-bus";
 
-const Payload = BaseSFNPayload;
+const Payload = ErrorSFNPayload;
 
 export class OnErrorHandler {
   constructor(
@@ -28,8 +28,12 @@ export class OnErrorHandler {
 
   async handle(payload: unknown): Promise<void> {
     return parseJson(payload, Payload)
-      .map(({ executionId }) => executionId)
-      .asyncAndThen(this.useCase.execute.bind(this.useCase))
+      .asyncAndThen(({ executionId, cause }) =>
+        this.useCase.execute(executionId, {
+          type: cause.errorType,
+          message: cause.errorMessage,
+        }),
+      )
       .match(
         () => {
           this.logger.info("OnError use case executed");

@@ -119,6 +119,7 @@ export function EngineStack({ stack }: StackContext) {
     lambdaFunction: onErrorFunction,
     payload: sfn.TaskInput.fromObject({
       executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      cause: sfn.JsonPath.stringToJson(sfn.JsonPath.stringAt("$.Cause")),
     }),
   });
 
@@ -126,6 +127,7 @@ export function EngineStack({ stack }: StackContext) {
     lambdaFunction: onDoneFunction,
     payload: sfn.TaskInput.fromObject({
       executionId: sfn.JsonPath.stringAt("$$.Execution.Name"),
+      renderedVideo: sfn.JsonPath.objectAt("$.renderedVideo.data"),
     }),
   });
 
