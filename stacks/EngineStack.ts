@@ -115,6 +115,10 @@ export function EngineStack({ stack }: StackContext) {
     resultPath: "$.renderedVideo",
   });
 
+  const unwrapOutputPass = new sfn.Pass(stack, "UnwrapOutput", {
+    inputPath: "$[0]",
+  });
+
   const onErrorTask = new tasks.LambdaInvoke(stack, "OnErrorTask", {
     lambdaFunction: onErrorFunction,
     payload: sfn.TaskInput.fromObject({
@@ -134,6 +138,7 @@ export function EngineStack({ stack }: StackContext) {
   const engineBlock = new sfn.Parallel(stack, "EngineBlock")
     .branch(generateQuoteTask.next(generateSpokenQuoteTask).next(generateRenderVideoParamsTask).next(renderVideoTask))
     .addCatch(onErrorTask)
+    .next(unwrapOutputPass)
     .next(onDoneTask);
 
   new sfn.StateMachine(stack, "Engine", {
