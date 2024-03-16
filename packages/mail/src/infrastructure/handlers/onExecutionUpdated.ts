@@ -5,7 +5,7 @@ import { SendMailOnExecutionUpdated } from "@core/usecases/SendMailOnExecutionUp
 import { MailjetConfig } from "@infrastructure/adapters/mailjet/config";
 import { MailjetMailService } from "@infrastructure/adapters/mailjet/mailjetMailService";
 import { PinoLogger } from "@infrastructure/adapters/pinoLogger";
-import { ReactMailContentGeneratorFactory } from "@infrastructure/adapters/reactMailContentGenerator";
+import { ReactMailContentGeneratorFactory } from "@infrastructure/adapters/mailContentGenerator/reactMailContentGenerator";
 import { S3FileStore } from "@infrastructure/adapters/s3FileStore";
 import { Execution } from "@video-generator/domain/Execution";
 import { EventBridgeHandler } from "aws-lambda";

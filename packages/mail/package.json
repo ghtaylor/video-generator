@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "type:check": "tsc --noEmit",
-    "dev:mail": "mail dev"
+    "dev:mail": "email dev"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.124",
+    "@types/react": "18.2.42",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0"
   },
@@ -20,6 +21,7 @@
     "neverthrow": "^6.0.0",
     "node-mailjet": "^6.0.5",
     "pino": "^8.16.1",
+    "react": "^18.2.0",
     "react-email": "2.1.0",
     "zod": "^3.22.2"
   }

@@ -23,7 +23,7 @@ export class SendMailOnExecutionUpdated {
           toEmail,
           content: mailContent,
         }))
-        .asyncAndThen(this.mailService.sendMail.bind(this.mailService));
+        .andThen(this.mailService.sendMail.bind(this.mailService));
     });
   }
 }

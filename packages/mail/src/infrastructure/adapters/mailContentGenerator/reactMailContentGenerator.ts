@@ -1,29 +1,42 @@
 import { ServiceError } from "@core/errors/ServiceError";
 import { FileStore } from "@core/fileStore";
 import { MailContentGenerator, MailContentGeneratorFactory } from "@core/mailContentGenerator";
+import { render } from "@react-email/components";
 import { DoneExecution, ErrorExecution, ExecutionStatus } from "@video-generator/domain/Execution";
 import { MailContent } from "@video-generator/domain/Mail";
-import { Result, ok } from "neverthrow";
+import { Result, ResultAsync, fromThrowable, ok } from "neverthrow";
+import DoneExecutionEmail, { DONE_EXECUTION_EMAIL_SUBJECT } from "./DoneExecutionEmail";
+import ErrorExecutionEmail, { ERROR_EXECUTION_EMAIL_SUBJECT } from "./ErrorExecutionEmail";
+
+const safeRender = fromThrowable(
+  render,
+  (error) => new ServiceError("Failed to render email", { originalError: error }),
+);
 
 export class ReactDoneExecutionMailContentGenerator implements MailContentGenerator<"DONE"> {
   constructor(private readonly fileStore: FileStore) {}
 
-  mailContentFrom(execution: DoneExecution): Result<MailContent, ServiceError> {
-    return ok({
-      subject: "Your video is ready!",
-      body: `Your video is ready! You can download it from this link: ${execution.id}`,
-    });
+  mailContentFrom(execution: DoneExecution): ResultAsync<MailContent, ServiceError> {
+    return this.fileStore
+      .getUrl(execution.renderedVideo.videoPath)
+      .andThen((videoDownloadUrl) => safeRender(DoneExecutionEmail({ execution, videoDownloadUrl })))
+      .map((htmlBody) => ({
+        subject: DONE_EXECUTION_EMAIL_SUBJECT,
+        body: htmlBody,
+      }));
   }
 }
 
 export class ReactErrorExecutionMailContentGenerator implements MailContentGenerator<"ERROR"> {
   constructor(private readonly fileStore: FileStore) {}
 
-  mailContentFrom(execution: ErrorExecution): Result<MailContent, ServiceError> {
-    return ok({
-      subject: "There was an error processing your video",
-      body: `There was an error processing your video. Please check the logs for more information. ${execution.id}`,
-    });
+  mailContentFrom(execution: ErrorExecution): ResultAsync<MailContent, ServiceError> {
+    return safeRender(ErrorExecutionEmail({ execution }))
+      .map((htmlBody) => ({
+        subject: ERROR_EXECUTION_EMAIL_SUBJECT,
+        body: htmlBody,
+      }))
+      .asyncMap((mailContent) => Promise.resolve(mailContent));
   }
 }
 

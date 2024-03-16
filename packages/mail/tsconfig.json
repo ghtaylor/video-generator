@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "lib": ["ESNext"],
+    "jsx": "react",
     "paths": {
       "@infrastructure/*": ["infrastructure/*"],
       "@core/*": ["core/*"],

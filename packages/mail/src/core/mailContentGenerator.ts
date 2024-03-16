@@ -1,10 +1,10 @@
-import { MailContent } from "@video-generator/domain/Mail";
-import { Result } from "neverthrow";
-import { ServiceError } from "./errors/ServiceError";
 import { Execution, ExecutionStatus } from "@video-generator/domain/Execution";
+import { MailContent } from "@video-generator/domain/Mail";
+import { Result, ResultAsync } from "neverthrow";
+import { ServiceError } from "./errors/ServiceError";
 
 export interface MailContentGenerator<TExecutionStatus extends ExecutionStatus> {
-  mailContentFrom(execution: Extract<Execution, { status: TExecutionStatus }>): Result<MailContent, ServiceError>;
+  mailContentFrom(execution: Extract<Execution, { status: TExecutionStatus }>): ResultAsync<MailContent, ServiceError>;
 }
 
 export interface MailContentGeneratorFactory {
