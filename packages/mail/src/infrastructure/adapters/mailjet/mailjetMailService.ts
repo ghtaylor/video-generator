@@ -1,5 +1,6 @@
 import { ServiceError } from "@core/errors/ServiceError";
-import { Mail, MailService } from "@core/mailService";
+import { MailService } from "@core/mailService";
+import { Mail } from "@video-generator/domain/Mail";
 import { Result, ResultAsync, errAsync, fromPromise, ok } from "neverthrow";
 import Mailjet, { SendEmailV3_1 } from "node-mailjet";
 
