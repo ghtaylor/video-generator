@@ -1,6 +1,6 @@
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
-import { Bucket, Config, Function, StackContext, use } from "sst/constructs";
+import { Config, Function, StackContext, use } from "sst/constructs";
 import { CommonStack } from "./CommonStack";
 import { VideoStack } from "./VideoStack";
 
@@ -8,13 +8,11 @@ export function EngineStack({ stack }: StackContext) {
   const ENGINE_DIR = "packages/engine";
 
   const { videoSite } = use(VideoStack);
-  const { eventBus } = use(CommonStack);
+  const { eventBus, bucket } = use(CommonStack);
 
   const OPENAI_API_KEY = new Config.Secret(stack, "OPENAI_API_KEY");
   const ELEVEN_LABS_CONFIG = new Config.Secret(stack, "ELEVEN_LABS_CONFIG");
   const VIDEO_CONFIG = new Config.Secret(stack, "VIDEO_CONFIG");
-
-  const bucket = new Bucket(stack, "Bucket");
 
   const generateQuoteFunction = new Function(stack, "GenerateQuote", {
     handler: `${ENGINE_DIR}/src/infrastructure/handlers/generateQuote.default`,
